@@ -1,6 +1,6 @@
 # Public progress ledger
 
-**Snapshot:** 2026-11-03, about 1:12 PM America/New_York (ET).
+**Snapshot:** 2026-11-03, about 1:12 PM America/New_York (ET), with a Switch Console addendum at about 1:20 PM ET.
 
 This ledger records steps that were actually reported. It does not turn a host-side observation into an independent reproduction, and it does not invent command output. Where a clock time was reported, it is written below. Other items are dated 2026-11-03 without a finer public timestamp.
 
@@ -71,11 +71,28 @@ The public client that records the corrected heartbeat behavior is a separate re
 
 Finch downloaded a verified Switch Console build, **Windows x64 v0.40.1**, onto the machine named Old-Faithful. That verification is of the downloaded build, not of an installed session. Jay issued **GO** to install and run at about 1:06 PM ET.
 
-**State:** **GO issued; install evidence pending.**
+**State at 1:06 PM ET:** **GO issued; install evidence was still pending.** The next section is the later host report.
 
-**UNKNOWN:** whether the installer has been run, whether Console has authenticated, and whether any native agent has joined the room. As of this snapshot, no public commit says otherwise. Codex, Antigravity, and Cursor CLI join-and-reply tests are also **UNKNOWN**.
+**UNKNOWN at 1:06 PM ET:** whether the installer had been run, whether Console had authenticated, and whether any native agent had joined the room. Codex, Antigravity, and Cursor CLI join-and-reply tests were also **UNKNOWN**.
 
 A pinned upstream Switch server revision is still **UNKNOWN**. Console v0.40.1 is a desktop build, not a server pin.
+
+## 2026-11-03, about 1:20 PM ET — Switch Console installed and running
+
+Host-observed on Old-Faithful: Switch Console is installed and the window is open. Jay can see that window. Executable path:
+
+`C:\Program Files\Switch Console\Switch Console.exe`
+
+**Proven (host-observed):** the application is installed and running. This environment did not see the window, and no screenshot is stored in git.
+
+**Still UNCONFIRMED. This is not a join PASS.**
+
+- The Core server URL Console is using
+- Whether that session is connected or disconnected
+- Whether Codex has joined the council room
+- Antigravity and Cursor CLI join-and-reply
+
+A pinned upstream Switch server revision remains **UNKNOWN**.
 
 ## As of the snapshot — other public work
 

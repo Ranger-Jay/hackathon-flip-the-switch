@@ -2,6 +2,13 @@
 
 This is the canonical, chronological public release history. Each numbered entry corresponds to exactly one independently scoped Git commit and an immutable annotated Git tag. An entry does not assert that application features or integration tests already work.
 
+## v002.03 — Switch Console observed running — 2026-11-03
+
+- Updated `docs/PROGRESS.md` with a host report at about 1:20 PM America/New_York: Switch Console is installed and running on Old-Faithful at `C:\Program Files\Switch Console\Switch Console.exe`. The window is visible.
+- Updated the Console lines in `docs/REPRODUCE.md` to match. Core server URL, connected/disconnected status, and Codex/council room join stay **UNCONFIRMED**. This revision does not claim a join PASS.
+- **Not claimed:** a pinned upstream server revision, a native agent join, or any new room message.
+- **Verification:** `python3 scripts/verify_repo.py` checks public hygiene only. It does not prove a Console connection.
+
 ## v002.02 — Sanitized Boons Switch client — 2026-11-03
 
 - Added `integrations/boons-shim`: a Python standard-library Switch client configured only by environment variables. `.env.example` lists names and no values. The connection-id state file is gitignored.

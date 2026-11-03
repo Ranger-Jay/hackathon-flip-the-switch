@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v002.02** · **State as of November 3, 2026: a sanitized custom-agent client is in the repository; the live inbound stream, Console install, and full workflow are not yet demonstrated.**
+**Current repository version: v002.03** · **State as of November 3, 2026 (~1:20 PM ET): Switch Console is installed and running on Old-Faithful; core connection and council-room join are unconfirmed; the inbound Boons stream and full workflow are not yet demonstrated.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
@@ -91,7 +91,7 @@ The 3D layer must never be required to read, operate, or reproduce the workflow.
 | :-- | :-- |
 | Public repository and versioning foundation | **v001.00 / v001.01 tagged and GitHub Actions checked**; current release review pending |
 | Switch deployment and room availability | **Partial, host-observed 2026-11-03.** Bridge port 8000 reported healthy; Mattermost council channel up; Gateway UI port 3000 was down earlier and is not re-verified. See the [progress ledger](docs/PROGRESS.md). |
-| Native agent join + real responses | **Not verified.** Switch Console install GO issued; install evidence pending. |
+| Native agent join + real responses | **Not verified.** Switch Console is installed and running on Old-Faithful (window visible, ~1:20 PM ET). Core server URL, connected/disconnected status, and Codex/council room join are **UNCONFIRMED**. |
 | Boons custom host bridge | **Partial.** Sanitized client: [integrations/boons-shim](integrations/boons-shim/README.md) (environment variables only). Outbound council post was observed on the host; inbound stream not proven. See [docs/PROGRESS.md](docs/PROGRESS.md). |
 | Human proposal → decision document | **Not verified** |
 | Interactive room interface / 3D enhancement | **In development / proposed** on `work/gem-interface` (not modified here) |

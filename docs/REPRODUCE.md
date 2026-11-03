@@ -1,6 +1,6 @@
 # Reproduce the Council Room
 
-**Current status:** Complete application reproduction is **NOT YET VERIFIED**. Host-observed notes as of 2026-11-03, about 1:12 PM America/New_York, are in [PROGRESS.md](PROGRESS.md). This runbook lists commands a fresh reproducer would run. It does not invent output that was not captured.
+**Current status:** Complete application reproduction is **NOT YET VERIFIED**. Host-observed notes are in [PROGRESS.md](PROGRESS.md): the general snapshot is 2026-11-03, about 1:12 PM America/New_York, and the Switch Console install note is about 1:20 PM ET. This runbook lists commands a fresh reproducer would run. It does not invent output that was not captured.
 
 ## Currently reproducible: public repository checks
 
@@ -32,13 +32,13 @@ Start with [Switch's CONTRIBUTING.md](https://github.com/sandbox-quantum/switch/
 
 ## Blocks to resolve before submission
 
-States below are as of 2026-11-03 ~1:12 PM ET. **PARTIAL** means a host-side report exists and is not an independent reproduction. No health-response body from the development host is stored in git. Those bodies were not re-fetched for this revision. SSH from a cloud sandbox to the development host port 22 was reported as `Operation not permitted` (outbound TCP blocked).
+States below are as of 2026-11-03 ~1:12 PM ET, except the Switch Console lines, which include a host report at about 1:20 PM ET. **PARTIAL** means a host-side report exists and is not an independent reproduction. No health-response body from the development host is stored in git. Those bodies were not re-fetched for this revision. SSH from a cloud sandbox to the development host port 22 was reported as `Operation not permitted` (outbound TCP blocked).
 
 | Gate | State | Evidence language |
 | :-- | :-- | :-- |
-| Pin correct upstream version and compatible agent controller | UNKNOWN | No upstream Switch git revision is pinned here. Switch Console Windows x64 **v0.40.1** was downloaded and verified onto Old-Faithful. That is a desktop build, not a server pin. |
+| Pin correct upstream version and compatible agent controller | UNKNOWN | No upstream Switch git revision is pinned here. Switch Console Windows x64 **v0.40.1** is installed and running on Old-Faithful as of about 1:20 PM ET (`C:\Program Files\Switch Console\Switch Console.exe`). That is a desktop build, not a server pin. The Core server URL in Console is **UNCONFIRMED**. |
 | Host/port health evidence | PARTIAL (host-observed) | On `nexus` (Linux Mint), Switch Core/bridge port **8000** was reported healthy and Mattermost port **8065** was reported up. Gateway UI port **3000** was down at an earlier check the same day and is not re-verified. Response bodies are not in this repository. |
-| Native sessions and custom shim | PARTIAL | Boons was registered out of band (no token in git). Host-local shim: **outbound post PASS; inbound stream not yet proven.** Switch Console: **GO issued; install evidence pending** (~1:06 PM ET). Codex, Antigravity, and Cursor CLI join-and-reply remain UNKNOWN. |
+| Native sessions and custom shim | PARTIAL | Boons was registered out of band (no token in git). Host-local shim: **outbound post PASS; inbound stream not yet proven.** Switch Console is installed and running on Old-Faithful (~1:20 PM ET); the window is visible. Core server URL, connected/disconnected status, and Codex/council room join are **UNCONFIRMED** (not a join PASS). Antigravity and Cursor CLI join-and-reply remain UNKNOWN. |
 | Fresh-clone user journey | UNKNOWN | `python3 scripts/verify_repo.py` only checks this repository. No fresh machine has reproduced the room workflow. |
 | Actual video matching the steps in this file | UNKNOWN | No demo video is in this repository. |
 
