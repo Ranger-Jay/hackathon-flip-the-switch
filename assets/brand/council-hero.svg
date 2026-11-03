@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="480" viewBox="0 0 1280 480" role="img" aria-labelledby="title desc">
+  <title id="title">Council Room — one room, many perspectives, one accountable decision</title>
+  <desc id="desc">Concept art: a dramatic 3D-inspired glowing circular council table, distinct agent seats, and a human decision point. This is not a running product screenshot.</desc>
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#070D1B"/><stop offset=".52" stop-color="#171B39"/><stop offset="1" stop-color="#052F3A"/></linearGradient>
+    <radialGradient id="aura"><stop stop-color="#63B7DD" stop-opacity=".19"/><stop offset=".72" stop-color="#7C69DB" stop-opacity=".07"/><stop offset="1" stop-color="#7C69DB" stop-opacity="0"/></radialGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#67E0D3"/><stop offset=".5" stop-color="#C59BFF"/><stop offset="1" stop-color="#E9C37C"/></linearGradient>
+    <linearGradient id="table" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#35477C"/><stop offset="1" stop-color="#151F47"/></linearGradient>
+    <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse"><path d="M38 0H0V38" fill="none" stroke="#8CEEE7" stroke-opacity=".055"/></pattern>
+    <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="blur"><feGaussianBlur stdDeviation="15"/></filter>
+  </defs>
+  <rect width="1280" height="480" rx="22" fill="url(#night)"/><rect width="1280" height="480" rx="22" fill="url(#grid)"/>
+  <rect x="1.5" y="1.5" width="1277" height="477" rx="20" fill="none" stroke="url(#ring)" stroke-opacity=".47" stroke-width="3"/>
+  <ellipse cx="958" cy="234" rx="325" ry="300" fill="url(#aura)"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <g transform="translate(75 65)">
+      <rect width="43" height="43" rx="12" fill="#153345" stroke="#5CE6DB" stroke-width="1.5"/>
+      <path d="M21.5 8L34 21.5L21.5 35L9 21.5Z" fill="none" stroke="#83FBE9" stroke-width="2"/><circle cx="21.5" cy="21.5" r="4" fill="#E3D1FA"/>
+      <text x="61" y="31" fill="#F5F7FF" font-size="24" font-weight="700" letter-spacing="4">COUNCIL ROOM</text>
+    </g>
+    <text x="77" y="188" fill="#FFFFFF" font-size="49" font-weight="700" letter-spacing="-1.6">Many minds.</text>
+    <text x="77" y="248" fill="#75EEE2" font-size="49" font-weight="700" letter-spacing="-1.6">One decision.</text>
+    <text x="80" y="293" fill="#BDCEE6" font-size="19">Real agents. Evidence. Human authority.</text>
+    <rect x="79" y="329" width="194" height="38" rx="19" fill="#103740" stroke="#67DED8" stroke-opacity=".7"/>
+    <circle cx="101" cy="348" r="5" fill="#72F2DF" filter="url(#glow)"/>
+    <text x="117" y="354" fill="#C1FDF0" font-size="13" font-weight="700" letter-spacing="1.3">SWITCH-POWERED</text>
+    <text x="78" y="431" fill="#94ABC9" font-size="13" letter-spacing="1.8">FLIP THE SWITCH 2026  /  TRACK 01</text>
+  </g>
+  <g transform="translate(954 242)" font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+    <ellipse rx="287" ry="168" fill="none" stroke="#70D9EA" stroke-opacity=".2" stroke-dasharray="5 9"/>
+    <ellipse rx="228" ry="124" fill="none" stroke="#9D8CED" stroke-opacity=".35"/>
+    <ellipse cy="10" rx="192" ry="105" fill="#7F9DE5" fill-opacity=".12" filter="url(#blur)"/>
+    <path d="M-168 -30 C-152 -112 161 -112 168 -30V35C156 107 -156 107 -168 35Z" fill="#111631" stroke="#768DCC" stroke-width="2"/>
+    <ellipse cy="-30" rx="168" ry="72" fill="url(#table)" stroke="url(#ring)" stroke-width="2.5"/>
+    <ellipse cy="-30" rx="130" ry="54" fill="none" stroke="#B5DCFB" stroke-opacity=".34" stroke-width="1.5" stroke-dasharray="4 7"/>
+    <ellipse cy="-30" rx="64" ry="29" fill="#102A3E" stroke="#75F0E3" stroke-opacity=".8"/>
+    <path d="M-24 -30l17 14 34 -36" fill="none" stroke="#98FFE9" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>
+    <g font-size="12" font-weight="700" letter-spacing="1">
+      <g transform="translate(-210 -99)"><circle r="31" fill="#123D4A" stroke="#65E5DA" stroke-width="2.5"/><path d="M-12 8V-10L0 -17L12 -10V8Z" fill="none" stroke="#BAFFF3" stroke-width="2"/><circle r="4" fill="#E3FFFB"/><text y="51" fill="#A7F8EB">CORA</text></g>
+      <g transform="translate(211 -99)"><circle r="31" fill="#312A58" stroke="#B99AFF" stroke-width="2.5"/><path d="M0 -18L13 10H-13Z" fill="none" stroke="#EAD6FF" stroke-width="2"/><circle r="5" fill="#D7B6FF"/><text y="51" fill="#E4D2FF">GEM</text></g>
+      <g transform="translate(-235 88)"><circle r="31" fill="#423424" stroke="#F5C57A" stroke-width="2.5"/><path d="M-11 -12H11V10H-11Z" fill="none" stroke="#FFEDD1" stroke-width="2"/><path d="M-6 -4H6M-6 3H3" stroke="#FFEDD1" stroke-width="2"/><text y="51" fill="#FCE5AF">BOONS</text></g>
+      <g transform="translate(238 88)"><circle r="31" fill="#1B3059" stroke="#80C5F9" stroke-width="2.5"/><path d="M0 -19L15 -9V10L0 19L-15 10V-9Z" fill="none" stroke="#C3E8FF" stroke-width="2"/><path d="M-8 0H8" stroke="#C3E8FF" stroke-width="2"/><text y="51" fill="#B6DBFF">FINCH</text></g>
+      <g transform="translate(0 -162)"><circle r="30" fill="#32214B" stroke="#DBBAF4" stroke-width="2.5"/><circle r="13" fill="none" stroke="#FFE8FF" stroke-width="2"/><path d="M-13 0H13M0 -13V13" stroke="#FFE8FF" stroke-width="1.6"/><text y="-43" fill="#EFD7FF">BUDDY*</text></g>
+      <g transform="translate(0 127)"><circle r="37" fill="#164B42" stroke="#85F0D4" stroke-width="3" filter="url(#glow)"/><path d="M0 -19L14 -10L10 11L0 21L-10 11L-14 -10Z" fill="none" stroke="#C2FFE5" stroke-width="2"/><path d="M-7 1L-1 8L8 -5" stroke="#C2FFE5" stroke-width="2.5"/><text y="61" fill="#D2FFE9">JAY · HUMAN</text></g>
+    </g>
+  </g>
+  <text x="1217" y="454" text-anchor="end" fill="#8799B5" font-family="Arial, Helvetica, sans-serif" font-size="11">*CONCEPTUAL SEAT — NOT LIVE PRESENCE</text>
+</svg>

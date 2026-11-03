@@ -1,0 +1,40 @@
+# Credentials and local environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+id_ed25519*
+id_rsa*
+secrets/
+private/
+.local/
+
+# Shim runtime state (connection id). Never commit.
+*_shim_state.json
+
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.turbo/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+playwright-report/
+test-results/
+
+# IDE, operating system and scratch files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+*.tmp
+*.swp
