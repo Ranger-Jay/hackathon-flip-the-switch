@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Council Room — Flip the Switch</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="nav-left">
+        <div class="brand-badge">
+          <span class="brand-icon">⚡</span>
+          <span class="brand-title">SWITCH COUNCIL</span>
+        </div>
+        <span class="room-pill">
+          <span class="status-dot pulse-green"></span>
+          Room: <strong>funding-intel-council</strong>
+        </span>
+      </div>
+      <div class="nav-center">
+        <span class="track-badge">Flip the Switch — Track 01</span>
+      </div>
+      <div class="nav-right">
+        <button id="viewToggleBtn" class="pill-btn active-view" title="Toggle 2D / 3D Chamber">
+          <span class="btn-icon">🌐</span>
+          <span id="viewModeLabel">Chamber: 3D Holo</span>
+        </button>
+        <button id="docToggleBtn" class="pill-btn" title="Toggle Room Document Drawer">
+          <span class="btn-icon">📜</span>
+          <span>Decision Doc</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-layout">
+      <!-- Left: Council Chamber Viewport -->
+      <section class="chamber-panel">
+        <div class="chamber-header">
+          <h2>COUNCIL CHAMBER</h2>
+          <span class="participant-count" id="seatCounter">6 Seats Connected</span>
+        </div>
+        
+        <div class="viewport-stage" id="viewportStage">
+          <!-- 3D Canvas -->
+          <canvas id="holoCanvas"></canvas>
+
+          <!-- 2D Circular Seating Overlay -->
+          <div class="seats-ring" id="seatsRing">
+            <!-- Dynamically populated or static slots -->
+          </div>
+
+          <!-- Central Table Hologram Target -->
+          <div class="central-nexus" id="centralNexus">
+            <div class="nexus-ring"></div>
+            <div class="nexus-core">
+              <span class="nexus-icon">⚡</span>
+              <span class="nexus-label" id="nexusStatus">IDLE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Diagnostics Footer -->
+        <div class="bridge-diagnostics">
+          <div class="diag-item">
+            <span class="diag-label">Host:</span>
+            <span class="diag-val" id="diagHost">nexus (192.168.1.153)</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Core (:8000):</span>
+            <span class="diag-val badge-green" id="diagCore">Active (Uvicorn)</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Mattermost (:8065):</span>
+            <span class="diag-val badge-green" id="diagChat">Online (v12.0)</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Bridge Protocol:</span>
+            <span class="diag-val badge-green">FastMCP / WS</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Live Conversation Stream -->
+      <section class="feed-panel">
+        <div class="feed-header">
+          <h2>LIVE WORKFLOW STREAM</h2>
+          <div class="workflow-controls">
+            <button id="playWorkflowBtn" class="action-btn">
+              <span>▶ Run Proposal Workflow</span>
+            </button>
+            <button id="resetWorkflowBtn" class="action-btn secondary">
+              <span>↺ Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+          <!-- Dynamic message turns inserted here -->
+        </div>
+
+        <div class="chat-input-bar">
+          <input type="text" id="userInput" placeholder="Submit a proposal or instruction to the Council..." disabled>
+          <button id="sendBtn" disabled>Send</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Room Decision Document Drawer (Sidecar) -->
+    <aside class="doc-drawer" id="docDrawer">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span class="doc-icon">📜</span>
+          <h3>ROOM DOCUMENT: DECISION-001</h3>
+        </div>
+        <button id="closeDrawerBtn" class="icon-btn">&times;</button>
+      </div>
+      <div class="drawer-body" id="drawerBody">
+        <div class="doc-placeholder">Run the workflow to generate and verify the official room decision document.</div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
