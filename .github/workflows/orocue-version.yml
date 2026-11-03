@@ -1,0 +1,48 @@
+name: Orocue version and public hygiene
+
+on:
+  push:
+    branches:
+      - orocue/public-foundation
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check public hygiene and documentation version
+        run: python3 scripts/verify_repo.py
+      - name: Validate version identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat VERSION)"
+          subject="$(git log -1 --format=%s)"
+          [[ "$version" =~ ^v[0-9]{3}\.[0-9]{2}$ ]]
+          [[ "$subject" == *"[$version]" ]] || {
+            echo "Commit subject must end with [$version]. Actual: $subject"
+            exit 1
+          }
+      - name: Create immutable annotated version tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat VERSION)"
+          if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+            tagged="$(git rev-list -n 1 "$version")"
+            if [[ "$tagged" != "$GITHUB_SHA" ]]; then
+              echo "Refusing to move immutable tag $version ($tagged)"
+              exit 1
+            fi
+            echo "Existing immutable tag points at current commit."
+            exit 0
+          fi
+          git -c user.name="Orocue Version Bot" -c user.email="actions@users.noreply.github.com"             tag -a "$version" -m "Orocue $version" "$GITHUB_SHA"
+          git push origin "refs/tags/$version"
