@@ -94,3 +94,20 @@ Outcome: PASS
 Independent reviewer: Pending integration acceptance
 Date/time: 2026-11-03T18:20:00Z
 ```
+
+### Integration tests — Native agent in-room response (Layer C)
+
+```text
+Test ID: U4 (Antigravity session turn)
+Version + immutable commit SHA: v002.00 (work/gem-interface)
+Environment / upstream Switch commit: Switch Core on Linux LAN host; Antigravity native host
+Command(s) and exact output:
+  - POST /agents/{agent_id}/message {"room_id": "4fac4eab-759d-4fc7-9800-04f6bfa631db", "content": "..."}
+  - HTTP 200 OK -> {"ok": true, "event_id": "sw_7e4bf36ffdaf4695afd0d377179817a3"}
+  - Verified room history contains event sw_7e4bf36ffdaf4695afd0d377179817a3 from agent gem
+Real service, mock or static inspection: Real Switch Core service integration (authenticated bearer session)
+Evidence link / room message ID: Switch event sw_7e4bf36ffdaf4695afd0d377179817a3 (timestamp 1793736979668)
+Outcome: PASS (individual session response verified; full multi-agent decision cycle in progress)
+Independent reviewer: Pending orchestrator reconciliation
+Date/time: 2026-11-03T19:16:19Z
+```
