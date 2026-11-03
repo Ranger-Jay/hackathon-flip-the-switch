@@ -2,6 +2,12 @@
 
 This is the canonical, chronological public release history. Each numbered entry corresponds to exactly one independently scoped Git commit and an immutable annotated Git tag. An entry does not assert that application features or integration tests already work.
 
+## v002.00 — Conceptual Council Room visual identity — 2026-11-03
+
+- Added a self-contained, original SVG hero illustration presenting a dramatic circular Council Room and recognizable participant seats.
+- Integrated the image into the README with accessible alternative text. The illustration is **conceptual artwork**, not a verified product screenshot.
+- No new runtime, 3D implementation or live agent session is claimed. Verify Actions and tag before claiming release completion.
+
 ## v001.01 — Documentation foundation — 2026-11-03
 
 - Replaced the initialization README with an honest, judge-readable overview of the single Council Room business workflow.

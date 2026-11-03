@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/brand/council-hero.svg" alt="Concept illustration of the Council Room; not a live product screenshot" width="100%"></p>
+
 # COUNCIL ROOM
 ### One room. Many perspectives. One accountable decision.
 
@@ -11,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v001.01** · **State as of November 3, 2026: foundation and documentation in progress; live multi-agent workflow not yet demonstrated.**
+**Current repository version: v002.00** · **State as of November 3, 2026: foundation, documentation, and conceptual visual identity in progress; live multi-agent workflow not yet demonstrated.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
@@ -81,13 +83,13 @@ Our visual direction is a **cinematic but practical council**: distinct agent id
 
 The 3D layer must never be required to read, operate, or reproduce the workflow. Keyboard navigation, reduced-motion support and a fast 2D fallback are mandatory.
 
-**Visual assets and interactive screenshots are not yet available.** We will publish genuine captures as the implementation is verified, not rendered images represented as a working app.
+**The banner above is original concept art, not a screenshot of a running app.** Interactive screenshots are not yet available. We will publish genuine captures as the implementation is verified, not rendered images represented as a working app.
 
 ## Current status
 
 | Capability | Status |
 | :-- | :-- |
-| Public repository and versioning foundation | **In progress** — branch review / tag verification pending |
+| Public repository and versioning foundation | **v001.00 / v001.01 tagged and GitHub Actions checked**; current release review pending |
 | Switch deployment and room availability | **Not verified** |
 | Native agent join + real responses | **Not verified** |
 | Boons custom host bridge | **In development** |
