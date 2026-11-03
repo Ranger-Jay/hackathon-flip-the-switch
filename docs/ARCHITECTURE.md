@@ -30,6 +30,8 @@ Codex, Cursor CLI and Antigravity are planned native Switch Console hosts. An in
 
 The non-native Boons host requires an explicitly versioned shim and authenticated protocol connection. Its test must distinguish mock transport from real room delivery and link a received message to the posted response.
 
+The public client is [`integrations/boons-shim`](../integrations/boons-shim/README.md). It is a Python standard-library program. Configuration is environment variables only (`SWITCH_BASE_URL`, `SWITCH_AGENT_ID`, `SWITCH_API_KEY`, `SWITCH_ROOM_ID`). Live values are never committed. Heartbeats are sent only after a `connection_state` event. A beat response of 404 or 409 reopens the stream instead of backing off. Shipping this client does not prove the inbound stream. Host-observed outbound evidence is in [PROGRESS.md](PROGRESS.md).
+
 ### Orchestration identity
 
 The project orchestrator in ChatGPT and any Switch-side Buddy persona are **separate sessions**. They do not automatically share state, credentials or a live connection. Switch-side summary participation must be explicitly instantiated and visibly identified; a user decision must be authored/confirmed by the real human.

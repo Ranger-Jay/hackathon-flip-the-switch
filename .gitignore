@@ -12,6 +12,9 @@ secrets/
 private/
 .local/
 
+# Shim runtime state (connection id). Never commit.
+*_shim_state.json
+
 # Dependencies and generated output
 node_modules/
 dist/

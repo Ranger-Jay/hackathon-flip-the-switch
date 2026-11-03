@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v002.01** · **State as of November 3, 2026 (~1:12 PM ET): the public ledger records host-observed bridge health, a Council Room bind, and one outbound Boons post; the inbound stream, Console install, and full workflow are not yet demonstrated.**
+**Current repository version: v002.02** · **State as of November 3, 2026: a sanitized custom-agent client is in the repository; the live inbound stream, Console install, and full workflow are not yet demonstrated.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
@@ -92,7 +92,7 @@ The 3D layer must never be required to read, operate, or reproduce the workflow.
 | Public repository and versioning foundation | **v001.00 / v001.01 tagged and GitHub Actions checked**; current release review pending |
 | Switch deployment and room availability | **Partial, host-observed 2026-11-03.** Bridge port 8000 reported healthy; Mattermost council channel up; Gateway UI port 3000 was down earlier and is not re-verified. See the [progress ledger](docs/PROGRESS.md). |
 | Native agent join + real responses | **Not verified.** Switch Console install GO issued; install evidence pending. |
-| Boons custom host bridge | **Partial, host-observed.** Registered out of band. One outbound council post (PASS reported on the host). Inbound stream not proven. Public client is a separate revision. |
+| Boons custom host bridge | **Partial.** Sanitized client: [integrations/boons-shim](integrations/boons-shim/README.md) (environment variables only). Outbound council post was observed on the host; inbound stream not proven. See [docs/PROGRESS.md](docs/PROGRESS.md). |
 | Human proposal → decision document | **Not verified** |
 | Interactive room interface / 3D enhancement | **In development / proposed** on `work/gem-interface` (not modified here) |
 | Fresh-clone end-to-end reproduction | **Not verified** |
@@ -130,6 +130,8 @@ These progress notes are on `work/cora-reproducibility` and are not on `main` un
 │   ├── PROGRESS.md            # Host-observed public progress ledger
 │   ├── TESTING.md             # Acceptance and proof ledger
 │   └── DEMO.md                # Live demonstration storyboard
+├── integrations/
+│   └── boons-shim/            # Sanitized custom Switch client (env-only)
 ├── scripts/verify_repo.py     # Public hygiene/documentation check
 └── .github/workflows/         # Version check and immutable tag automation
 ```
@@ -171,6 +173,7 @@ The prior repository initialization commit predates Orocue and is recorded trans
 - The current branch records a **repository foundation plus a host-observed progress ledger**, not the complete product.
 - Switch bridge health was reported on the development host. Response bodies are not in git. Gateway UI port 3000 was down at the last report. See [docs/PROGRESS.md](docs/PROGRESS.md).
 - Provider authentication and cross-host reachability still require live proof. Cloud egress to the development host SSH port was reported blocked.
+- The client in `integrations/boons-shim` holds no credentials. It does not prove the inbound event stream.
 - Native providers and the custom host may require separate operating-system credentials and login steps.
 - The decision document format and UI are subject to real-room integration tests.
 - 3D presentation is a progressive enhancement, not a committed dependency.

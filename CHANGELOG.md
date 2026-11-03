@@ -2,6 +2,14 @@
 
 This is the canonical, chronological public release history. Each numbered entry corresponds to exactly one independently scoped Git commit and an immutable annotated Git tag. An entry does not assert that application features or integration tests already work.
 
+## v002.02 — Sanitized Boons Switch client — 2026-11-03
+
+- Added `integrations/boons-shim`: a Python standard-library Switch client configured only by environment variables. `.env.example` lists names and no values. The connection-id state file is gitignored.
+- Heartbeats start after a `connection_state` event. HTTP 404 or 409 on beat reopens the stream instead of backing off.
+- Linked from the README and `docs/ARCHITECTURE.md`. Live room credentials are not in the tree.
+- **Not claimed:** a new live post, or an inbound event stream. The host-observed outbound post remains the v002.01 ledger entry and was not re-run here.
+- **Verification:** `python3 scripts/verify_repo.py` checks public hygiene only. It does not prove the bridge, the post, or the stream.
+
 ## v002.01 — Public progress ledger — 2026-11-03
 
 - Added `docs/PROGRESS.md`, a chronological public ledger of host-observed steps as of 2026-11-03, about 1:12 PM America/New_York.
