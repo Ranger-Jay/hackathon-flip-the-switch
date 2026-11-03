@@ -10,7 +10,7 @@ The IDs below match that table. The state column is the product-test state on th
 
 | ID | Acceptance criterion | State | Product-test reading |
 | :-- | :-- | :-- | :-- |
-| U1 | Human can enter the only Council Room | PASS | A non-admin seeded product-test user joined LAN Mattermost team `switch` and channel `council`, and a post succeeded. An independent continuity check matched the create evidence. The proof post is captured in a private coordination issue. |
+| U1 | Human can enter the only Council Room | PASS | A non-admin seeded product-test user joined LAN Mattermost team `switch` and channel `council`, and a post succeeded. An independent continuity check matched the create evidence. The proof post is captured in a private coordination issue. Detail: [u1-council-entry.md](u1-council-entry.md). |
 | U2 | Human can post one real proposal | UNKNOWN | No business proposal is proven in the room. |
 | U3 | Roles and participant identity are distinct | UNKNOWN | Distinct participant identities are unproven. |
 | U4 | Agents receive addressed work and respond in-role | UNKNOWN | No in-role agent response is proven. |
