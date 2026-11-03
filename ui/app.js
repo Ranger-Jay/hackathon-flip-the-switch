@@ -1,5 +1,8 @@
 // Council Room — Accessible Chamber Interface
 // Clean public implementation for Switch Hackathon (Track 01)
+const SWITCH_ROOM_ID = "4fac4eab-759d-4fc7-9800-04f6bfa631db";
+const MATTERMOST_CHANNEL_ID = "44dwjxtfbfgf7c1siwopmxoacr";
+const BOONS_AGENT_ID = "89181515-6b34-4254-884f-2678bd7dafc1";
 
 const SEATS = [
   { id: "jay", name: "Jay", role: "Human Lead", avatar: "avatars/jay.svg", status: "online", emoji: "🐕" },
@@ -59,7 +62,8 @@ const DECISION_DOC_CONTENT = `
 <div class="doc-rendered">
   <h1>COUNCIL DECISION RECORD</h1>
   <p><strong>Document ID:</strong> <span class="citation-pill">DECISION-20261103-01</span></p>
-  <p><strong>Room:</strong> <code>funding-intel-council</code></p>
+  <p><strong>Switch Room ID:</strong> <code>4fac4eab-759d-4fc7-9800-04f6bfa631db</code></p>
+  <p><strong>Mattermost Channel:</strong> <code>switch/council</code> (<code>44dwjxtfbfgf7c1siwopmxoacr</code>)</p>
   <p><strong>Status:</strong> <span style="color:#10B981;font-weight:600;">APPROVED & SEALED</span></p>
   
   <h2>1. Context & Proposal</h2>
