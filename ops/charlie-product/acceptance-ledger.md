@@ -28,7 +28,7 @@ The IDs below match that table. The state column is the product-test state on th
 
 U2 through U10, and UX1 through UX3, stay UNKNOWN until Switch Core room binding and Boons registration are complete. That pair is the orchestrator gate. Proposal, agent join, decision, outage, reconnect, and third-party reproduction tests wait on it.
 
-The U1 pass is channel entry on LAN Mattermost. Core room binding remains unproven, which is why the later rows stay UNKNOWN.
+The U1 pass is channel entry on LAN Mattermost. Core room binding remains unproven, which is why the later rows stay UNKNOWN. The storyboard consequence is [demo-hold.md](demo-hold.md).
 
 ## Left off this page
 
