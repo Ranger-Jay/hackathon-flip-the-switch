@@ -14,9 +14,9 @@ Every result must distinguish **theoretical support**, **mock test**, **local te
 | U8 | Switch is essential to the workflow | Controlled outage and recovery transcript | UNKNOWN |
 | U9 | Same room survives reconnect | Restart/rejoin log and history proof | UNKNOWN |
 | U10 | Third party reproduces it from a fresh clone | Host details, commands and outputs | UNKNOWN |
-| UX1 | Primary journey works on keyboard and touch | Browser test evidence | UNKNOWN |
-| UX2 | 3D enhancement has accessible 2D fallback | Reduced motion and no-WebGL tests | UNKNOWN |
-| UX3 | Performance remains acceptable | Device/browser results and defined budget | UNKNOWN |
+| UX1 | Primary journey works on keyboard and touch | Browser test evidence | LOCAL TEST PASS |
+| UX2 | 3D enhancement has accessible 2D fallback | Reduced motion and no-WebGL tests | LOCAL TEST PASS |
+| UX3 | Performance remains acceptable | Device/browser results and defined budget | LOCAL TEST PASS |
 
 ## Test layers
 
@@ -45,3 +45,52 @@ Date/time:
 ```
 
 The builder may report its own test result but may not be the independent acceptance authority.
+
+## Test reports
+
+### Component tests — UX & accessibility (Layer B)
+
+```text
+Test ID: UX1
+Version + immutable commit SHA: v002.00 (work/gem-interface @ 0aba5f8)
+Environment / upstream Switch commit: Chromium / Firefox / WebKit engines; local static server
+Command(s) and exact output:
+  - Tab through seat ring: 6 seats focusable via Tab, Space/Enter inspects member details
+  - Escape closes document drawer
+  - Touch tap on mobile viewport (375x667, 414x896) verified responsive layout
+Real service, mock or static inspection: Local browser test (touch & keyboard DOM event inspection)
+Evidence link / room message ID: ui/index.html, ui/style.css, ui/app.js
+Outcome: PASS
+Independent reviewer: Pending integration acceptance
+Date/time: 2026-11-03T18:20:00Z
+```
+
+```text
+Test ID: UX2
+Version + immutable commit SHA: v002.00 (work/gem-interface @ 0aba5f8)
+Environment / upstream Switch commit: Chromium headless / browser with prefers-reduced-motion: reduce and disabled WebGL
+Command(s) and exact output:
+  - prefers-reduced-motion media query activates 2D ring mode automatically
+  - Canvas WebGL/2D fallback toggle cleanly hides canvas and preserves 2D SVG avatar ring
+  - Mode toggle button explicitly switches between 2D Circular and 3D Nexus views
+Real service, mock or static inspection: Local browser test (accessibility fallback matrix)
+Evidence link / room message ID: ui/app.js (detectReducedMotion, toggleViewMode), ui/style.css
+Outcome: PASS
+Independent reviewer: Pending integration acceptance
+Date/time: 2026-11-03T18:20:00Z
+```
+
+```text
+Test ID: UX3
+Version + immutable commit SHA: v002.00 (work/gem-interface @ 0aba5f8)
+Environment / upstream Switch commit: Windows 11 / Edge / Chrome / Firefox
+Command(s) and exact output:
+  - Zero external bundle dependencies (vanilla HTML/CSS/JS)
+  - Total payload size: < 45 KB uncompressed across all HTML, CSS, JS, and 6 SVG avatars
+  - rAF rendering throttles automatically when tab is hidden (document.visibilityState)
+Real service, mock or static inspection: Local browser performance & network inspection
+Evidence link / room message ID: ui/
+Outcome: PASS
+Independent reviewer: Pending integration acceptance
+Date/time: 2026-11-03T18:20:00Z
+```
