@@ -2,6 +2,14 @@
 
 This is the canonical, chronological public release history. Each numbered entry corresponds to exactly one independently scoped Git commit and an immutable annotated Git tag. An entry does not assert that application features or integration tests already work.
 
+## v002.01 — Public progress ledger — 2026-11-03
+
+- Added `docs/PROGRESS.md`, a chronological public ledger of host-observed steps as of 2026-11-03, about 1:12 PM America/New_York.
+- Updated the `docs/REPRODUCE.md` gate table from blanket UNKNOWN to the accurate partial or still-unknown state. Health-response bodies are not invented. Expected host commands are listed without fabricated output.
+- LAN and tailnet addresses stay out of the public files. Private ops are a pointer to `Ranger-Jay/switch-private` issue #2 only.
+- **Not claimed:** inbound Boons stream, Gateway UI recovery, Switch Console install, a pinned upstream server revision, a fresh-clone journey, or a demo video. Outbound council post is recorded as host-observed PASS only.
+- **Verification:** `python3 scripts/verify_repo.py` checks public hygiene and docs consistency. It does not prove Switch health.
+
 ## v002.00 — Conceptual Council Room visual identity — 2026-11-03
 
 - Added a self-contained, original SVG hero illustration presenting a dramatic circular Council Room and recognizable participant seats.

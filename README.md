@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v002.00** · **State as of November 3, 2026: foundation, documentation, and conceptual visual identity in progress; live multi-agent workflow not yet demonstrated.**
+**Current repository version: v002.01** · **State as of November 3, 2026 (~1:12 PM ET): the public ledger records host-observed bridge health, a Council Room bind, and one outbound Boons post; the inbound stream, Console install, and full workflow are not yet demonstrated.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
@@ -90,11 +90,11 @@ The 3D layer must never be required to read, operate, or reproduce the workflow.
 | Capability | Status |
 | :-- | :-- |
 | Public repository and versioning foundation | **v001.00 / v001.01 tagged and GitHub Actions checked**; current release review pending |
-| Switch deployment and room availability | **Not verified** |
-| Native agent join + real responses | **Not verified** |
-| Boons custom host bridge | **In development** |
+| Switch deployment and room availability | **Partial, host-observed 2026-11-03.** Bridge port 8000 reported healthy; Mattermost council channel up; Gateway UI port 3000 was down earlier and is not re-verified. See the [progress ledger](docs/PROGRESS.md). |
+| Native agent join + real responses | **Not verified.** Switch Console install GO issued; install evidence pending. |
+| Boons custom host bridge | **Partial, host-observed.** Registered out of band. One outbound council post (PASS reported on the host). Inbound stream not proven. Public client is a separate revision. |
 | Human proposal → decision document | **Not verified** |
-| Interactive room interface / 3D enhancement | **In development / proposed** |
+| Interactive room interface / 3D enhancement | **In development / proposed** on `work/gem-interface` (not modified here) |
 | Fresh-clone end-to-end reproduction | **Not verified** |
 | Recorded demo and submission | **Not yet available** |
 
@@ -110,7 +110,7 @@ cd hackathon-flip-the-switch
 python3 scripts/verify_repo.py
 ```
 
-For now, cloning the **review branch** may be necessary to see these files before they are approved for `main`. A complete, tested setup will include the pinned Switch version, host configuration, provider prerequisites, sample non-sensitive decision and exact verification commands.
+These progress notes are on `work/cora-reproducibility` and are not on `main` until a reviewed merge. A complete, tested setup will include the pinned Switch version, host configuration, provider prerequisites, sample non-sensitive decision and exact verification commands. Host addresses are not stored in this repository.
 
 [Reproduction runbook and known gaps](docs/REPRODUCE.md)
 
@@ -127,6 +127,7 @@ For now, cloning the **review branch** may be necessary to see these files befor
 │   ├── ARCHITECTURE.md        # Host and responsibility boundaries
 │   ├── WORKFLOW.md            # The single business decision workflow
 │   ├── REPRODUCE.md           # Fresh-clone reproduction plan
+│   ├── PROGRESS.md            # Host-observed public progress ledger
 │   ├── TESTING.md             # Acceptance and proof ledger
 │   └── DEMO.md                # Live demonstration storyboard
 ├── scripts/verify_repo.py     # Public hygiene/documentation check
@@ -154,7 +155,8 @@ The prior repository initialization commit predates Orocue and is recorded trans
 
 | Test | What it actually proves | Recorded outcome |
 | :-- | :-- | :-- |
-| `python3 scripts/verify_repo.py` | Public-file hygiene and documentation integrity only | **Execution evidence pending** |
+| `python3 scripts/verify_repo.py` | Public-file hygiene and documentation integrity only | **Required on this revision; does not prove Switch** |
+| Boons outbound council post | One host-observed Mattermost post | **PASS reported on the host, 2026-11-03; message id not archived here. Inbound stream UNKNOWN** |
 | Native agent room join | A real provider can receive and respond | **UNKNOWN** |
 | Role-specific messages | Distinct agents act from their roles | **UNKNOWN** |
 | Switch outage/reconnect | Coordination depends on Switch and recovers | **UNKNOWN** |
@@ -166,8 +168,9 @@ The prior repository initialization commit predates Orocue and is recorded trans
 
 ## Known limitations
 
-- The current branch is a **repository and documentation foundation**, not the complete product.
-- Switch service deployment, provider authentication and cross-host reachability still require live proof.
+- The current branch records a **repository foundation plus a host-observed progress ledger**, not the complete product.
+- Switch bridge health was reported on the development host. Response bodies are not in git. Gateway UI port 3000 was down at the last report. See [docs/PROGRESS.md](docs/PROGRESS.md).
+- Provider authentication and cross-host reachability still require live proof. Cloud egress to the development host SSH port was reported blocked.
 - Native providers and the custom host may require separate operating-system credentials and login steps.
 - The decision document format and UI are subject to real-room integration tests.
 - 3D presentation is a progressive enhancement, not a committed dependency.

@@ -1,6 +1,6 @@
 # Reproduce the Council Room
 
-**Current status:** Foundation-only; complete application reproduction is **NOT YET VERIFIED**. This is a deliberately honest runbook that will be completed from actual testing evidence before submission.
+**Current status:** Complete application reproduction is **NOT YET VERIFIED**. Host-observed notes as of 2026-11-03, about 1:12 PM America/New_York, are in [PROGRESS.md](PROGRESS.md). This runbook lists commands a fresh reproducer would run. It does not invent output that was not captured.
 
 ## Currently reproducible: public repository checks
 
@@ -12,7 +12,7 @@ python3 scripts/verify_repo.py
 
 The checker validates version references, expected documentation links, and a narrow set of public secret/prefix hazards. It does not run Switch.
 
-While the foundation remains on a review branch rather than `main`, check out `orocue/public-foundation` to use its files. Do not present this branch as an approved release.
+The progress notes in this revision are on `work/cora-reproducibility`. They are not on `main` until a reviewed merge. Do not present this branch as an approved release. Acceptance IDs in [TESTING.md](TESTING.md) stay **UNKNOWN** until the artifacts listed there exist. The gate table below only narrows items where a host-side report exists.
 
 ## Requirements for the eventual end-to-end reproduction
 
@@ -32,12 +32,33 @@ Start with [Switch's CONTRIBUTING.md](https://github.com/sandbox-quantum/switch/
 
 ## Blocks to resolve before submission
 
-| Gate | State |
-| :-- | :-- |
-| Pin correct upstream version and compatible agent controller | UNKNOWN |
-| Host/port health evidence | UNKNOWN |
-| Native sessions and custom shim | UNKNOWN |
-| Fresh-clone user journey | UNKNOWN |
-| Actual video matching the steps in this file | UNKNOWN |
+States below are as of 2026-11-03 ~1:12 PM ET. **PARTIAL** means a host-side report exists and is not an independent reproduction. No health-response body from the development host is stored in git. Those bodies were not re-fetched for this revision. SSH from a cloud sandbox to the development host port 22 was reported as `Operation not permitted` (outbound TCP blocked).
+
+| Gate | State | Evidence language |
+| :-- | :-- | :-- |
+| Pin correct upstream version and compatible agent controller | UNKNOWN | No upstream Switch git revision is pinned here. Switch Console Windows x64 **v0.40.1** was downloaded and verified onto Old-Faithful. That is a desktop build, not a server pin. |
+| Host/port health evidence | PARTIAL (host-observed) | On `nexus` (Linux Mint), Switch Core/bridge port **8000** was reported healthy and Mattermost port **8065** was reported up. Gateway UI port **3000** was down at an earlier check the same day and is not re-verified. Response bodies are not in this repository. |
+| Native sessions and custom shim | PARTIAL | Boons was registered out of band (no token in git). Host-local shim: **outbound post PASS; inbound stream not yet proven.** Switch Console: **GO issued; install evidence pending** (~1:06 PM ET). Codex, Antigravity, and Cursor CLI join-and-reply remain UNKNOWN. |
+| Fresh-clone user journey | UNKNOWN | `python3 scripts/verify_repo.py` only checks this repository. No fresh machine has reproduced the room workflow. |
+| Actual video matching the steps in this file | UNKNOWN | No demo video is in this repository. |
 
 Do not replace this list with optimistic claims. Update from real tests with a date, command and exact artifact link.
+
+## Commands a fresh reproducer runs on the host
+
+Run these **on the Switch host** after setting `SWITCH_BASE_URL` to that host's bridge URL (the bridge, not the Gateway UI). Do not point them at a LAN or tailnet address copied from a private note into git. The outputs are **not** recorded in this repository; write down the status and body you actually receive.
+
+```bash
+# Bridge health. A host-side report on 2026-11-03 said this was ok.
+# The body was not archived here.
+curl -fsS "${SWITCH_BASE_URL}/health"
+
+# Mattermost system ping on the host. Port 8065 was reported up.
+curl -fsS "http://127.0.0.1:8065/api/v4/system/ping"
+
+# Gateway UI. It was down earlier on 2026-11-03. Record the code.
+# Do not assume success.
+curl -sS -o /dev/null -w "%{http_code}\n" "http://127.0.0.1:3000/"
+```
+
+Shim commands, once the client is present in the revision you checked out, are documented beside that client. Running them from a network that cannot reach the host is expected to fail and is not a health result.
