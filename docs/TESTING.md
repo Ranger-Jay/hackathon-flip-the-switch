@@ -111,3 +111,21 @@ Outcome: PASS (individual session response verified; full multi-agent decision c
 Independent reviewer: Pending orchestrator reconciliation
 Date/time: 2026-11-03T19:16:19Z
 ```
+
+### Recovery tests — Host reboot & room state preservation (Layer D)
+
+```text
+Test ID: U9 (Room survives host restart and reconnect)
+Version + immutable commit SHA: v002.00 (work/gem-interface)
+Environment / upstream Switch commit: Linux LAN host reboot; Switch Core & Postgres state
+Command(s) and exact output:
+  - Host power-loss reboot recovery (uptime reset to 0; Postgres & Mattermost restarted via Docker)
+  - Switch Core restarted on port 8000 (uv run switch_core.main)
+  - GET /agents/rooms/4fac4eab-759d-4fc7-9800-04f6bfa631db/participants -> boons: live, gem: joined, user: present
+  - GET /agents/{id}/rooms/4fac4eab-759d-4fc7-9800-04f6bfa631db/history -> 100% of room events preserved
+Real service, mock or static inspection: Real service recovery verification post-reboot
+Evidence link / room message ID: Preserved event sw_7e4bf36ffdaf4695afd0d377179817a3 in room 4fac4eab-759d-4fc7-9800-04f6bfa631db
+Outcome: PASS (durable room state and message history completely survived host reboot and reconnection)
+Independent reviewer: Pending orchestrator reconciliation
+Date/time: 2026-11-03T23:55:00Z
+```
