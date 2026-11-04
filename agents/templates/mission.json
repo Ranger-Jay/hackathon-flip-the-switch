@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "mission_id": null,
+  "revision": 1,
+  "correlation_id": null,
+  "source_ref": null,
+  "owner_runtime": null,
+  "package_sha": null,
+  "branch": null,
+  "head_sha": null,
+  "objective": null,
+  "acceptance": [],
+  "allowed_actions": [],
+  "blocked_actions": [
+    "unapproved merge",
+    "unapproved deployment",
+    "unapproved paid invocation"
+  ],
+  "reviewer_runtime": null,
+  "status": "queued",
+  "lease": {
+    "owner": null,
+    "expires_at": null,
+    "expected_revision": null
+  },
+  "checkpoint_ref": null,
+  "next_action": null
+}

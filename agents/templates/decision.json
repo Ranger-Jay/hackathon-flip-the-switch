@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "decision_id": null,
+  "status": "proposed",
+  "question": null,
+  "options": [],
+  "selected": null,
+  "authority_ref": null,
+  "decided_at": null,
+  "rationale": null,
+  "dissent": [],
+  "supersedes": null
+}

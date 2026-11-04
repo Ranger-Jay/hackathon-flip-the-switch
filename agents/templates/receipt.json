@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "mission_id": null,
+  "correlation_id": null,
+  "dedup_key": null,
+  "runtime_name": null,
+  "boot_id": null,
+  "state": "queued",
+  "observed_at": null,
+  "source_ref": null,
+  "transport_ref": null,
+  "artifact_refs": [],
+  "result": "unknown",
+  "limitations": []
+}

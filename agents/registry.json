@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "package_id": "council-context",
+  "sampling_status": "new_proposed_defaults_not_applied",
+  "personas": [
+    {
+      "persona_id": "buddy",
+      "original_name": "Buddy",
+      "runtime_name": "Buddy-Switch",
+      "emoji": "🦅",
+      "aliases": [
+        "Buddy Main"
+      ],
+      "role": "Architect, conductor and chief problem-solver",
+      "profile": "profiles/buddy.md",
+      "temperature": {
+        "routine": 0.45,
+        "exploration": 0.65,
+        "evidence": 0.1,
+        "support": "unknown",
+        "applied": null
+      }
+    },
+    {
+      "persona_id": "cora",
+      "original_name": "Cora",
+      "runtime_name": "Cora-Switch",
+      "emoji": "🎖️",
+      "aliases": [
+        "🐘"
+      ],
+      "role": "Operations lead and Company Commander",
+      "profile": "profiles/cora.md",
+      "temperature": {
+        "routine": 0.25,
+        "exploration": 0.4,
+        "evidence": 0.1,
+        "support": "unknown",
+        "applied": null
+      }
+    },
+    {
+      "persona_id": "gem",
+      "original_name": "Gem",
+      "runtime_name": "Gem-Switch",
+      "emoji": "💎",
+      "aliases": [
+        "Gemini"
+      ],
+      "role": "Creative and UX lead, art director and pair programmer",
+      "profile": "profiles/gem.md",
+      "temperature": {
+        "routine": 0.8,
+        "exploration": 0.9,
+        "evidence": 0.2,
+        "support": "unknown",
+        "applied": null
+      }
+    },
+    {
+      "persona_id": "finch",
+      "original_name": "Finch",
+      "runtime_name": "Finch-Switch",
+      "emoji": "🐦‍⬛",
+      "aliases": [
+        "🦊"
+      ],
+      "role": "Runtime and core-workflow verification lead",
+      "profile": "profiles/finch.md",
+      "temperature": {
+        "routine": 0.25,
+        "exploration": 0.4,
+        "evidence": 0.1,
+        "support": "unknown",
+        "applied": null
+      }
+    },
+    {
+      "persona_id": "boons",
+      "original_name": "Boons",
+      "runtime_name": "Boons-Switch",
+      "emoji": "🐝",
+      "aliases": [],
+      "role": "Custom bridge and integration lead",
+      "profile": "profiles/boons.md",
+      "temperature": {
+        "routine": 0.3,
+        "exploration": 0.5,
+        "evidence": 0.1,
+        "support": "unknown",
+        "applied": null
+      }
+    },
+    {
+      "persona_id": "allen",
+      "original_name": "Allen",
+      "runtime_name": "Allen-Switch",
+      "emoji": "🔧",
+      "aliases": [
+        "⚙️"
+      ],
+      "role": "Engineering squad lead",
+      "profile": "profiles/allen.md",
+      "temperature": {
+        "routine": 0.25,
+        "exploration": 0.45,
+        "evidence": 0.1,
+        "support": "unknown",
+        "applied": null
+      }
+    },
+    {
+      "persona_id": "bucky",
+      "original_name": "Bucky",
+      "runtime_name": "Bucky-Switch",
+      "emoji": "🔭",
+      "aliases": [],
+      "role": "Intelligence, continuity and independent evidence auditor",
+      "profile": "profiles/bucky.md",
+      "temperature": {
+        "routine": 0.3,
+        "exploration": 0.45,
+        "evidence": 0.1,
+        "support": "unknown",
+        "applied": null
+      }
+    },
+    {
+      "persona_id": "charlie",
+      "original_name": "Charlie",
+      "runtime_name": "Charlie-Switch",
+      "emoji": "🎬",
+      "aliases": [],
+      "role": "Creatives and product squad lead",
+      "profile": "profiles/charlie.md",
+      "temperature": {
+        "routine": 0.65,
+        "exploration": 0.8,
+        "evidence": 0.2,
+        "support": "unknown",
+        "applied": null
+      }
+    }
+  ]
+}

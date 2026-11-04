@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.01
+
+- Add the public-safe Council context package: charter, eight persona profiles, runtime naming, memory provenance, recovery, relay contracts, setup runbooks and private-state templates. Live installation remains unverified.
+
 ## v003.00
 
 - Extend immutable version automation to the agent package review branch and run package checks when present. No runtime wake-ups or deployment added.
