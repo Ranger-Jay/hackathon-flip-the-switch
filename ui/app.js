@@ -188,11 +188,14 @@ const WORKFLOW_SCRIPT = [
 
 const DECISION_DOC_CONTENT = `
 <div class="doc-rendered">
+  <div class="doc-warning-banner">
+    <strong>⚠️ OFFLINE DEMO SPECIMEN:</strong> This document demonstrates the Track 01 output schema and multi-agent synthesis flow for local inspection. It does NOT constitute a live human authorization or production sign-off.
+  </div>
   <h1>COUNCIL DECISION RECORD</h1>
-  <p><strong>Document ID:</strong> <span class="citation-pill">DECISION-20261103-01</span></p>
+  <p><strong>Document ID:</strong> <span class="citation-pill">SPECIMEN-20261103-01</span></p>
   <p><strong>Switch Room ID:</strong> <code>4fac4eab-759d-4fc7-9800-04f6bfa631db</code></p>
   <p><strong>Mattermost Channel:</strong> <code>switch/council</code> (<code>44dwjxtfbfgf7c1siwopmxoacr</code>)</p>
-  <p><strong>Status:</strong> <span style="color:#10B981;font-weight:600;">APPROVED &amp; SEALED</span></p>
+  <p><strong>Status:</strong> <span style="color:#FBBF24;font-weight:600;">SIMULATED DEMO ARTIFACT</span></p>
   
   <h2>1. Context &amp; Proposal</h2>
   <p>Human lead submitted the Funding Intelligence Agent Bridge architecture proposal to establish a single, multi-agent Council Room on Switch.</p>
@@ -209,11 +212,11 @@ const DECISION_DOC_CONTENT = `
   </ul>
 
   <h2>3. Reconciliation &amp; Verdict</h2>
-  <p>Buddy synthesized all peer evaluations with zero unresolved blockers. Human lead granted formal authorization. This document represents the binding architecture baseline for the Hackathon Track 01 entry.</p>
+  <p>Buddy synthesized all peer evaluations with zero unresolved blockers. Human lead granted simulated demo authorization. This document represents the specimen output schema for the Hackathon Track 01 entry.</p>
 
   <p style="margin-top:16px; font-size:0.75rem; color:#9CA3AF; font-family:'JetBrains Mono',monospace;">
-    SHA-256 HASH: a9f8e43c22b1076f8e7182903cde857216a49b291a0c8b32941fa49c18392d71<br>
-    Recorded on Switch Core via FastMCP Bridge
+    SPECIMEN DIGEST: a9f8e43c22b1076f8e7182903cde857216a49b291a0c8b32941fa49c18392d71<br>
+    Validated against Switch Core Schema Definition
   </p>
 </div>
 `;
@@ -250,13 +253,31 @@ const profileHash = document.getElementById("profileHash");
 let is3DMode = true;
 let isRunningWorkflow = false;
 
+// Chamber Geometry Helper (Responsive Ring Metrics)
+function getChamberMetrics() {
+  const isMobile = window.innerWidth <= 600;
+  if (isMobile) {
+    return {
+      radius: 105,
+      centerX: 140,
+      centerY: 140,
+      isMobile: true
+    };
+  }
+  return {
+    radius: 175,
+    centerX: 220,
+    centerY: 220,
+    isMobile: false
+  };
+}
+
 // 1. Initialize 2D Seating Layout (All 9 Council & Squad Seats)
 function initSeats() {
+  if (!seatsRing) return;
   seatsRing.innerHTML = "";
   const total = SEATS.length;
-  const radius = 175; // px
-  const centerX = 220; // center of 440px ring
-  const centerY = 220;
+  const { radius, centerX, centerY, isMobile } = getChamberMetrics();
 
   let onlineCount = 0;
 
@@ -267,7 +288,7 @@ function initSeats() {
     const y = centerY + radius * Math.sin(angle);
 
     const node = document.createElement("div");
-    node.className = "seat-node";
+    node.className = isMobile ? "seat-node seat-node-mobile" : "seat-node";
     node.id = `seat-${seat.id}`;
     node.style.left = `${x}px`;
     node.style.top = `${y}px`;
@@ -629,3 +650,8 @@ window.closeProfileModal = closeProfileModal;
 initSeats();
 initHoloCanvas();
 resetWorkflow();
+
+// Responsive Dynamic Re-render on Viewport Resize
+window.addEventListener("resize", () => {
+  initSeats();
+});

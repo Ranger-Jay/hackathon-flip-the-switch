@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Council Room — Flip the Switch</title>
+  <title>Council Room — Flip the Switch (Track 01)</title>
+  <link rel="icon" type="image/svg+xml" href="avatars/gem.svg">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,11 +22,12 @@
         <span class="room-pill">
           <span class="status-dot pulse-green"></span>
           Channel: <strong>switch/council</strong>
-          <span style="font-family:'JetBrains Mono',monospace; opacity:0.6; font-size:0.7rem;">(44dwjxtf...)</span>
+          <span class="pill-channel-hash" style="font-family:'JetBrains Mono',monospace; opacity:0.6; font-size:0.7rem;">(44dwjxtf...)</span>
         </span>
       </div>
       <div class="nav-center">
         <span class="track-badge">Flip the Switch — Track 01</span>
+        <span class="demo-specimen-pill">[DEMO SPECIMEN]</span>
       </div>
       <div class="nav-right">
         <button id="viewToggleBtn" class="pill-btn active-view" title="Toggle 2D / 3D Chamber">
@@ -54,7 +56,7 @@
 
           <!-- 2D Circular Seating Overlay -->
           <div class="seats-ring" id="seatsRing">
-            <!-- Dynamically populated or static slots -->
+            <!-- Dynamically populated seats -->
           </div>
 
           <!-- Central Table Hologram Target -->
@@ -70,20 +72,20 @@
         <!-- System Diagnostics Footer -->
         <div class="bridge-diagnostics">
           <div class="diag-item">
-            <span class="diag-label">Host:</span>
-            <span class="diag-val" id="diagHost">nexus (192.168.1.153)</span>
+            <span class="diag-label">Target Room:</span>
+            <span class="diag-val font-mono">4fac4eab...</span>
           </div>
           <div class="diag-item">
-            <span class="diag-label">Core (:8000):</span>
-            <span class="diag-val badge-green" id="diagCore">Active (Uvicorn)</span>
+            <span class="diag-label">Runtime Mode:</span>
+            <span class="diag-val badge-amber" id="diagCore">Local Specimen (Offline)</span>
           </div>
           <div class="diag-item">
-            <span class="diag-label">Mattermost (:8065):</span>
-            <span class="diag-val badge-green" id="diagChat">Online (v12.0)</span>
+            <span class="diag-label">Channel:</span>
+            <span class="diag-val">switch/council</span>
           </div>
           <div class="diag-item">
-            <span class="diag-label">Bridge Protocol:</span>
-            <span class="diag-val badge-green">FastMCP / WS</span>
+            <span class="diag-label">Bridge Transport:</span>
+            <span class="diag-val badge-amber">SSE / FastMCP (Ready)</span>
           </div>
         </div>
       </section>
@@ -91,10 +93,13 @@
       <!-- Right: Live Conversation Stream -->
       <section class="feed-panel">
         <div class="feed-header">
-          <h2>LIVE WORKFLOW STREAM</h2>
+          <div class="feed-title-wrap">
+            <h2>WORKFLOW DEMO STREAM</h2>
+            <span class="feed-subtitle">Track 01 Offline Schema Demonstration</span>
+          </div>
           <div class="workflow-controls">
             <button id="playWorkflowBtn" class="action-btn">
-              <span>▶ Run Proposal Workflow</span>
+              <span>▶ Run Demo Simulation</span>
             </button>
             <button id="resetWorkflowBtn" class="action-btn secondary">
               <span>↺ Reset</span>
@@ -118,12 +123,12 @@
       <div class="drawer-header">
         <div class="drawer-title">
           <span class="doc-icon">📜</span>
-          <h3>ROOM DOCUMENT: DECISION-001</h3>
+          <h3>ROOM DOCUMENT: SPECIMEN-001</h3>
         </div>
         <button id="closeDrawerBtn" class="icon-btn">&times;</button>
       </div>
       <div class="drawer-body" id="drawerBody">
-        <div class="doc-placeholder">Run the workflow to generate and verify the official room decision document.</div>
+        <div class="doc-placeholder">Run the demo simulation to generate and inspect the specimen room decision record.</div>
       </div>
     </aside>
 

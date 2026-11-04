@@ -106,6 +106,18 @@ body {
   font-family: 'JetBrains Mono', monospace;
 }
 
+.demo-specimen-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .pill-btn {
   display: flex;
   align-items: center;
@@ -161,6 +173,19 @@ body {
   font-size: 0.85rem;
   letter-spacing: 0.08em;
   color: var(--text-muted);
+}
+
+.feed-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feed-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .participant-count {
@@ -504,6 +529,17 @@ body {
   border-radius: 8px;
 }
 
+.doc-warning-banner {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  color: #FBBF24;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
 .doc-rendered h1 {
   font-size: 1.1rem;
   margin-bottom: 10px;
@@ -582,6 +618,105 @@ body {
   .doc-drawer {
     width: 100%;
     right: -100%;
+  }
+}
+
+@media (max-width: 600px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .top-nav {
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px;
+    align-items: stretch;
+  }
+
+  .nav-left, .nav-center, .nav-right {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .pill-channel-hash {
+    display: none;
+  }
+
+  .chamber-panel {
+    min-height: 360px;
+  }
+
+  .viewport-stage {
+    min-height: 300px;
+    overflow: hidden;
+  }
+
+  .seats-ring {
+    width: 280px;
+    height: 280px;
+    max-width: 280px;
+    max-height: 280px;
+  }
+
+  .seat-node, .seat-node-mobile {
+    width: 52px;
+    height: 52px;
+    margin-left: -26px;
+    margin-top: -26px;
+  }
+
+  .seat-badge {
+    font-size: 0.58rem;
+    padding: 1px 4px;
+    bottom: -4px;
+  }
+
+  .bridge-diagnostics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 8px 12px;
+  }
+
+  .feed-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .workflow-controls {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .action-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .chat-input-bar {
+    padding: 10px 14px;
+  }
+
+  .profile-card {
+    padding: 18px 14px;
+    width: 95%;
+  }
+
+  .profile-header {
+    gap: 12px;
+  }
+
+  .profile-avatar-wrap {
+    width: 72px;
+    height: 72px;
   }
 }
 
