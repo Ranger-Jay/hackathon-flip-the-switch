@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.03
+
+- Add 23 semantic regression tests for stale/cancelled/mismatched wake envelopes, receipt correlation, honest sampling state, integrity and non-overwrite behavior. These are offline checks, not live Switch acceptance.
+
 ## v003.02
 
 - Add offline package integrity, bootstrap packet, exclusive private-template creation and wake/receipt contract validation. No network or provider execution.

@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v003.02** · **State as of November 3, 2026: foundation, documentation, and conceptual visual identity in progress; live multi-agent workflow not yet demonstrated.**
+**Current repository version: v003.03** · **State as of November 3, 2026: foundation, documentation, and conceptual visual identity in progress; live multi-agent workflow not yet demonstrated.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
