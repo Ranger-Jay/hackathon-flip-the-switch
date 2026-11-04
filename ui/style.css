@@ -584,3 +584,209 @@ body {
     right: -100%;
   }
 }
+
+/* Profile Inspector Modal */
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(4, 6, 12, 0.75);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.profile-modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.profile-card {
+  position: relative;
+  width: 90%;
+  max-width: 440px;
+  background: rgba(13, 17, 26, 0.95);
+  border: 1px solid var(--border-active);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.15);
+  transform: translateY(16px) scale(0.96);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-modal-overlay.open .profile-card {
+  transform: translateY(0) scale(1);
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.15s;
+}
+
+.close-modal-btn:hover {
+  color: var(--accent-cyan);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--accent-cyan);
+  background: #0A0D14;
+  box-shadow: 0 4px 16px rgba(0, 240, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.profile-avatar-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-status-indicator {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #0A0D14;
+  background: var(--accent-green);
+}
+
+.profile-status-indicator.no-session {
+  background: var(--accent-amber);
+}
+
+.profile-status-indicator.offline {
+  background: #6B7280;
+}
+
+.profile-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-names {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-emoji {
+  font-size: 1.3rem;
+}
+
+.profile-names h3 {
+  font-size: 1.2rem;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.profile-runtime-tag {
+  font-size: 0.7rem;
+  background: rgba(139, 92, 246, 0.2);
+  color: #C4B5FD;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.profile-role {
+  font-size: 0.82rem;
+  color: var(--accent-cyan);
+  font-weight: 500;
+}
+
+.profile-desc {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #D1D5DB;
+  margin-bottom: 16px;
+}
+
+.profile-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meta-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta-value {
+  font-size: 0.72rem;
+  color: var(--text-main);
+  word-break: break-all;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Accessibility & Keyboard Nav */
+.seat-node:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.pill-btn:focus-visible, .action-btn:focus-visible, .icon-btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+  }
+  .nexus-ring, .pulse-green, .seat-node.active-turn {
+    animation: none !important;
+  }
+}

@@ -45,7 +45,7 @@
       <section class="chamber-panel">
         <div class="chamber-header">
           <h2>COUNCIL CHAMBER</h2>
-          <span class="participant-count" id="seatCounter">6 Seats Connected</span>
+          <span class="participant-count" id="seatCounter">9 Seats Configured</span>
         </div>
         
         <div class="viewport-stage" id="viewportStage">
@@ -126,6 +126,48 @@
         <div class="doc-placeholder">Run the workflow to generate and verify the official room decision document.</div>
       </div>
     </aside>
+
+    <!-- Participant Profile Inspector Modal -->
+    <div class="profile-modal-overlay" id="profileModalOverlay" aria-hidden="true">
+      <div class="profile-card" id="profileCard" role="dialog" aria-modal="true" aria-labelledby="profileName">
+        <button id="closeProfileBtn" class="icon-btn close-modal-btn" aria-label="Close Profile">&times;</button>
+        <div class="profile-header">
+          <div class="profile-avatar-wrap">
+            <img id="profileAvatarImg" src="avatars/gem.svg" alt="" width="96" height="96">
+            <span class="profile-status-indicator" id="profileStatusIndicator"></span>
+          </div>
+          <div class="profile-title-group">
+            <div class="profile-names">
+              <span class="profile-emoji" id="profileEmoji">💎</span>
+              <h3 id="profileName">Gem</h3>
+              <span class="profile-runtime-tag" id="profileRuntime">Gem-Switch</span>
+            </div>
+            <div class="profile-role" id="profileRole">Creative &amp; UX Lead</div>
+          </div>
+        </div>
+        <div class="profile-body">
+          <p class="profile-desc" id="profileDesc"></p>
+          <div class="profile-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">Persona ID:</span>
+              <span class="meta-value font-mono" id="profilePersonaId"></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Transport ID:</span>
+              <span class="meta-value font-mono" id="profileTransport"></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Nexus Presence:</span>
+              <span class="meta-value font-mono" id="profilePresence"></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Identity Hash:</span>
+              <span class="meta-value font-mono" id="profileHash"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>

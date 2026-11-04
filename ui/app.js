@@ -1,16 +1,126 @@
-// Council Room — Accessible Chamber Interface
+// Council Room — Accessible Chamber Interface & Avatar Presentation
 // Clean public implementation for Switch Hackathon (Track 01)
 const SWITCH_ROOM_ID = "4fac4eab-759d-4fc7-9800-04f6bfa631db";
 const MATTERMOST_CHANNEL_ID = "44dwjxtfbfgf7c1siwopmxoacr";
-const BOONS_AGENT_ID = "89181515-6b34-4254-884f-2678bd7dafc1";
 
 const SEATS = [
-  { id: "jay", name: "Jay", role: "Human Lead", avatar: "avatars/jay.svg", status: "online", emoji: "🐕" },
-  { id: "buddy", name: "Buddy", role: "Orchestrator", avatar: "avatars/buddy.svg", status: "online", emoji: "🦅" },
-  { id: "finch", name: "Finch", role: "Codex Runtime", avatar: "avatars/finch.svg", status: "online", emoji: "🐦‍⬛" },
-  { id: "cora", name: "Cora", role: "Infra & Ops", avatar: "avatars/cora.svg", status: "online", emoji: "🐘" },
-  { id: "gem", name: "Gem", role: "Creative & UX", avatar: "avatars/gem.svg", status: "online", emoji: "💎" },
-  { id: "boons", name: "Boons", role: "Custom Shim", avatar: "avatars/boons.svg", status: "online", emoji: "🌿" }
+  {
+    id: "jay",
+    originalName: "Jay",
+    runtimeName: "Jay",
+    role: "Human Lead & Authorizer",
+    emoji: "🐕",
+    avatar: "avatars/jay.svg",
+    photo: null,
+    status: "online",
+    transportId: "user",
+    description: "Company founder, product visionary, and ultimate authorization authority for all architecture decisions.",
+    hash: "0xJAY777A1"
+  },
+  {
+    id: "buddy",
+    originalName: "Buddy",
+    runtimeName: "Buddy-Switch",
+    role: "Architect & Conductor",
+    emoji: "🦅",
+    avatar: "avatars/buddy.svg",
+    photo: null,
+    status: "online",
+    transportId: "buddy",
+    description: "Chief problem-solver, orchestrator, and synthesizer across all squad roles and evidence matrices.",
+    hash: "0xBUD999F2"
+  },
+  {
+    id: "cora",
+    originalName: "Cora",
+    runtimeName: "Cora-Switch",
+    role: "Operations Lead & Commander",
+    emoji: "🎖️",
+    avatar: "avatars/cora.svg",
+    photo: null,
+    status: "online",
+    transportId: "cora",
+    description: "Company Commander, operations lead, host infrastructure runtime, and security gating.",
+    hash: "0xCOR444C3"
+  },
+  {
+    id: "gem",
+    originalName: "Gem",
+    runtimeName: "Gem-Switch",
+    role: "Creative & UX Lead",
+    emoji: "💎",
+    avatar: "avatars/gem.svg",
+    photo: "avatars/gem.png",
+    status: "online",
+    transportId: "766f6a25-41e5-49fb-abef-ebf389ba82c4",
+    description: "Art director, pair programmer, and native Antigravity host UI designer. Crafting luminous human experiences.",
+    hash: "0xGEM888D4"
+  },
+  {
+    id: "finch",
+    originalName: "Finch",
+    runtimeName: "Finch-Switch",
+    role: "Runtime & Verification Lead",
+    emoji: "🐦‍⬛",
+    avatar: "avatars/finch.svg",
+    photo: null,
+    status: "online",
+    transportId: "fa8773bb-9bee-4e0e-87c0-6dafbbfe112e",
+    description: "Codex native runtime lead, state-machine verification, and host browser test execution owner.",
+    hash: "0xFIN111E5"
+  },
+  {
+    id: "boons",
+    originalName: "Boons",
+    runtimeName: "Boons-Switch",
+    role: "Bridge & Integration Lead",
+    emoji: "🐝",
+    avatar: "avatars/boons.svg",
+    photo: null,
+    status: "online",
+    transportId: "89181515-6b34-4254-884f-2678bd7dafc1",
+    description: "Custom shim engineer, wire protocol serialization, and high-frequency bridge heartbeat connector.",
+    hash: "0xBOO222B6"
+  },
+  {
+    id: "allen",
+    originalName: "Allen",
+    runtimeName: "Allen-Switch",
+    role: "Engineering Squad Lead",
+    emoji: "🔧",
+    avatar: "avatars/allen.svg",
+    photo: null,
+    status: "idle",
+    transportId: "allen",
+    description: "Core systems engineering, fail-closed cost-gate implementation, and service daemon automation.",
+    hash: "0xALL333A7"
+  },
+  {
+    id: "bucky",
+    originalName: "Bucky",
+    runtimeName: "Bucky-Switch",
+    role: "Intelligence & Evidence Auditor",
+    emoji: "🔭",
+    avatar: "avatars/bucky.svg",
+    photo: null,
+    status: "idle",
+    transportId: "bucky",
+    description: "Independent audit verifier, continuity tracking, and receipt validator against ground-truth logs.",
+    hash: "0xBUC555E8"
+  },
+  {
+    id: "charlie",
+    originalName: "Charlie",
+    runtimeName: "Charlie-Switch",
+    role: "Creatives & Product Squad Lead",
+    emoji: "🎬",
+    avatar: "avatars/charlie.svg",
+    photo: null,
+    status: "idle",
+    transportId: "charlie",
+    description: "Product demonstration storytelling, media asset production, and creative workflow director.",
+    hash: "0xCHA666C9"
+  }
 ];
 
 const WORKFLOW_SCRIPT = [
@@ -23,7 +133,7 @@ const WORKFLOW_SCRIPT = [
   {
     sender: "finch",
     prefix: "Finch (Codex Runtime):",
-    content: "From Codex Native Runtime: verified single-room claim slot under Switch protocol rev 8. Turn-taking state machine enforces one active turn per agent without duplicate delivery. Recommendation: require all agent replies to cite the proposal message ID.",
+    content: "From Codex Native Runtime: verified single-room claim slot under Switch protocol rev 8. Turn-taking state machine enforces one active turn per agent without duplicate delivery. Verified via stable message ID receipts.",
     delay: 2400
   },
   {
@@ -35,7 +145,7 @@ const WORKFLOW_SCRIPT = [
   {
     sender: "gem",
     prefix: "Gem (Creative & UX):",
-    content: "From Creative & UX: Council Room visual identity locked across all 6 seats with high-contrast avatars and WCAG 2.1 AA compliant typography. 2D/3D dual-mode viewport verified. Room messages structured for token conservation and instant readability.",
+    content: "From Creative & UX: Council Room visual identity locked across all 9 seats with high-contrast avatars, crop-safe derivatives, and WCAG 2.1 AA compliant typography. 2D/3D dual-mode viewport verified. Room messages structured for token conservation and instant readability.",
     delay: 2200
   },
   {
@@ -45,9 +155,27 @@ const WORKFLOW_SCRIPT = [
     delay: 2000
   },
   {
+    sender: "allen",
+    prefix: "Allen (Engineering):",
+    content: "From Engineering: Fail-closed cost-gate implemented in PR #5. Pre-spawn validation asserts non-empty model and effort before executing paid Codex turns. 16/16 Vitest passes clean.",
+    delay: 2000
+  },
+  {
+    sender: "bucky",
+    prefix: "Bucky (Auditor):",
+    content: "From Independent Evidence Auditor: Continuity ledger verified. Room history matches 15 recorded events on Nexus Core with zero unverified claims. All receipts cross-checked against transcript timestamps.",
+    delay: 2000
+  },
+  {
+    sender: "charlie",
+    prefix: "Charlie (Creatives):",
+    content: "From Creatives & Product: Demonstration narrative ready. Track 01 submission deck and interactive chamber viewer validated. Decision record workflow verified for end-to-end capture.",
+    delay: 2000
+  },
+  {
     sender: "buddy",
     prefix: "Buddy (Orchestrator):",
-    content: "Reconciliation and synthesis: Runtime (Finch), Infra (Cora), UX (Gem), and Shim (Boons) are aligned with zero cross-dependency deadlock. Proposal meets Track 01 standards: Switch is central, setup is reproducible, and the decision path is clean. Recommendation to Jay: APPROVE.",
+    content: "Reconciliation and synthesis: Runtime (Finch), Infra (Cora), UX (Gem), Shim (Boons), Engineering (Allen), Audit (Bucky), and Product (Charlie) are aligned with zero cross-dependency deadlock. Proposal meets Track 01 standards: Switch is central, setup is reproducible, and the decision path is clean. Recommendation to Jay: APPROVE.",
     delay: 2600
   },
   {
@@ -64,20 +192,23 @@ const DECISION_DOC_CONTENT = `
   <p><strong>Document ID:</strong> <span class="citation-pill">DECISION-20261103-01</span></p>
   <p><strong>Switch Room ID:</strong> <code>4fac4eab-759d-4fc7-9800-04f6bfa631db</code></p>
   <p><strong>Mattermost Channel:</strong> <code>switch/council</code> (<code>44dwjxtfbfgf7c1siwopmxoacr</code>)</p>
-  <p><strong>Status:</strong> <span style="color:#10B981;font-weight:600;">APPROVED & SEALED</span></p>
+  <p><strong>Status:</strong> <span style="color:#10B981;font-weight:600;">APPROVED &amp; SEALED</span></p>
   
-  <h2>1. Context & Proposal</h2>
+  <h2>1. Context &amp; Proposal</h2>
   <p>Human lead submitted the Funding Intelligence Agent Bridge architecture proposal to establish a single, multi-agent Council Room on Switch.</p>
   
-  <h2>2. Evidence & Role Evaluations</h2>
+  <h2>2. Evidence &amp; Role Evaluations</h2>
   <ul>
     <li><strong>Runtime:</strong> Finch confirmed Protocol Rev 8 slot claims and zero-duplicate turn routing <span class="citation-pill">Turn #2</span>.</li>
     <li><strong>Infra:</strong> Cora confirmed host access matrix and isolated Docker stack readiness <span class="citation-pill">Turn #3</span>.</li>
     <li><strong>UX:</strong> Gem delivered accessible dual-mode viewport, token-efficient formats, and distinct seat identities <span class="citation-pill">Turn #4</span>.</li>
     <li><strong>Shim:</strong> Boons verified wire contract and ingress/egress serialization <span class="citation-pill">Turn #5</span>.</li>
+    <li><strong>Engineering:</strong> Allen verified fail-closed cost-gate PR #5 with 16/16 test passes <span class="citation-pill">Turn #6</span>.</li>
+    <li><strong>Auditor:</strong> Bucky confirmed continuity ledger against Nexus Core receipts <span class="citation-pill">Turn #7</span>.</li>
+    <li><strong>Product:</strong> Charlie verified demonstration narrative and submission assets <span class="citation-pill">Turn #8</span>.</li>
   </ul>
 
-  <h2>3. Reconciliation & Verdict</h2>
+  <h2>3. Reconciliation &amp; Verdict</h2>
   <p>Buddy synthesized all peer evaluations with zero unresolved blockers. Human lead granted formal authorization. This document represents the binding architecture baseline for the Hackathon Track 01 entry.</p>
 
   <p style="margin-top:16px; font-size:0.75rem; color:#9CA3AF; font-family:'JetBrains Mono',monospace;">
@@ -99,19 +230,38 @@ const drawerBody = document.getElementById("drawerBody");
 const nexusStatus = document.getElementById("nexusStatus");
 const viewToggleBtn = document.getElementById("viewToggleBtn");
 const holoCanvas = document.getElementById("holoCanvas");
+const seatCounter = document.getElementById("seatCounter");
+
+// Profile Modal DOM Elements
+const profileModalOverlay = document.getElementById("profileModalOverlay");
+const closeProfileBtn = document.getElementById("closeProfileBtn");
+const profileAvatarImg = document.getElementById("profileAvatarImg");
+const profileStatusIndicator = document.getElementById("profileStatusIndicator");
+const profileEmoji = document.getElementById("profileEmoji");
+const profileName = document.getElementById("profileName");
+const profileRuntime = document.getElementById("profileRuntime");
+const profileRole = document.getElementById("profileRole");
+const profileDesc = document.getElementById("profileDesc");
+const profilePersonaId = document.getElementById("profilePersonaId");
+const profileTransport = document.getElementById("profileTransport");
+const profilePresence = document.getElementById("profilePresence");
+const profileHash = document.getElementById("profileHash");
 
 let is3DMode = true;
 let isRunningWorkflow = false;
 
-// 1. Initialize 2D Seating Layout
+// 1. Initialize 2D Seating Layout (All 9 Council & Squad Seats)
 function initSeats() {
   seatsRing.innerHTML = "";
   const total = SEATS.length;
-  const radius = 170; // px
-  const centerX = 220; // half of 440px ring
+  const radius = 175; // px
+  const centerX = 220; // center of 440px ring
   const centerY = 220;
 
+  let onlineCount = 0;
+
   SEATS.forEach((seat, idx) => {
+    if (seat.status === "online") onlineCount++;
     const angle = (idx / total) * 2 * Math.PI - Math.PI / 2;
     const x = centerX + radius * Math.cos(angle);
     const y = centerY + radius * Math.sin(angle);
@@ -121,21 +271,102 @@ function initSeats() {
     node.id = `seat-${seat.id}`;
     node.style.left = `${x}px`;
     node.style.top = `${y}px`;
+    node.setAttribute("tabindex", "0");
+    node.setAttribute("role", "button");
+    node.setAttribute("aria-label", `${seat.originalName} (${seat.role}) - ${seat.status}`);
+
+    const avatarSrc = seat.photo || seat.avatar;
+    const fallbackSvg = seat.avatar;
 
     node.innerHTML = `
       <div class="seat-avatar">
-        <img src="${seat.avatar}" alt="${seat.name}" width="64" height="64">
+        <img src="${avatarSrc}" onerror="this.onerror=null; this.src='${fallbackSvg}';" alt="${seat.originalName}" width="64" height="64" loading="lazy">
       </div>
-      <div class="seat-badge">${seat.emoji} ${seat.name}</div>
+      <div class="seat-badge">${seat.emoji} ${seat.originalName}</div>
     `;
 
+    // Click opens profile inspector
     node.addEventListener("click", () => {
+      openProfileModal(seat);
       filterMessagesBySender(seat.id);
+    });
+
+    // Keyboard support (Enter / Space)
+    node.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openProfileModal(seat);
+        filterMessagesBySender(seat.id);
+      }
     });
 
     seatsRing.appendChild(node);
   });
+
+  if (seatCounter) {
+    seatCounter.textContent = `${total} Seats Configured (${onlineCount} Online)`;
+  }
 }
+
+// Profile Modal Controller
+function openProfileModal(seat) {
+  if (!profileModalOverlay) return;
+
+  const avatarSrc = seat.photo || seat.avatar;
+  const fallbackSvg = seat.avatar;
+
+  profileAvatarImg.src = avatarSrc;
+  profileAvatarImg.onerror = () => {
+    profileAvatarImg.src = fallbackSvg;
+  };
+  profileAvatarImg.alt = `${seat.originalName} Avatar`;
+
+  profileEmoji.textContent = seat.emoji;
+  profileName.textContent = seat.originalName;
+  profileRuntime.textContent = seat.runtimeName;
+  profileRole.textContent = seat.role;
+  profileDesc.textContent = seat.description;
+  profilePersonaId.textContent = seat.id;
+  profileTransport.textContent = seat.transportId;
+  profilePresence.textContent = seat.status.toUpperCase();
+  profileHash.textContent = seat.hash;
+
+  profileStatusIndicator.className = "profile-status-indicator";
+  if (seat.status === "online") {
+    profileStatusIndicator.classList.add("online");
+  } else if (seat.status === "no_session" || seat.status === "idle") {
+    profileStatusIndicator.classList.add("no-session");
+  } else {
+    profileStatusIndicator.classList.add("offline");
+  }
+
+  profileModalOverlay.classList.add("open");
+  profileModalOverlay.setAttribute("aria-hidden", "false");
+}
+
+function closeProfileModal() {
+  if (!profileModalOverlay) return;
+  profileModalOverlay.classList.remove("open");
+  profileModalOverlay.setAttribute("aria-hidden", "true");
+}
+
+if (closeProfileBtn) {
+  closeProfileBtn.addEventListener("click", closeProfileModal);
+}
+
+if (profileModalOverlay) {
+  profileModalOverlay.addEventListener("click", (e) => {
+    if (e.target === profileModalOverlay) {
+      closeProfileModal();
+    }
+  });
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && profileModalOverlay && profileModalOverlay.classList.contains("open")) {
+    closeProfileModal();
+  }
+});
 
 // 2. Holographic Canvas (Procedural 3D Particle Nexus)
 let ctx = holoCanvas.getContext("2d");
@@ -236,9 +467,14 @@ async function runWorkflow() {
 
 function appendMessageCard(turn) {
   const seat = SEATS.find(s => s.id === turn.sender) || {
-    name: "Agent",
+    id: "unknown",
+    originalName: "Agent",
+    runtimeName: "Agent-Switch",
     role: "Council",
-    avatar: "avatars/buddy.svg"
+    emoji: "⚡",
+    avatar: "avatars/buddy.svg",
+    photo: null,
+    status: "online"
   };
 
   const card = document.createElement("div");
@@ -247,10 +483,12 @@ function appendMessageCard(turn) {
 
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const avatarSrc = seat.photo || seat.avatar;
+  const fallbackSvg = seat.avatar;
 
   card.innerHTML = `
-    <div class="msg-avatar-col">
-      <img src="${seat.avatar}" alt="${seat.name}">
+    <div class="msg-avatar-col" style="cursor:pointer;" title="Inspect ${seat.originalName}'s profile">
+      <img src="${avatarSrc}" onerror="this.onerror=null; this.src='${fallbackSvg}';" alt="${seat.originalName} (${seat.runtimeName})" width="42" height="42" loading="lazy">
     </div>
     <div class="msg-body-col">
       <div class="msg-meta">
@@ -261,6 +499,12 @@ function appendMessageCard(turn) {
       <div class="msg-content">${turn.content}</div>
     </div>
   `;
+
+  // Clicking message avatar opens profile inspector
+  const avatarCol = card.querySelector(".msg-avatar-col");
+  if (avatarCol) {
+    avatarCol.addEventListener("click", () => openProfileModal(seat));
+  }
 
   messagesContainer.appendChild(card);
 }
@@ -376,6 +620,10 @@ class SwitchCoreBridge {
 }
 
 window.SwitchCoreBridge = SwitchCoreBridge;
+window.SEATS = SEATS;
+window.WORKFLOW_SCRIPT = WORKFLOW_SCRIPT;
+window.openProfileModal = openProfileModal;
+window.closeProfileModal = closeProfileModal;
 
 // Initial Boot
 initSeats();
