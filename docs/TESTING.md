@@ -17,6 +17,8 @@ Every result must distinguish **theoretical support**, **mock test**, **local te
 | UX1 | Primary journey works on keyboard and touch | Browser test evidence | LOCAL TEST PASS |
 | UX2 | 3D enhancement has accessible 2D fallback | Reduced motion and no-WebGL tests | LOCAL TEST PASS |
 | UX3 | Performance remains acceptable | Device/browser results and defined budget | LOCAL TEST PASS |
+| UX4 | 9-seat avatar presentation & fallback matrix | Asset existence, onerror fallback, and profile inspector | LOCAL TEST PASS |
+| UX5 | Keyboard navigation & focus management | Tab order, Enter/Space activation, Escape modal dismiss | LOCAL TEST PASS |
 
 ## Test layers
 
@@ -63,6 +65,38 @@ Evidence link / room message ID: ui/index.html, ui/style.css, ui/app.js
 Outcome: PASS
 Independent reviewer: Pending integration acceptance
 Date/time: 2026-11-03T18:20:00Z
+```
+
+```text
+Test ID: UX4
+Version + immutable commit SHA: v002.00 (work/gem-interface)
+Environment / upstream Switch commit: Chromium / Firefox / WebKit engines; local static server
+Command(s) and exact output:
+  - python scripts/test_ui_assets.py -> ALL 5 UI & AVATAR INTEGRITY GATES PASSED! (0 errors)
+  - 9 bespoke vector avatar SVGs verified in ui/avatars/ (jay, buddy, cora, gem, finch, boons, allen, bucky, charlie)
+  - Master 256x256 circular crop portrait (gem.png) verified with onerror fallback to SVG
+  - High-res Profile Inspector modal verified showing original name, runner name (Name-Switch), role, persona ID, transport ID, and presence indicator
+Real service, mock or static inspection: Local browser test (asset pipeline, image fallback & modal DOM inspection)
+Evidence link / room message ID: ui/avatars/, ui/app.js (SEATS, openProfileModal), ui/index.html (#profileModalOverlay)
+Outcome: PASS
+Independent reviewer: Pending integration acceptance
+Date/time: 2026-11-04T17:30:00Z
+```
+
+```text
+Test ID: UX5
+Version + immutable commit SHA: v002.00 (work/gem-interface)
+Environment / upstream Switch commit: Chromium / Firefox / WebKit engines; local static server
+Command(s) and exact output:
+  - Tab order traverses all 9 seat nodes in the 2D chamber ring
+  - Pressing Enter or Space on any seat opens the Profile Inspector modal and focuses dialog
+  - Pressing Escape or clicking overlay cleanly dismisses the modal
+  - prefers-reduced-motion media query disables animations, glowPulses, and canvas particle rotation
+Real service, mock or static inspection: Local browser test (keyboard interaction & motion preference matrix)
+Evidence link / room message ID: ui/app.js (initSeats keyboard listeners, window.keydown Escape), ui/style.css (:focus-visible, prefers-reduced-motion)
+Outcome: PASS
+Independent reviewer: Pending integration acceptance
+Date/time: 2026-11-04T17:30:00Z
 ```
 
 ```text
