@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.02
+
+- Add offline package integrity, bootstrap packet, exclusive private-template creation and wake/receipt contract validation. No network or provider execution.
+
 ## v003.01
 
 - Add the public-safe Council context package: charter, eight persona profiles, runtime naming, memory provenance, recovery, relay contracts, setup runbooks and private-state templates. Live installation remains unverified.
