@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.04
+
+- Document package usage, verified offline scope, relay integration findings and the deferred Buddy Town diary template. Live integration remains UNKNOWN; no merge, deployment or paid invocation.
+
 ## v003.03
 
 - Add 23 semantic regression tests for stale/cancelled/mismatched wake envelopes, receipt correlation, honest sampling state, integrity and non-overwrite behavior. These are offline checks, not live Switch acceptance.
