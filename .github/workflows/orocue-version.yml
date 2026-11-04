@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - orocue/public-foundation
+      - work/buddy-agent-memory-package
 
 permissions:
   contents: read
@@ -19,6 +20,14 @@ jobs:
           fetch-depth: 0
       - name: Check public hygiene and documentation version
         run: python3 scripts/verify_repo.py
+      - name: Check agent package when present
+        run: |
+          if test -f scripts/council_package.py; then
+            python3 scripts/council_package.py verify
+          fi
+          if test -d tests/council; then
+            python3 -m unittest discover -s tests/council -v
+          fi
       - name: Validate version identity
         shell: bash
         run: |

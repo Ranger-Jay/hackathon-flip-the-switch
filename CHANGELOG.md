@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.00
+
+- Extend immutable version automation to the agent package review branch and run package checks when present. No runtime wake-ups or deployment added.
+
 This is the canonical, chronological public release history. Each numbered entry corresponds to exactly one independently scoped Git commit and an immutable annotated Git tag. An entry does not assert that application features or integration tests already work.
 
 ## v002.00 — Conceptual Council Room visual identity — 2026-11-03
