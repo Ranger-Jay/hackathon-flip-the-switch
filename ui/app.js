@@ -329,9 +329,37 @@ function initSeats() {
   }
 }
 
-// Profile Modal Controller
+// Profile Modal Controller with Complete Focus Management & Trap
+let lastActiveElement = null;
+
+function handleModalFocusTrap(e) {
+  if (!profileModalOverlay || !profileModalOverlay.classList.contains("open")) return;
+  if (e.key !== "Tab") return;
+
+  const focusable = profileCard.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusable.length === 0) return;
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (e.shiftKey) {
+    if (document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    }
+  } else {
+    if (document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+}
+
 function openProfileModal(seat) {
   if (!profileModalOverlay) return;
+  lastActiveElement = document.activeElement;
 
   const avatarSrc = seat.photo || seat.avatar;
   const fallbackSvg = seat.avatar;
@@ -363,12 +391,25 @@ function openProfileModal(seat) {
 
   profileModalOverlay.classList.add("open");
   profileModalOverlay.setAttribute("aria-hidden", "false");
+  window.addEventListener("keydown", handleModalFocusTrap);
+
+  // Set focus into modal after transition
+  setTimeout(() => {
+    if (closeProfileBtn) closeProfileBtn.focus();
+  }, 30);
 }
 
 function closeProfileModal() {
   if (!profileModalOverlay) return;
   profileModalOverlay.classList.remove("open");
   profileModalOverlay.setAttribute("aria-hidden", "true");
+  window.removeEventListener("keydown", handleModalFocusTrap);
+
+  // Restore focus to opener element
+  if (lastActiveElement && typeof lastActiveElement.focus === "function") {
+    lastActiveElement.focus();
+    lastActiveElement = null;
+  }
 }
 
 if (closeProfileBtn) {
@@ -389,11 +430,31 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-// 2. Holographic Canvas (Procedural 3D Particle Nexus)
+// 2. Holographic Canvas (Procedural 3D Particle Nexus with Reduced Motion Guard)
 let ctx = holoCanvas.getContext("2d");
-let animationFrameId;
+let animationFrameId = null;
 let particles = [];
 let angleOffset = 0;
+
+const motionQuery = (typeof window !== "undefined" && window.matchMedia)
+  ? window.matchMedia("(prefers-reduced-motion: reduce)")
+  : null;
+let prefersReducedMotion = motionQuery ? motionQuery.matches : false;
+
+if (motionQuery && motionQuery.addEventListener) {
+  motionQuery.addEventListener("change", (e) => {
+    prefersReducedMotion = e.matches;
+    if (prefersReducedMotion) {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      renderHoloFrame();
+    } else if (is3DMode && !animationFrameId) {
+      animateHolo();
+    }
+  });
+}
 
 function initHoloCanvas() {
   resizeCanvas();
@@ -410,26 +471,34 @@ function initHoloCanvas() {
     });
   }
 
-  animateHolo();
+  if (prefersReducedMotion) {
+    renderHoloFrame();
+  } else {
+    animateHolo();
+  }
 }
 
 function resizeCanvas() {
   const rect = holoCanvas.getBoundingClientRect();
   holoCanvas.width = rect.width;
   holoCanvas.height = rect.height;
+  if (prefersReducedMotion) {
+    renderHoloFrame();
+  }
 }
 
-function animateHolo() {
+function renderHoloFrame() {
   ctx.clearRect(0, 0, holoCanvas.width, holoCanvas.height);
 
   if (is3DMode) {
     const cx = holoCanvas.width / 2;
     const cy = holoCanvas.height / 2;
-    angleOffset += 0.005;
 
     ctx.fillStyle = "rgba(0, 240, 255, 0.4)";
     particles.forEach(p => {
-      p.theta += p.speed;
+      if (!prefersReducedMotion) {
+        p.theta += p.speed;
+      }
       const x = cx + p.radius * Math.sin(p.phi) * Math.cos(p.theta + angleOffset);
       const y = cy + (p.radius * Math.cos(p.phi) * 0.4) + Math.sin(angleOffset) * 10;
       const alpha = 0.2 + (Math.sin(p.theta) + 1) * 0.3;
@@ -452,27 +521,56 @@ function animateHolo() {
     ctx.ellipse(cx, cy, 240, 90, 0, 0, Math.PI * 2);
     ctx.stroke();
   }
+}
 
+function animateHolo() {
+  renderHoloFrame();
+  if (prefersReducedMotion || !is3DMode) {
+    animationFrameId = null;
+    return;
+  }
+  angleOffset += 0.005;
   animationFrameId = requestAnimationFrame(animateHolo);
 }
 
-// 3. Workflow Simulation Engine
+// 3. Workflow Simulation Engine with AbortController Cancellation & Safe DOM Rendering
+let workflowAbortController = null;
+
 async function runWorkflow() {
   if (isRunningWorkflow) return;
   isRunningWorkflow = true;
+  workflowAbortController = new AbortController();
+  const { signal } = workflowAbortController;
+
   playWorkflowBtn.disabled = true;
   messagesContainer.innerHTML = "";
   nexusStatus.textContent = "IN SESSION";
   nexusStatus.style.color = "#00F0FF";
 
   for (let i = 0; i < WORKFLOW_SCRIPT.length; i++) {
+    if (signal.aborted) return;
     const turn = WORKFLOW_SCRIPT[i];
     
     highlightSeat(turn.sender);
-    await new Promise(r => setTimeout(r, turn.delay));
+    
+    // Cancellable timeout promise
+    const completed = await new Promise((resolve) => {
+      const timer = setTimeout(() => resolve(true), turn.delay);
+      signal.addEventListener("abort", () => {
+        clearTimeout(timer);
+        resolve(false);
+      }, { once: true });
+    });
+
+    if (!completed || signal.aborted) {
+      return;
+    }
+
     appendMessageCard(turn);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
+
+  if (signal.aborted) return;
 
   clearSeatHighlights();
   nexusStatus.textContent = "DECIDED";
@@ -484,6 +582,7 @@ async function runWorkflow() {
 
   isRunningWorkflow = false;
   playWorkflowBtn.disabled = false;
+  workflowAbortController = null;
 }
 
 function appendMessageCard(turn) {
@@ -507,26 +606,57 @@ function appendMessageCard(turn) {
   const avatarSrc = seat.photo || seat.avatar;
   const fallbackSvg = seat.avatar;
 
-  card.innerHTML = `
-    <div class="msg-avatar-col" style="cursor:pointer;" title="Inspect ${seat.originalName}'s profile">
-      <img src="${avatarSrc}" onerror="this.onerror=null; this.src='${fallbackSvg}';" alt="${seat.originalName} (${seat.runtimeName})" width="42" height="42" loading="lazy">
-    </div>
-    <div class="msg-body-col">
-      <div class="msg-meta">
-        <span class="msg-author">${turn.prefix}</span>
-        <span class="msg-role-tag">${seat.role}</span>
-        <span class="msg-time">${timeStr}</span>
-      </div>
-      <div class="msg-content">${turn.content}</div>
-    </div>
-  `;
+  // Safe DOM construction (prevents injection / XSS)
+  const avatarCol = document.createElement("div");
+  avatarCol.className = "msg-avatar-col";
+  avatarCol.style.cursor = "pointer";
+  avatarCol.title = `Inspect ${seat.originalName}'s profile`;
 
-  // Clicking message avatar opens profile inspector
-  const avatarCol = card.querySelector(".msg-avatar-col");
-  if (avatarCol) {
-    avatarCol.addEventListener("click", () => openProfileModal(seat));
-  }
+  const avatarImg = document.createElement("img");
+  avatarImg.src = avatarSrc;
+  avatarImg.onerror = () => {
+    avatarImg.onerror = null;
+    avatarImg.src = fallbackSvg;
+  };
+  avatarImg.alt = `${seat.originalName} (${seat.runtimeName})`;
+  avatarImg.width = 42;
+  avatarImg.height = 42;
+  avatarImg.loading = "lazy";
+  avatarCol.appendChild(avatarImg);
 
+  const bodyCol = document.createElement("div");
+  bodyCol.className = "msg-body-col";
+
+  const metaDiv = document.createElement("div");
+  metaDiv.className = "msg-meta";
+
+  const authorSpan = document.createElement("span");
+  authorSpan.className = "msg-author";
+  authorSpan.textContent = turn.prefix || "";
+
+  const roleTag = document.createElement("span");
+  roleTag.className = "msg-role-tag";
+  roleTag.textContent = seat.role || "";
+
+  const timeSpan = document.createElement("span");
+  timeSpan.className = "msg-time";
+  timeSpan.textContent = timeStr;
+
+  metaDiv.appendChild(authorSpan);
+  metaDiv.appendChild(roleTag);
+  metaDiv.appendChild(timeSpan);
+
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "msg-content";
+  contentDiv.textContent = turn.content || "";
+
+  bodyCol.appendChild(metaDiv);
+  bodyCol.appendChild(contentDiv);
+
+  card.appendChild(avatarCol);
+  card.appendChild(bodyCol);
+
+  avatarCol.addEventListener("click", () => openProfileModal(seat));
   messagesContainer.appendChild(card);
 }
 
@@ -543,9 +673,18 @@ function clearSeatHighlights() {
 }
 
 function resetWorkflow() {
+  if (workflowAbortController) {
+    workflowAbortController.abort();
+    workflowAbortController = null;
+  }
+  isRunningWorkflow = false;
+  if (playWorkflowBtn) {
+    playWorkflowBtn.disabled = false;
+  }
+
   messagesContainer.innerHTML = `
     <div style="text-align:center; padding:40px; color:#6B7280; font-size:0.85rem;">
-      Ready to run council proposal workflow. Click "Run Proposal Workflow" above.
+      Ready to run council demo simulation. Click "Run Demo Simulation" above.
     </div>
   `;
   clearSeatHighlights();
@@ -553,7 +692,7 @@ function resetWorkflow() {
   nexusStatus.style.color = "#9CA3AF";
   docDrawer.classList.remove("open");
   docToggleBtn.classList.remove("active-view");
-  drawerBody.innerHTML = '<div class="doc-placeholder">Run the workflow to generate and verify the official room decision document.</div>';
+  drawerBody.innerHTML = '<div class="doc-placeholder">Run the demo simulation to generate and inspect the specimen room decision record.</div>';
 }
 
 function filterMessagesBySender(senderId) {
@@ -645,6 +784,9 @@ window.SEATS = SEATS;
 window.WORKFLOW_SCRIPT = WORKFLOW_SCRIPT;
 window.openProfileModal = openProfileModal;
 window.closeProfileModal = closeProfileModal;
+window.runWorkflow = runWorkflow;
+window.resetWorkflow = resetWorkflow;
+window.appendMessageCard = appendMessageCard;
 
 // Initial Boot
 initSeats();
