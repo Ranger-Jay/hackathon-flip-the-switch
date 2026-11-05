@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.07
+
+- Specify feature-by-feature releases, immutable tagged history and per-feature dependency/deployment/rollback records. Distinguish a code tag from restoring running services and compatible data.
+
 ## v003.06
 
 - Make Switch charter compliance, bounded additional-model invocation, no-DM/no-loop rules and enforcement evidence mandatory. Preserve the distinction between published policy and tested host enforcement.

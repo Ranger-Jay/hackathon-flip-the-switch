@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v003.06** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
+**Current repository version: v003.07** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
@@ -95,7 +95,7 @@ The 3D layer must never be required to read, operate, or reproduce the workflow.
 | Capability | Status |
 | :-- | :-- |
 | Public repository and versioning foundation | **v001.00 / v001.01 tagged and GitHub Actions checked**; current release review pending |
-| Agent context package | **39 public context files pass integrity checks; 23 offline regression tests pass** |
+| Agent context package | **40 public context files pass integrity checks; 23 offline regression tests pass** |
 | Live Actions → Switch wake / target ACK | **UNKNOWN; endpoint, network and runtime tests required** |
 | Switch deployment and room availability | **Not verified** |
 | Native agent join + real responses | **Not verified** |
@@ -153,6 +153,8 @@ Application code and interface assets will be added **only as real, reviewable i
 
 ## Versioning
 
+We release features individually under the **Orocue one-version / one-commit rule**. Each feature has its own tag and rollback record; unrelated features are not bundled into a single release. See the [feature-release contract](agents/FEATURE_RELEASES.md).
+
 We use the **Orocue one-version / one-commit rule**:
 
 - **Exactly one distinct concern per commit:** one feature, fix, test change, or documentation change—not a mixture.
@@ -171,7 +173,7 @@ The prior repository initialization commit predates Orocue and is recorded trans
 | Test | What it actually proves | Recorded outcome |
 | :-- | :-- | :-- |
 | `python3 scripts/verify_repo.py` | Public-file hygiene and documentation integrity only | **PASS locally; CI recorded on review commits** |
-| `python3 scripts/council_package.py verify` | 39 public context file hashes and identity registry | **PASS locally** |
+| `python3 scripts/council_package.py verify` | 40 public context file hashes and identity registry | **PASS locally** |
 | `python3 -m unittest discover -s tests/council -v` | 23 offline contract/failure cases | **23/23 PASS locally** |
 | Native agent room join | A real provider can receive and respond | **UNKNOWN** |
 | Role-specific messages | Distinct agents act from their roles | **UNKNOWN** |

@@ -36,6 +36,8 @@ Report policy published, instructions loaded, configuration applied and enforcem
 ## Roles
 Buddy coordinates architecture and integration; Cora owns operations and setup; Gem owns visual and interaction quality; Finch verifies runtime behavior; Boons owns custom bridge behavior; Allen owns scoped engineering; Bucky independently audits evidence and continuity; Charlie owns product narrative and demonstration clarity. Actual assignment wins over a broad role description.
 
+Feature releases are separate, versioned and reversible where supported. Follow FEATURE_RELEASES.md; an immutable tag identifies a code snapshot, while deployment/data rollback requires its own tested procedure.
+
 ## Decisions and disagreement
 Present options with concrete tradeoffs. Keep dissent and unresolved uncertainty in the decision record. Only label a choice approved when its authority and source are recorded. A newer teammate comment does not supersede a human instruction by itself. Correct errors by appending a superseding record, retaining the earlier evidence.
 

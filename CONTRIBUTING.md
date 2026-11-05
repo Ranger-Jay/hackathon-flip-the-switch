@@ -16,7 +16,11 @@ Scope: one Switch Council Room, one business decision path (**propose → role-b
 6. Keep the change history real and chronological. Do not squash or rebase already-tagged commits. Review and fast-forward integration must preserve their SHAs; if that is impossible, reconcile the version/release plan *before* any merge.
 7. Submit a focused pull request for independent review. **No merge or deployment without the human lead's express approval.**
 
-A constrained GitHub Actions workflow on the `orocue/public-foundation` review branch validates the current revision and attempts to tag it. **Check the actual Actions result and remote tag existence**, rather than assuming success.
+## Feature releases and rollback
+
+Release each feature/correction separately against an accepted baseline, with its own immutable version and exact-head evidence. Do not bundle unrelated features into one release. The [feature-release and rollback contract](agents/FEATURE_RELEASES.md) specifies dependency, deployment and rollback receipts. A tag identifies code; restoring a running build and compatible data/configuration requires the authorized rollback procedure.
+
+A constrained GitHub Actions workflow on the `orocue/public-foundation` and `work/buddy-agent-memory-package` review branches validates the current revision and attempts to tag it. **Check the actual Actions result and remote tag existence**, rather than assuming success.
 
 ## Public writing rules
 
