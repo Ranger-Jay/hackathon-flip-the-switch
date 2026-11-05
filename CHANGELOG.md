@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.08
+
+- Add an unprivileged home layout for Buddy and Finch with writes off, paths under the service home, and a check-only helper. Funnel stays unwired. Rollback of a later process is to stop that process. No live start.
+
 ## v004.07
 
 - Describe predefined public clients for Buddy and Finch, the ChatGPT callback placeholder, and S256-only discovery. The resource server still has no registration endpoint. Live Dex metadata is unchanged.

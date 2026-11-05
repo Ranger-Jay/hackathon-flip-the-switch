@@ -35,7 +35,7 @@ python3 scripts/verify_repo.py
 
 Lane B tags continue the immutable `v004.xx` series. Each fix is one commit and one annotated tag. Do not recycle a tag.
 
-The tested environment is fully pinned in `requirements.lock`, including test and SDK dependencies; `requirements.txt` lists the three direct runtime dependencies. This intentionally uses the tested MCP Python SDK 1.30.0 API. Do not silently substitute the SDK's current main branch or major version. Tests make no paid calls, require no production credentials, and use fake origins plus an ephemeral loopback upstream for the official SDK stdio client. Expected result: **42 MCP tests, 23 existing context-package tests and 42 context-file integrity checks pass**. The locked Starlette test client emits one upstream httpx deprecation warning; it does not affect assertions.
+The tested environment is fully pinned in `requirements.lock`, including test and SDK dependencies; `requirements.txt` lists the three direct runtime dependencies. This intentionally uses the tested MCP Python SDK 1.30.0 API. Do not silently substitute the SDK's current main branch or major version. Tests make no paid calls, require no production credentials, and use fake origins plus an ephemeral loopback upstream for the official SDK stdio client. Expected result: **43 MCP tests, 23 existing context-package tests and 42 context-file integrity checks pass**. The locked Starlette test client emits one upstream httpx deprecation warning; it does not affect assertions.
 
 Coverage includes JWT signatures/issuer/resource/subject/scopes, HTTP discovery and read-only access, stdio initialization/list/read/post, the two-tool list, fixed identities, DM denial, unknown arguments, persistence and concurrent duplicates, source/hour limits, timeout/cancellation barriers, rejection of non-`sw_` ids and of marker-only confirmation, file permissions and HTTP client lifecycle. These are not live product acceptance results.
 
@@ -69,7 +69,7 @@ Issuer discovery must list PKCE method `S256` and not `plain`, must allow token 
 
 Do not present a Mattermost PAT or Switch agent key to ChatGPT as OAuth. Upstream keys stay on the gateway. No-auth public HTTP and arbitrary bearer bypasses are unsupported. If the existing issuer issues opaque tokens, it is not compatible with this JWT verifier without a separately reviewed introspection implementation.
 
-The optional [council-mcp.service.example](council-mcp.service.example) shows the intended separate service account and filesystem restrictions. It is a template, not an installed service. The host owner validates actual paths, ingress, issuer/client registration and permissions before starting it; this package makes no live host changes.
+The optional [council-mcp.service.example](council-mcp.service.example) shows a system unit and is not the home layout. Unprivileged files live under [home/README.md](home/README.md): writes off, no `/opt`, no Funnel commands, and the helper only checks an env file.
 
 ## Connection and live acceptance
 
