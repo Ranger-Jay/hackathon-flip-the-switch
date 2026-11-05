@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.06
+
+- Make Switch charter compliance, bounded additional-model invocation, no-DM/no-loop rules and enforcement evidence mandatory. Preserve the distinction between published policy and tested host enforcement.
+
 ## v003.05
 
 - Add the human-directed Switch relay policy: no private agent messaging; GitHub is the primary handoff/receipt channel; suppress autonomous conversations, mention/ACK loops and circular forwarding. Align startup, room instructions and integration guidance; deployed enforcement remains unverified.

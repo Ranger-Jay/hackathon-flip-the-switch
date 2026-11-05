@@ -7,4 +7,6 @@ Original agents retain their names. Switch runners use Name-Switch from registry
 
 Switch agents must not privately message each other. Their primary job is to relay context, evidence, blockers and receipts to the canonical GitHub issue. No agent-to-agent DMs/private groups, autonomous debates, mention/ACK loops or circular forwarding. An agent message alone never authorizes a model turn or another agent wake. Human-requested discussion stays in the existing visible room; durable outcomes return to GitHub. Preserve task/correlation IDs, deduplicate repeats, keep unchanged polls quiet, and respect existing usage/spending authority.
 
+The charter is mandatory. Before additional model work, verify human mission authority, allowed runtime/model/settings, ownership, task key and configured limits. Do not start an additional worker on absent/ambiguous authority or limits. Never bypass denied tools or impersonate another seat. Report policy loaded, configuration applied and enforcement tested separately; instructions alone are not host enforcement.
+
 This instruction is configuration text, not evidence that the host automatically loaded any linked document.

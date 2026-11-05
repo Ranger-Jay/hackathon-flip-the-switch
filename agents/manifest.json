@@ -7,7 +7,7 @@
     "agents/ACTIONS_INTEGRATION.md": "3dc1944d8ea60ff4ee3f302565d7a19d224df0fb849d488e117692535f04de42",
     "agents/AVATARS.md": "b988474dd1dc3885e6e4d9212fd98e89c5fca52586af523ffbb6c4aa092757ba",
     "agents/BUDDY_TOWN_FUTURE.md": "d294abfd1c293df7f46d3138bc819c77d6642414247d865582803bd95b4f608a",
-    "agents/CHARTER.md": "f8db93066f2894e44ec79c80386c44fe055155b4221e0f93f3cc7a7a6377a75c",
+    "agents/CHARTER.md": "3d1d5d8f0d063a2a69264e94c11441f612223a2aa0054f0260bd9669097f61e6",
     "agents/CORA_SETUP.md": "a3b136c147367304d81f5f3551ca9e4079f923fa46ec07b895ff3cfbcd3d7a6d",
     "agents/HANDOFF.md": "299de4ef93ba717f443a78e0ccfbb80546c33fb5aaa9839b82cf6140305c3684",
     "agents/IDENTITY.md": "35b7254ef7fed26c35cf3b599a5ef849cd90792fadd8bcc83f111ba79980ef64",
@@ -17,7 +17,7 @@
     "agents/RECOVERY.md": "7d6725601216f334a18974954c6b2cb94a3fe1d28f7dfb5fff852480d9289a8d",
     "agents/SAMPLING.md": "e10e4c2269f5739b553a49d190c5d61c70f6ff37558c2e094462172a5ebfadab",
     "agents/SECURITY.md": "8fc6290d0010c8ef06b2ed2a2d3b863d639651ef955bbbf50067c569f65b4d60",
-    "agents/START_HERE.md": "91c221d36b0071f2f02023daa936f64cdd25269465ed38294f2e32723dd23a7a",
+    "agents/START_HERE.md": "53bb5558bcae61bd681b0b93feae80359e6e823567f612a681be6d1da7b5f04f",
     "agents/WAKEUPS.md": "ac41cc4d468f14082047a47aa0e69af3a5a33c7a221579d5b9bb6826807ea831",
     "agents/profiles/allen.md": "cb529506484e2a1ea32bbb31ad7165316f8f531c42939cd286b6eb60eb774808",
     "agents/profiles/boons.md": "910e258926bf3ec96a4ee6facf725391a30b17a0ac208fe3ead0a070b6fdcf35",
@@ -38,7 +38,7 @@
     "agents/templates/installation.json": "375be2199fae70cdbb66c844c142a5876781cbe1c63d56d67b40edd20464c7b2",
     "agents/templates/mission.json": "451c82ee0e38af63533e8c28697881dd3d39037363ec3ddc399034aacb221530",
     "agents/templates/receipt.json": "4ae68aec9919d00b3d33e80fc2afed9c82dde78d650b52913d15ba3f6a980a3e",
-    "agents/templates/room-instructions.md": "a597c209cb09742ee1e4f5af069796d59bd5111ff549208318709a2c7baba444",
+    "agents/templates/room-instructions.md": "fc81e47a3badee7d77507312b024d00a65019392a8887f25568b0d694c768756",
     "agents/templates/runtime.json": "89e9822676826380fd358064abdb20f3e01d67816e86c9def19b63ed8c765ca1",
     "agents/templates/wake.example.json": "b8ac7cd5c987089b398f93c7d0daa03f38f1c53c9dd401f37b400cffc718e4ad"
   }

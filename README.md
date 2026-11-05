@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v003.05** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
+**Current repository version: v003.06** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
