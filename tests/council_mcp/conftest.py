@@ -28,7 +28,8 @@ def settings(tmp_path):
                     human_user_ids=(HUMAN,), room_id="00000000-0000-4000-8000-000000000001",
                     agent_id="00000000-0000-4000-8000-000000000002",
                     mm_token="synthetic-reader-credential", switch_token="synthetic-seat-credential",
-                    state_file=str(tmp_path / "receipts.sqlite"), writes_enabled=True)
+                    state_file=str(tmp_path / "receipts.sqlite"), writes_enabled=True,
+                    seat="buddy", core_sender_id=CORE_SENDER, runtime_label="Buddy Main")
 
 
 class Upstream:

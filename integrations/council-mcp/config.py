@@ -1,5 +1,5 @@
 """Server-only identity/configuration. Never accept resource IDs or credentials from tools."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import json
 import os
 from pathlib import Path
@@ -10,6 +10,13 @@ from uuid import UUID
 
 MM_ID = re.compile(r"^[a-z0-9]{26}$")
 KEY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$")
+SEATS = ("buddy", "finch")
+# Jay's Buddy candidate. Finch must not reuse it. Funnel is not wired from this package.
+BUDDY_RESOURCE = "https://nexus.tail3b496f.ts.net/mcp"
+# Proposed public clients. The historical shared id is not a principal.
+BUDDY_CLIENT = "chatgpt-council-buddy"
+FINCH_CLIENT = "council-finch"
+SHARED_CLIENT = "chatgpt-council-mcp"
 
 
 class CouncilError(Exception):
@@ -69,7 +76,10 @@ class Settings:
     mm_token: str = field(repr=False)
     switch_token: str = field(repr=False)
     state_file: str
-    runtime_label: str = "Buddy Main"
+    seat: str
+    core_sender_id: str
+    runtime_label: str = ""
+    oauth_client_id: str = ""
     writes_enabled: bool = False
     max_writes_hour: int = 6
     max_writes_source: int = 1
@@ -96,6 +106,9 @@ class Settings:
                 raise CouncilError("Invalid configured Switch ID") from error
         require(1 <= self.max_writes_hour <= 60 and 1 <= self.max_writes_source <= 3, "Invalid write ceilings")
         require(self.transport in ("stdio", "streamable-http"), "Unsupported transport")
+        require(self.seat in SEATS, "Seat must be buddy or finch")
+        require(isinstance(self.core_sender_id, str) and 1 <= len(self.core_sender_id) <= 200
+                and not any(ord(c) < 32 for c in self.core_sender_id), "Invalid Core sender id")
         require(1 <= len(self.runtime_label) <= 80 and not any(ord(c) < 32 for c in self.runtime_label),
                 "Invalid runtime label")
         if self.transport == "streamable-http":
@@ -109,8 +122,22 @@ class Settings:
             require(p.scheme == "https" and p.hostname and not p.username and not p.password
                     and not p.fragment and not p.query, "HTTPS JWKS URL required")
             require(bool(self.subjects), "Explicit OAuth subject allowlist required")
+            require(isinstance(self.oauth_client_id, str) and bool(KEY.fullmatch(self.oauth_client_id)),
+                    "Explicit OAuth client id required")
+            require(self.oauth_client_id != SHARED_CLIENT, "Shared council client is not a principal")
+            if self.seat == "finch":
+                require(self.resource != BUDDY_RESOURCE, "Finch must not reuse the Buddy resource URL")
+                require(self.oauth_client_id != BUDDY_CLIENT, "Finch cannot use the Buddy client")
+            else:
+                require(self.oauth_client_id != FINCH_CLIENT, "Buddy cannot use the Finch client")
         require(1024 <= self.port <= 65535, "Invalid listen port")
         return self
+
+    def labeled(self):
+        """Return settings with the seat's runtime label filled in when omitted."""
+        if self.runtime_label:
+            return self
+        return replace(self, runtime_label="Buddy Main" if self.seat == "buddy" else "Finch")
 
     @property
     def resource(self):
@@ -133,7 +160,10 @@ class Settings:
             mm_token=secret(needed("COUNCIL_MM_TOKEN_FILE")),
             switch_token=secret(needed("COUNCIL_SWITCH_TOKEN_FILE")),
             state_file=needed("COUNCIL_STATE_FILE"),
-            runtime_label=os.environ.get("COUNCIL_RUNTIME_LABEL", "Buddy Main"),
+            seat=needed("COUNCIL_SEAT"),
+            core_sender_id=needed("COUNCIL_CORE_SENDER_ID"),
+            runtime_label=os.environ.get("COUNCIL_RUNTIME_LABEL", ""),
+            oauth_client_id=os.environ.get("COUNCIL_OAUTH_CLIENT_ID", ""),
             writes_enabled=os.environ.get("COUNCIL_ENABLE_WRITES") == "true",
             max_writes_hour=int(os.environ.get("COUNCIL_MAX_WRITES_HOUR", "6")),
             max_writes_source=int(os.environ.get("COUNCIL_MAX_WRITES_SOURCE", "1")),
@@ -144,4 +174,4 @@ class Settings:
             subjects=tuple(json.loads(os.environ.get("COUNCIL_OAUTH_SUBJECTS", "[]"))),
             port=int(os.environ.get("COUNCIL_PORT", "8787")),
             allow_loopback_http=local,
-        ).validate()
+        ).labeled().validate()

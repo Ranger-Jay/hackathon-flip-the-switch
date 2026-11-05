@@ -7,7 +7,7 @@ import httpx
 import pytest
 
 from conftest import CHANNEL, HUMAN, READER, SENDER, SOURCE, FOREIGN, CORE_SENDER, FORGED_EVENT_ID, Upstream
-from config import CouncilError, private_file, secret
+from config import BUDDY_CLIENT, BUDDY_RESOURCE, CouncilError, FINCH_CLIENT, SHARED_CLIENT, private_file, secret
 from core import Council, MAX_RESPONSE
 
 
@@ -25,6 +25,7 @@ def test_read_history_returns_core_sender_for_fixed_room(rig):
     assert result["room_id"] == council.s.room_id
     assert result["events"][0]["event_id"] == "sw_" + "c" * 32
     assert result["events"][0]["sender"] == CORE_SENDER
+    assert result["events"][0]["own_seat"] is True and result["seat"] == "buddy"
     assert result["events"][0]["content_is_untrusted"]
     assert "synthetic-123" in result["events"][0]["message"]
     assert not backend.sent
@@ -224,6 +225,44 @@ def test_private_parent_and_redacted_configuration(settings, tmp_path):
     directory.mkdir(mode=0o755)
     with pytest.raises(CouncilError, match="0700"):
         private_file(directory / "state", create=True)
+
+
+def test_one_state_file_cannot_change_seat(settings):
+    first = Council(settings)
+    try:
+        with pytest.raises(CouncilError, match="another seat"):
+            Council(replace(settings, seat="finch", core_sender_id="seat:finch"))
+    finally:
+        run(first.client.aclose())
+
+
+def test_finch_rejects_buddy_resource_and_shared_client(settings):
+    http = dict(transport="streamable-http", issuer_url="https://auth.example/realms/council/",
+                jwks_url="https://auth.example/jwks", subjects=("finch-subject",),
+                seat="finch", core_sender_id="seat:finch", runtime_label="Finch",
+                oauth_client_id=FINCH_CLIENT,
+                public_url="https://nexus.tail3b496f.ts.net:8444")
+    assert replace(settings, **http).validate().resource == "https://nexus.tail3b496f.ts.net:8444/mcp"
+    with pytest.raises(CouncilError, match="Buddy resource"):
+        replace(settings, **dict(http, public_url="https://nexus.tail3b496f.ts.net")).validate()
+    with pytest.raises(CouncilError, match="Buddy client"):
+        replace(settings, **dict(http, oauth_client_id=BUDDY_CLIENT)).validate()
+    with pytest.raises(CouncilError, match="not a principal"):
+        replace(settings, **dict(http, oauth_client_id=SHARED_CLIENT)).validate()
+    assert BUDDY_RESOURCE == "https://nexus.tail3b496f.ts.net/mcp"
+
+
+def test_audit_names_seat_and_omits_message_text(rig):
+    council, _backend = rig
+    run(council.read_history(principal="jay"))
+    run(council.post_message("secret-body-text", "request1", "jay"))
+    raw = Path(council.s.state_file).read_bytes()
+    assert b"secret-body-text" not in raw and b"synthetic-seat-credential" not in raw
+    import sqlite3
+    rows = sqlite3.connect(council.s.state_file).execute(
+        "SELECT principal, seat, tool, outcome FROM audit ORDER BY id").fetchall()
+    assert ("jay", "buddy", "read_history", "ok") in rows
+    assert ("jay", "buddy", "post_message", "confirmed") in rows
 
 
 @pytest.mark.parametrize("url", ["http://mm.example", "https://user:pass@mm.example", "https://mm.example/path"])

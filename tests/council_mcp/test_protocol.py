@@ -32,7 +32,7 @@ REMOVED = {"council_identity", "council_read_recent", "council_post_reply", "cou
 def remote(settings):
     return replace(settings, transport="streamable-http", public_url="https://council.example",
                    issuer_url="https://auth.example/realms/council/", jwks_url="https://auth.example/jwks",
-                   subjects=("jay",))
+                   subjects=("jay",), oauth_client_id="chatgpt-council-buddy")
 
 
 @pytest.fixture
@@ -40,10 +40,12 @@ def signer(remote):
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     jwks = SimpleNamespace(get_signing_key_from_jwt=lambda _token: SimpleNamespace(key=key.public_key()))
     verifier = OAuthVerifier(remote, jwks)
-    def token(**claims):
-        payload = dict(iss=remote.issuer_url, aud=remote.resource, sub="jay", iat=int(time.time()),
-                       exp=int(time.time()) + 300, scope=READ + " " + WRITE)
+    def token(drop=(), **claims):
+        payload = dict(iss=remote.issuer_url, aud=remote.resource, sub="jay", azp=remote.oauth_client_id,
+                       iat=int(time.time()), exp=int(time.time()) + 300, scope=READ + " " + WRITE)
         payload.update(claims)
+        for key_name in drop:
+            payload.pop(key_name, None)
         return jwt.encode(payload, key, algorithm="RS256")
     return verifier, token
 
@@ -52,8 +54,10 @@ def test_real_jwt_signature_and_subject_resource_checks(signer):
     verifier, token = signer
     good = asyncio.run(verifier.verify_token(token()))
     assert good.subject == "jay" and WRITE in good.scopes
-    cases = [token(aud="https://foreign.example/mcp"), token(iss="https://other.example"),
-             token(sub="other"), token(exp=int(time.time()) - 10), token(scope=WRITE),
+    assert good.client_id == "chatgpt-council-buddy"
+    cases = [token(aud="https://foreign.example/mcp"), token(aud="chatgpt-council-buddy"),
+             token(iss="https://other.example"), token(sub="other"), token(azp="council-finch"),
+             token(drop=("azp",)), token(exp=int(time.time()) - 10), token(scope=WRITE),
              token(iat=int(time.time()) + 3600), "opaque-mattermost-token"]
     for value in cases:
         assert asyncio.run(verifier.verify_token(value)) is None
@@ -187,7 +191,8 @@ def test_actual_sdk_stdio_client_through_loopback_upstreams(settings, tmp_path):
                COUNCIL_READER_USER_ID=READER, COUNCIL_SENDER_USER_ID=SENDER,
                COUNCIL_HUMAN_USER_IDS=json.dumps([HUMAN]), COUNCIL_MM_TOKEN_FILE=str(tmp_path / "mm.token"),
                COUNCIL_SWITCH_TOKEN_FILE=str(tmp_path / "switch.token"),
-               COUNCIL_STATE_FILE=str(tmp_path / "stdio.sqlite"), COUNCIL_ENABLE_WRITES="true")
+               COUNCIL_STATE_FILE=str(tmp_path / "stdio.sqlite"), COUNCIL_ENABLE_WRITES="true",
+               COUNCIL_SEAT="buddy", COUNCIL_CORE_SENDER_ID=CORE_SENDER)
 
     async def scenario():
         params = StdioServerParameters(command=sys.executable,

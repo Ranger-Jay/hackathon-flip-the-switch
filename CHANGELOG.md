@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.05
+
+- Bind each Council MCP process to one seat, `buddy` or `finch`, with its own resource URL, OAuth client, Core sender, subject allowlist and state file. Finch cannot reuse the Buddy resource or the shared client, and a token with no client id is denied. Live Dex and Funnel remain unwired.
+
 ## v004.04
 
 - Expose only `post_message` and `read_history`. Keep receipt and deduplication internal, and read Switch Core history so a message carries a `sw_` event id and sender. A Mattermost marker does not confirm a write. Live acceptance remains unverified.

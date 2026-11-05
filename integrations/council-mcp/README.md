@@ -35,7 +35,7 @@ python3 scripts/verify_repo.py
 
 Lane B tags continue the immutable `v004.xx` series. Each fix is one commit and one annotated tag. Do not recycle a tag.
 
-The tested environment is fully pinned in `requirements.lock`, including test and SDK dependencies; `requirements.txt` lists the three direct runtime dependencies. This intentionally uses the tested MCP Python SDK 1.30.0 API. Do not silently substitute the SDK's current main branch or major version. Tests make no paid calls, require no production credentials, and use fake origins plus an ephemeral loopback upstream for the official SDK stdio client. Expected result: **37 MCP tests, 23 existing context-package tests and 42 context-file integrity checks pass**. The locked Starlette test client emits one upstream httpx deprecation warning; it does not affect assertions.
+The tested environment is fully pinned in `requirements.lock`, including test and SDK dependencies; `requirements.txt` lists the three direct runtime dependencies. This intentionally uses the tested MCP Python SDK 1.30.0 API. Do not silently substitute the SDK's current main branch or major version. Tests make no paid calls, require no production credentials, and use fake origins plus an ephemeral loopback upstream for the official SDK stdio client. Expected result: **40 MCP tests, 23 existing context-package tests and 42 context-file integrity checks pass**. The locked Starlette test client emits one upstream httpx deprecation warning; it does not affect assertions.
 
 Coverage includes JWT signatures/issuer/resource/subject/scopes, HTTP discovery and read-only access, stdio initialization/list/read/post, the two-tool list, fixed identities, DM denial, unknown arguments, persistence and concurrent duplicates, source/hour limits, timeout/cancellation barriers, rejection of non-`sw_` ids and of marker-only confirmation, file permissions and HTTP client lifecycle. These are not live product acceptance results.
 
@@ -58,7 +58,11 @@ Set `COUNCIL_TRANSPORT=streamable-http`. The process listens only on `127.0.0.1:
 - Exact issuer, including any realm path or trailing slash.
 - HTTPS JWKS URL controlled by that issuer; only RS256/ES256 signatures are accepted.
 - JWT audience/resource equal to the public MCP URL, for example `https://council.example.invalid/mcp`.
-- Explicit subject allowlist for this installation. All allowlisted subjects share the one configured Buddy seat; a different seat requires a separately configured instance and state file.
+- `COUNCIL_SEAT` is `buddy` or `finch`. One process serves one seat. There is no shared-subject fallback and no caller-selectable seat.
+- Explicit subject allowlist containing only that seat's principals. The same subject must not be listed on both instances.
+- `COUNCIL_OAUTH_CLIENT_ID` is required for HTTP. Proposed ids are `chatgpt-council-buddy` and `council-finch`. The historical shared id `chatgpt-council-mcp` is rejected. A token without `azp`/`client_id`, or with a different client, is denied. The subject is not used as a client id.
+- `COUNCIL_CORE_SENDER_ID` is the Core sender stamped on this seat's own events. `read_history` sets `own_seat` only when the event sender equals it.
+- Buddy's candidate resource is `https://nexus.tail3b496f.ts.net/mcp`. Finch must not use that URL. The candidate Finch origin is `https://nexus.tail3b496f.ts.net:8444` (resource `https://nexus.tail3b496f.ts.net:8444/mcp`), a different port because this server has no path-prefix mount. Neither URL is wired to Funnel by this package. A different seat also needs its own seat-key file, receipt/audit database and client. The state file refuses to open under another seat, room, resource or client.
 - `council:read` for discovery/read tools; add `council:write` only for the authorized posting installation. The gateway advertises both scopes but does not require write scope for reads. Tokens require signature, `iss`, `aud`, `sub`, `iat` and `exp`. Expiry is checked on each request; there is no live token-introspection/revocation feed.
 
 Do not present a Mattermost PAT or Switch agent key to ChatGPT as OAuth. Upstream keys stay on the gateway. No-auth public HTTP and arbitrary bearer bypasses are unsupported. If the existing issuer issues opaque tokens, it is not compatible with this JWT verifier without a separately reviewed introspection implementation.
