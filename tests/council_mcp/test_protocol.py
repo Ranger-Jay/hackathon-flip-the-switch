@@ -50,6 +50,31 @@ def signer(remote):
     return verifier, token
 
 
+def test_home_env_keeps_writes_off_and_refuses_to_start(tmp_path):
+    import subprocess
+    from home.check_env import problems
+    home = ROOT / "integrations/council-mcp/home"
+    assert problems(home / "buddy.env.example") == []
+    assert problems(home / "finch.env.example") == []
+    bad = tmp_path / "finch.env"
+    text = (home / "finch.env.example").read_text().replace(
+        "COUNCIL_PUBLIC_URL=https://nexus.tail3b496f.ts.net:8444",
+        "COUNCIL_PUBLIC_URL=https://nexus.tail3b496f.ts.net")
+    text = text.replace("COUNCIL_ENABLE_WRITES=false", "COUNCIL_ENABLE_WRITES=true")
+    text = text.replace("${HOME}/council-mcp/finch/state/receipts.sqlite", "/opt/council-mcp/receipts.sqlite")
+    bad.write_text(text)
+    found = " ".join(problems(bad))
+    assert "false" in found and "Buddy resource" in found and "/opt" in found
+    script = home / "run-gateway.sh"
+    checked = subprocess.run(["sh", str(script), "--check", str(home / "buddy.env.example")],
+                             capture_output=True, text=True)
+    assert checked.returncode == 0, checked.stderr
+    assert "was not started" in checked.stdout
+    started = subprocess.run(["sh", str(script), "--start", str(home / "buddy.env.example")],
+                             capture_output=True, text=True)
+    assert started.returncode != 0
+
+
 def test_issuer_metadata_rejects_plain_pkce_and_secret_only_clients():
     import json
     from issuer.metadata import issuer_metadata_problems
