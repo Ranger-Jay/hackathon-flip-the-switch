@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.03
+
+- Document the scoped MCP setup, external OAuth prerequisites, configuration/service templates, original-session read/post/receipt acceptance and per-feature rollback. Distinguish the built gateway from an installed ChatGPT connection and preserve unknown live status.
+
 ## v004.02
 
 - Correct HTTP resource metadata to advertise read and write scopes while accepting read-only tokens; close the shared upstream client at application shutdown, not at each stateless request. Both defects reproduced before correction; all 35 synthetic MCP tests now pass. Live access remains unverified.

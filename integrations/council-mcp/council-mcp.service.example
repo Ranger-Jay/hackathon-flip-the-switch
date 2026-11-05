@@ -1,0 +1,29 @@
+# Template: validate paths, account, configuration and ingress on the actual host.
+# Installation/start is a separate host-owner action; no Switch/poller takeover.
+[Unit]
+Description=Scoped Council MCP room gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=council-mcp
+Group=council-mcp
+WorkingDirectory=/opt/council-mcp
+EnvironmentFile=/etc/council-mcp/service.env
+ExecStart=/opt/council-mcp/.venv/bin/python /opt/council-mcp/integrations/council-mcp/server.py
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=20
+UMask=0077
+StateDirectory=council-mcp
+StateDirectoryMode=0700
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictSUIDSGID=true
+ReadWritePaths=/var/lib/council-mcp
+
+[Install]
+WantedBy=multi-user.target
