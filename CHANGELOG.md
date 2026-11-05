@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.02
+
+- Correct HTTP resource metadata to advertise read and write scopes while accepting read-only tokens; close the shared upstream client at application shutdown, not at each stateless request. Both defects reproduced before correction; all 35 synthetic MCP tests now pass. Live access remains unverified.
+
 ## v004.01
 
 - Add 34 synthetic MCP tests: actual SDK stdio round trip, HTTP JSON-RPC/OAuth/signature and scope checks, fixed identities/room, no DMs/mentions, persistence/concurrent duplicate protection, timeout/cancellation reconciliation and credential-file isolation. These do not establish a live connection.

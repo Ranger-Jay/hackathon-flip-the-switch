@@ -9,6 +9,7 @@ from jwt import PyJWKClient
 from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.auth.provider import AccessToken, TokenVerifier
 from mcp.server.auth.settings import AuthSettings
+from mcp.server.auth.routes import create_protected_resource_routes
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
@@ -25,6 +26,32 @@ WRITE = "council:write"
 
 class StrictFastMCP(FastMCP):
     """Use public SDK hooks to reject undeclared tool arguments."""
+    http_shutdown = None
+
+    def streamable_http_app(self):
+        app = super().streamable_http_app()
+        auth = self.settings.auth
+        if auth and auth.resource_server_url:
+            # SDK 1.x otherwise advertises only globally required scopes. WRITE is
+            # supported, but must not become required for read-only installations.
+            metadata = create_protected_resource_routes(
+                resource_url=auth.resource_server_url, authorization_servers=[auth.issuer_url],
+                scopes_supported=[READ, WRITE])
+            paths = {route.path for route in metadata}
+            app.router.routes[:] = [r for r in app.router.routes if getattr(r, "path", None) not in paths] + metadata
+        original = app.router.lifespan_context
+
+        @asynccontextmanager
+        async def lifespan(application):
+            try:
+                async with original(application):
+                    yield
+            finally:
+                if self.http_shutdown:
+                    await self.http_shutdown()
+        app.router.lifespan_context = lifespan
+        return app
+
     async def list_tools(self):
         result = await super().list_tools()
         for tool in result:
@@ -93,7 +120,7 @@ def create_server(settings, council=None, verifier=None):
         try:
             yield {}
         finally:
-            if owns_client:
+            if owns_client and not remote:
                 await council.client.aclose()
 
     mcp = StrictFastMCP(
@@ -108,6 +135,8 @@ def create_server(settings, council=None, verifier=None):
         transport_security=security,
         lifespan=lifespan,
     )
+    if owns_client and remote:
+        mcp.http_shutdown = council.client.aclose
 
     def caller(write=False):
         if not remote:

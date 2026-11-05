@@ -78,6 +78,7 @@ def test_http_oauth_metadata_scopes_tool_schema_and_write(remote, rig, signer):
         assert denied.status_code == 401 and "resource_metadata=" in denied.headers["www-authenticate"]
         metadata = client.get("/.well-known/oauth-protected-resource/mcp").json()
         assert metadata["resource"] == remote.resource
+        assert set(metadata["scopes_supported"]) == {READ, WRITE}
         assert remote.issuer_url.rstrip("/") in [x.rstrip("/") for x in metadata["authorization_servers"]]
         assert client.get("/healthz").json()["live_upstream_verified"] is False
         init = rpc(client, "initialize", dict(protocolVersion="2025-11-25", capabilities={},
@@ -98,6 +99,20 @@ def test_http_oauth_metadata_scopes_tool_schema_and_write(remote, rig, signer):
         assert evil["result"]["isError"]
         bad_host = client.post("/mcp", headers={"Host": "foreign.example", "Authorization": "Bearer " + token()}, json={})
         assert bad_host.status_code in (400, 403, 421)
+
+
+def test_http_owned_client_survives_multiple_requests_and_closes_on_shutdown(remote, rig, signer, monkeypatch):
+    import server as module
+    council, _backend = rig
+    verifier, token = signer
+    monkeypatch.setattr(module, "Council", lambda _settings: council)
+    service = create_server(remote, verifier=verifier)
+    with TestClient(service.streamable_http_app(), base_url=remote.public_url) as client:
+        for _ in range(2):
+            response = rpc(client, "tools/call", dict(name="council_identity", arguments={}), token()).json()
+            assert not response["result"].get("isError"), response
+            assert not council.client.is_closed
+    assert council.client.is_closed
 
 
 def test_http_requires_auth_configuration(settings):
