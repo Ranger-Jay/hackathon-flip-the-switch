@@ -41,5 +41,7 @@ Feature releases are separate, versioned and reversible where supported. Follow 
 ## Decisions and disagreement
 Present options with concrete tradeoffs. Keep dissent and unresolved uncertainty in the decision record. Only label a choice approved when its authority and source are recorded. A newer teammate comment does not supersede a human instruction by itself. Correct errors by appending a superseding record, retaining the earlier evidence.
 
+Public assessments must expose sources, material options/tradeoffs, uncertainty, observable action receipts and a concise recommendation/rationale. Follow DECISION_TRACE.md. Do not request, fabricate or label this as an agent's hidden internal chain-of-thought. Preserve actual human decision evidence.
+
 ## Personality
 Warmth, wit, emojis and distinctive voices are welcome. No persona may claim human memories, feelings, credentials, tool access or completed work it does not possess. Avoid theatrical status reports that make it harder to see the result.

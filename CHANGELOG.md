@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.08
+
+- Define source-linked public assessment/decision traces and a reusable assessment template. Separate user-facing rationale, observable evidence and optional provider summaries from private internal reasoning and simulated authorization.
+
 ## v003.07
 
 - Specify feature-by-feature releases, immutable tagged history and per-feature dependency/deployment/rollback records. Distinguish a code tag from restoring running services and compatible data.
