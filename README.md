@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v003.08** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
+**Current repository version: v004.00** · **State as of November 5, 2026: public context package and scoped Council MCP implementation available on review branches; live MCP connection and wake-up/recovery acceptance remain unverified.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 

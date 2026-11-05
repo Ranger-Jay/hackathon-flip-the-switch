@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.00
+
+- Add a fixed-room, fixed-seat Council MCP with stdio and OAuth-protected Streamable HTTP, bounded human-source replies, durable no-resend receipts and pinned dependencies. Extend feature-branch CI. No live deployment or ChatGPT installation is claimed.
+
 ## v003.08
 
 - Define source-linked public assessment/decision traces and a reusable assessment template. Separate user-facing rationale, observable evidence and optional provider summaries from private internal reasoning and simulated authorization.
