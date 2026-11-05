@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.04
+
+- Expose only `post_message` and `read_history`. Keep receipt and deduplication internal, and read Switch Core history so a message carries a `sw_` event id and sender. A Mattermost marker does not confirm a write. Live acceptance remains unverified.
+
 ## v004.03
 
 - Document the scoped MCP setup, external OAuth prerequisites, configuration/service templates, original-session read/post/receipt acceptance and per-feature rollback. Distinguish the built gateway from an installed ChatGPT connection and preserve unknown live status.

@@ -19,12 +19,13 @@ from mcp.server.auth.provider import AccessToken, TokenVerifier
 import pytest
 from starlette.testclient import TestClient
 
-from conftest import ROOT, CHANNEL, HUMAN, READER, SENDER, SOURCE
+from conftest import ROOT, CHANNEL, HUMAN, READER, SENDER, SOURCE, CORE_SENDER
 from config import CouncilError
 from server import create_server, OAuthVerifier, READ, WRITE
 
 
-TOOLS = {"council_identity", "council_read_recent", "council_post_reply", "council_receipt"}
+TOOLS = {"post_message", "read_history"}
+REMOVED = {"council_identity", "council_read_recent", "council_post_reply", "council_receipt"}
 
 
 @pytest.fixture
@@ -87,15 +88,20 @@ def test_http_oauth_metadata_scopes_tool_schema_and_write(remote, rig, signer):
         listed = rpc(client, "tools/list", token=token()).json()["result"]["tools"]
         assert {t["name"] for t in listed} == TOOLS
         assert all(t["inputSchema"]["additionalProperties"] is False for t in listed)
-        write = next(t for t in listed if t["name"] == "council_post_reply")
+        write = next(t for t in listed if t["name"] == "post_message")
         assert not write["annotations"]["readOnlyHint"]
-        assert not {"agent_id", "channel_id", "room_id", "url", "token"} & set(write["inputSchema"]["properties"])
+        assert not {"agent_id", "channel_id", "room_id", "url", "token", "seat"} & set(write["inputSchema"]["properties"])
         args = dict(source_post_id=SOURCE, message="HTTP MCP contract reply", request_id="http-request1")
-        rejected = rpc(client, "tools/call", dict(name="council_post_reply", arguments=args), token(scope=READ)).json()
+        rejected = rpc(client, "tools/call", dict(name="post_message", arguments=args), token(scope=READ)).json()
         assert rejected["result"]["isError"] and not backend.sent
-        posted = rpc(client, "tools/call", dict(name="council_post_reply", arguments=args), token()).json()
+        posted = rpc(client, "tools/call", dict(name="post_message", arguments=args), token()).json()
         assert not posted["result"].get("isError") and len(backend.sent) == 1
-        evil = rpc(client, "tools/call", dict(name="council_identity", arguments={"agent_id": "foreign"}), token()).json()
+        body = json.loads(posted["result"]["content"][0]["text"])
+        assert body["event_id"].startswith("sw_") and body["sender"] == CORE_SENDER
+        for name in REMOVED:
+            removed = rpc(client, "tools/call", dict(name=name, arguments={}), token()).json()
+            assert removed["result"]["isError"]
+        evil = rpc(client, "tools/call", dict(name="post_message", arguments=args | {"seat": "finch"}), token()).json()
         assert evil["result"]["isError"]
         bad_host = client.post("/mcp", headers={"Host": "foreign.example", "Authorization": "Bearer " + token()}, json={})
         assert bad_host.status_code in (400, 403, 421)
@@ -109,7 +115,7 @@ def test_http_owned_client_survives_multiple_requests_and_closes_on_shutdown(rem
     service = create_server(remote, verifier=verifier)
     with TestClient(service.streamable_http_app(), base_url=remote.public_url) as client:
         for _ in range(2):
-            response = rpc(client, "tools/call", dict(name="council_identity", arguments={}), token()).json()
+            response = rpc(client, "tools/call", dict(name="read_history", arguments={"limit": 1}), token()).json()
             assert not response["result"].get("isError"), response
             assert not council.client.is_closed
     assert council.client.is_closed
@@ -122,6 +128,10 @@ def test_http_requires_auth_configuration(settings):
 
 def test_actual_sdk_stdio_client_through_loopback_upstreams(settings, tmp_path):
     sent = []
+    events = [{
+        "id": "sw_" + "d" * 32, "kind": "message", "sender": CORE_SENDER, "sender_name": "buddy",
+        "body": "stdio nonce: synthetic-123", "timestamp": 1_700_000_000_000,
+    }]
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
@@ -140,10 +150,21 @@ def test_actual_sdk_stdio_client_through_loopback_upstreams(settings, tmp_path):
             self.respond(data)
 
         def do_POST(self):
+            raw = self.rfile.read(int(self.headers["Content-Length"] or 0))
+            body = json.loads(raw or b"{}")
+            if self.path.endswith("/ops/read_context"):
+                assert body["room_id"] == settings.room_id
+                self.respond({"result": {"threads": [{"root": event, "replies": []} for event in events],
+                                         "truncated": False, "oldest_timestamp": 1_700_000_000_000}})
+                return
             assert self.path == "/agents/" + settings.agent_id + "/message"
             assert self.headers["Authorization"] == "Bearer synthetic-switch-credential"
-            sent.append(json.loads(self.rfile.read(int(self.headers["Content-Length"]))))
-            self.respond({"event_id": "stdio-core-ref"})
+            assert body["room_id"] == settings.room_id
+            sent.append(body)
+            event_id = "sw_" + "e" * 32
+            events.append({"id": event_id, "kind": "message", "sender": CORE_SENDER, "sender_name": "buddy",
+                           "body": body["content"], "timestamp": 1_700_000_000_001})
+            self.respond({"ok": True, "event_id": event_id})
 
         def respond(self, data):
             body = json.dumps(data).encode()
@@ -176,13 +197,14 @@ def test_actual_sdk_stdio_client_through_loopback_upstreams(settings, tmp_path):
                 await session.initialize()
                 tools = await session.list_tools()
                 assert {t.name for t in tools.tools} == TOOLS
-                result = await session.call_tool("council_read_recent", {"limit": 1})
+                result = await session.call_tool("read_history", {"limit": 1})
                 assert not result.isError and "synthetic-123" in str(result)
+                assert "sw_" + "d" * 32 in str(result) and CORE_SENDER in str(result)
                 args = dict(source_post_id=SOURCE, message="stdio reply", request_id="stdio-request1")
-                first = await session.call_tool("council_post_reply", args)
-                second = await session.call_tool("council_post_reply", args)
+                first = await session.call_tool("post_message", args)
+                second = await session.call_tool("post_message", args)
                 assert not first.isError and not second.isError
-                assert "submitted" in str(first) and "duplicate" in str(second)
+                assert "sw_" + "e" * 32 in str(first) and "duplicate" in str(second)
     try:
         asyncio.run(scenario())
         assert len(sent) == 1

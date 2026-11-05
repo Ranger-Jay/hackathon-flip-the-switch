@@ -16,6 +16,9 @@ SENDER = "s" * 26
 HUMAN = "h" * 26
 SOURCE = "p" * 26
 FOREIGN = "f" * 26
+CORE_SENDER = "seat:buddy"
+EVENT_ID = "sw_" + "a" * 32
+FORGED_EVENT_ID = "sw_" + "b" * 32
 
 
 @pytest.fixture
@@ -36,9 +39,12 @@ class Upstream:
         self.posts = {SOURCE: dict(id=SOURCE, channel_id=CHANNEL, user_id=HUMAN,
                                    message="Human mission: test relay", create_at=1, delete_at=0, type="")}
         self.sent = []
+        self.core_events = []
         self.requests = []
         self.fail_send = False
+        self.bad_event_id = False
         self.override = None
+        self._seq = 0
 
     async def __call__(self, request):
         self.requests.append(request)
@@ -62,10 +68,28 @@ class Upstream:
                 return httpx.Response(404)
         elif path == "/agents/" + self.s.agent_id + "/message" and request.method == "POST":
             import json
-            self.sent.append(json.loads(request.content))
+            body = json.loads(request.content)
+            assert body["room_id"] == self.s.room_id
+            self.sent.append(body)
             if self.fail_send:
                 raise httpx.ReadTimeout("simulated lost reply containing a secret", request=request)
-            data = {"event_id": "synthetic-core-receipt"}
+            self._seq += 1
+            event_id = "not-a-core-event" if self.bad_event_id else "sw_" + f"{self._seq:032x}"
+            if not self.bad_event_id:
+                self.core_events.append({
+                    "id": event_id, "kind": "message", "sender": CORE_SENDER, "sender_name": "buddy",
+                    "body": body["content"], "timestamp": 1_700_000_000_000 + self._seq,
+                })
+            data = {"ok": True, "event_id": event_id}
+        elif path == "/agents/" + self.s.agent_id + "/ops/read_context" and request.method == "POST":
+            import json
+            body = json.loads(request.content)
+            assert body["room_id"] == self.s.room_id
+            assert 1 <= body["limit"] <= 50
+            data = {"result": {
+                "threads": [{"root": event, "replies": []} for event in self.core_events],
+                "truncated": False, "oldest_timestamp": 1_700_000_000_000,
+            }}
         else:
             raise AssertionError("Unexpected route: " + path)
         return httpx.Response(200, json=data)
