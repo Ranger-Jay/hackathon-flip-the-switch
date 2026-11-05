@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.07
+
+- Describe predefined public clients for Buddy and Finch, the ChatGPT callback placeholder, and S256-only discovery. The resource server still has no registration endpoint. Live Dex metadata is unchanged.
+
 ## v004.06
 
 - Keep the MCP verifier fail-closed: `aud` must be the resource string, and `openid` does not become `council:read` or `council:write`. Record the Nexus Dex gap for Allen. No live Dex change and no token is issued.

@@ -1,0 +1,24 @@
+# Desired predefined public clients. NOT applied to Nexus Dex.
+# Dex v2.43.1 will not, from this file alone, set aud to the MCP resource or
+# emit council scopes. See NEXUS_DEX_CHECKLIST.md. Do not put secrets in this file.
+#
+# Copy each ChatGPT redirect from that workspace's connector management page.
+# It looks like https://chatgpt.com/connector/oauth/{callback_id} where
+# {callback_id} is assigned by ChatGPT. Register the exact URI. Do not register
+# the brace placeholder itself. The three redirects already on the live client
+# are not that URI.
+#
+# Dex expresses a public client with `public: true` (token endpoint auth none).
+# This example does not set a client secret.
+
+staticClients:
+  - id: chatgpt-council-buddy
+    name: Council Buddy
+    public: true
+    redirectURIs:
+      - https://chatgpt.com/connector/oauth/REPLACE_WITH_BUDDY_CALLBACK_ID
+  - id: council-finch
+    name: Council Finch
+    public: true
+    redirectURIs:
+      - https://chatgpt.com/connector/oauth/REPLACE_WITH_FINCH_CALLBACK_ID

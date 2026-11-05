@@ -50,6 +50,24 @@ def signer(remote):
     return verifier, token
 
 
+def test_issuer_metadata_rejects_plain_pkce_and_secret_only_clients():
+    import json
+    from issuer.metadata import issuer_metadata_problems
+    example = json.loads((ROOT / "integrations/council-mcp/issuer/discovery.example.json").read_text())
+    assert issuer_metadata_problems(example) == []
+    advertised = dict(example, code_challenge_methods_supported=["S256", "plain"])
+    assert any("plain" in problem for problem in issuer_metadata_problems(advertised))
+    secret_only = dict(example, token_endpoint_auth_methods_supported=["client_secret_basic", "client_secret_post"])
+    assert any("none" in problem for problem in issuer_metadata_problems(secret_only))
+    with_iss = dict(example, authorization_response_iss_parameter_supported=True)
+    assert any("9207" in problem for problem in issuer_metadata_problems(with_iss))
+    clients = (ROOT / "integrations/council-mcp/issuer/public_clients.example.yaml").read_text()
+    assert "chatgpt-council-buddy" in clients and "council-finch" in clients
+    redirects = [line.strip() for line in clients.splitlines() if line.strip().startswith("- https://chatgpt.com/connector")]
+    assert redirects and all("REPLACE_WITH_" in line and "{callback_id}" not in line for line in redirects)
+    assert "public: true" in clients
+
+
 def test_scope_policy_does_not_invent_write_or_accept_client_audience():
     from issuer.token_requirements import council_scopes
     resource = "https://council.example/mcp"
@@ -103,6 +121,8 @@ def test_http_oauth_metadata_scopes_tool_schema_and_write(remote, rig, signer):
         assert denied.status_code == 401 and "resource_metadata=" in denied.headers["www-authenticate"]
         metadata = client.get("/.well-known/oauth-protected-resource/mcp").json()
         assert metadata["resource"] == remote.resource
+        paths = {getattr(route, "path", "") for route in app.routes}
+        assert not any("register" in path for path in paths)
         assert set(metadata["scopes_supported"]) == {READ, WRITE}
         assert remote.issuer_url.rstrip("/") in [x.rstrip("/") for x in metadata["authorization_servers"]]
         assert client.get("/healthz").json()["live_upstream_verified"] is False
