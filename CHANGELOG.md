@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.01
+
+- Add 34 synthetic MCP tests: actual SDK stdio round trip, HTTP JSON-RPC/OAuth/signature and scope checks, fixed identities/room, no DMs/mentions, persistence/concurrent duplicate protection, timeout/cancellation reconciliation and credential-file isolation. These do not establish a live connection.
+
 ## v004.00
 
 - Add a fixed-room, fixed-seat Council MCP with stdio and OAuth-protected Streamable HTTP, bounded human-source replies, durable no-resend receipts and pinned dependencies. Extend feature-branch CI. No live deployment or ChatGPT installation is claimed.
