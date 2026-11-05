@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v003.04** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
+**Current repository version: v003.05** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
@@ -86,6 +86,8 @@ The 3D layer must never be required to read, operate, or reproduce the workflow.
 **The banner above is original concept art, not a screenshot of a running app.** Interactive screenshots are not yet available. We will publish genuine captures as the implementation is verified, not rendered images represented as a working app.
 
 ## Current status
+
+**Switch agent communication rule:** no private agent-to-agent messages. Switch agents primarily relay task context and receipts to GitHub; no autonomous agent conversations, mention/ACK loops or circular forwarding. Human-requested Council discussions remain visible and return their outcome to GitHub. See [the charter](agents/CHARTER.md).
 
 **New: [Council context package](agents/README.md).** Eight persona profiles, distinct Switch runner names, a charter, source-linked memory, handoff receipts, recovery, sampling proposals and Cora’s installation runbook. **GitHub is our durable relay/switchboard; Switch is the live Council surface.** [Actions integration findings](agents/ACTIONS_INTEGRATION.md) separate transport delivery from runner ACK and completed work. The included manual workflow is a dry-run template; live wakes and new schedules are not activated.
 

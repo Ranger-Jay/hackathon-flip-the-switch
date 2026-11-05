@@ -1,6 +1,11 @@
 # GitHub relay and wake-up contract
 The private GitHub issue is the canonical mission and receipt thread. Switch carries live Council discussion and addressed wake messages. The public repository distributes reviewed reusable context. GitHub Actions can bridge events between them; it is not durable agent memory by itself.
 
+## Usage policy before delivery
+Switch agents primarily relay to GitHub and must not privately message one another. A wake is a bounded notification about a human-authorized task, not permission for agent-to-agent chat, autonomous debate or another model invocation.
+
+Do not wire agent-authored status, forwarded echoes or ACKs into additional model wakes. Deduplicate by original source/correlation key; suppress the relay's own messages. Record an ACK once in GitHub and do not ACK the ACK. Check the human's task and existing usage/spending authority before any invocation; leave unapproved work queued for the human. Human-requested Council discussion uses the existing visible room and returns its durable outcome to GitHub.
+
 ## Delivery chain
 1. An authorized human or approved integration creates a mission in the private relay.
 2. An Action reads the canonical event, checks authorization, target mapping, revision, cancellation and deduplication.

@@ -1,6 +1,11 @@
 # Actions → Switch integration investigation
 Status: documented integration path; deployed roundtrip UNKNOWN. This package does not activate new polling, live relay credentials, model calls or schedules.
 
+## Relay-only defaults and loop prevention
+Switch agents must not privately message one another; their primary duty is to relay task context and receipts to GitHub. The integration must not create private agent conversations or make an agent's status/ACK automatically wake another model.
+
+Require a human-authorized bounded task before invocation. Preserve original source/correlation IDs, suppress own-message echoes and duplicates, and never acknowledge an acknowledgment. Test that a forwarded message or agent-authored receipt cannot create a wake cascade. Until these controls are verified, documentation of the policy is not evidence that deployed adapters enforce it. Human-requested room discussion remains visible and records its outcome in GitHub.
+
 ## What is supported upstream
 Switch documents authenticated HTTP message posting and addressed agent events. A relay can use POST /agents/{sender_id}/message with room_id and content; it need not hold a persistent connection just to post. Use an agent API key, not the registration token. The sender needs access and the target's addressing policy must permit it. Check installed API version and response shape first.
 

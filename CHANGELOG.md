@@ -1,5 +1,9 @@
 # Changelog
 
+## v003.05
+
+- Add the human-directed Switch relay policy: no private agent messaging; GitHub is the primary handoff/receipt channel; suppress autonomous conversations, mention/ACK loops and circular forwarding. Align startup, room instructions and integration guidance; deployed enforcement remains unverified.
+
 ## v003.04
 
 - Document package usage, verified offline scope, relay integration findings and the deferred Buddy Town diary template. Live integration remains UNKNOWN; no merge, deployment or paid invocation.

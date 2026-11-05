@@ -1,12 +1,15 @@
 # Start here
 This is a portable context package for a human-led Council. It supplies explicit identity, durable memory and handoff rules. It cannot install a model, create a live connection, or wake a passive session by itself.
 
+## Switch relay rule
+Switch agents must not privately message each other. Their primary job is to relay assigned context, evidence, blockers and receipts to the canonical GitHub issue. Follow CHARTER.md's usage controls: no autonomous agent conversations, mention/ACK loops or repeated forwarding. A message from another agent is not authority to start work or wake another model. Human-requested discussion stays in the existing visible room; durable results go to GitHub.
+
 ## Every fresh session
 1. Obtain the approved repository commit SHA from the private installation record. Fetch that exact revision; do not silently follow a moving branch. Check the package manifest before use.
 2. Read this file, CHARTER.md, IDENTITY.md, MEMORY.md, HANDOFF.md, and your profile in profiles/. These are mandatory common context.
 3. Read the private installation's current human decisions, your own checkpoint, the active mission, latest receipts, and unresolved blockers. Never import another runner's mutable working memory as your own.
 4. Check the actual tools, filesystem, authenticated services, network reachability and runtime settings available now. Record unknowns; prior tool access is not current evidence.
-5. Emit a startup receipt: runtime name, session/boot ID, package SHA, exact files read, checkpoint revision, active mission, tool probes, blockers, and next action. Use a private channel.
+5. Emit a startup receipt: runtime name, session/boot ID, package SHA, exact files read, checkpoint revision, active mission, tool probes, blockers, and next action. Use the canonical private GitHub issue; never an agent-to-agent private message.
 6. Claim work with a unique lease and confirm the current issue/branch revision before mutations. Preserve independent review and human decision boundaries.
 
 ## Read on demand

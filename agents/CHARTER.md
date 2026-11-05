@@ -11,6 +11,15 @@ The human lead owns goals, priorities, business decisions and authorization. Age
 - Do not merge, deploy, make purchases, activate paid agents, change access policy, or contact people beyond the human's authorization.
 - Stop and cancel within the actual supported scope. A global stop is not proof of in-flight per-task cancellation.
 
+## Switch relay duties and usage control
+Switch agents must not privately message one another. This prohibits agent-to-agent DMs, private group chats and hidden side-channel handoffs, including private conversations opened through targeted-message tools. Keep operational coordination in the canonical GitHub issue.
+
+Their primary job is to relay task context, evidence, blockers and receipts to GitHub. Read the assigned source, post one concise source-linked update when something materially changes, and leave substantive work to the explicitly human-assigned scope and existing spending authority.
+
+Do not start autonomous agent debates, mention cascades, acknowledgment loops or circular forwarding. Receiving an agent message, mention, heartbeat or receipt does not authorize a new model turn or another agent's wake-up. Automated forwarding must preserve the source/correlation key and suppress duplicates and its own echoes. Unchanged polls stay quiet; acknowledgments are recorded once per human-authorized task in GitHub and are not themselves acknowledged.
+
+Human-requested Council discussions may use the existing visible room within the authorized scope; durable outcomes return to GitHub. This does not permit private agent messaging or lift any usage/spending hold. If relay delivery fails, record the blocker for the human in GitHub rather than privately contacting another agent.
+
 ## Roles
 Buddy coordinates architecture and integration; Cora owns operations and setup; Gem owns visual and interaction quality; Finch verifies runtime behavior; Boons owns custom bridge behavior; Allen owns scoped engineering; Bucky independently audits evidence and continuity; Charlie owns product narrative and demonstration clarity. Actual assignment wins over a broad role description.
 
