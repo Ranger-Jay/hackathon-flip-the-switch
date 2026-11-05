@@ -1,0 +1,50 @@
+# Copy only after review into the PRIVATE relay repository.
+# Requires scripts/council_package.py and the agents/ package at the reviewed revision.
+# NO Switch credential, network send, schedule, or model invocation.
+name: Council wake envelope dry run
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        required: true
+        options:
+          - Buddy-Switch
+          - Cora-Switch
+          - Gem-Switch
+          - Finch-Switch
+          - Boons-Switch
+          - Allen-Switch
+          - Bucky-Switch
+          - Charlie-Switch
+      source_ref:
+        description: Canonical issue comment URL in this private repository
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: council-wake-dry-run
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify public context
+        run: python3 scripts/council_package.py verify
+      - name: Generate synthetic envelope without delivery
+        env:
+          WAKE_TARGET: ${{ inputs.target }}
+          WAKE_SOURCE: ${{ inputs.source_ref }}
+          WAKE_REPO: ${{ github.repository }}
+          PACKAGE_SHA: ${{ github.sha }}
+        run: |
+          python3 scripts/council_package.py make-wake \
+            --target "$WAKE_TARGET" --source-ref "$WAKE_SOURCE" \
+            --repo "$WAKE_REPO" --package-sha "$PACKAGE_SHA" > wake.json
+          python3 scripts/council_package.py check-wake wake.json
+          echo "Envelope valid. Delivery NOT attempted; target handle remains a placeholder."

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "mission_id": "synthetic-restart-001",
+  "revision": 1,
+  "correlation_id": "example-correlation-001",
+  "dedup_key": "example/council-private:comment-1:Finch-Switch:r1",
+  "target_runtime": "Finch-Switch",
+  "target_handle": "finch-switch-example",
+  "source_repo": "example/council-private",
+  "source_event_id": "comment-1",
+  "source_ref": "https://github.com/example/council-private/issues/1#issuecomment-1",
+  "package_sha": "0000000000000000000000000000000000000000",
+  "created_at": "2026-01-01T00:00:00Z",
+  "expires_at": "2026-01-01T00:30:00Z",
+  "status": "queued"
+}

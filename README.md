@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v002.00** · **State as of November 3, 2026: foundation, documentation, and conceptual visual identity in progress; live multi-agent workflow not yet demonstrated.**
+**Current repository version: v003.08** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
@@ -79,6 +79,8 @@ flowchart LR
 
 ## A room worth looking at
 
+The [public assessment and decision trace](agents/DECISION_TRACE.md) will show each agent's recommendation, cited evidence, options, uncertainty and observable action receipts, followed by the human decision. This is a user-facing rationale/evidence trail, not a private chain-of-thought transcript or a scripted approval.
+
 Our visual direction is a **cinematic but practical council**: distinct agent identities, luminous presence indicators, clear evidence trails, a high-contrast conversation canvas and a concise decision panel. An optional **3D Council Constellation** would show participants as seats around a virtual table, with the active speaker and evidence links highlighted.
 
 The 3D layer must never be required to read, operate, or reproduce the workflow. Keyboard navigation, reduced-motion support and a fast 2D fallback are mandatory.
@@ -87,9 +89,16 @@ The 3D layer must never be required to read, operate, or reproduce the workflow.
 
 ## Current status
 
+**Switch agent communication rule:** no private agent-to-agent messages. Switch agents primarily relay task context and receipts to GitHub; no autonomous agent conversations, mention/ACK loops or circular forwarding. Human-requested Council discussions remain visible and return their outcome to GitHub. See [the charter](agents/CHARTER.md).
+
+**New: [Council context package](agents/README.md).** Eight persona profiles, distinct Switch runner names, a charter, source-linked memory, handoff receipts, recovery, sampling proposals and Cora’s installation runbook. **GitHub is our durable relay/switchboard; Switch is the live Council surface.** [Actions integration findings](agents/ACTIONS_INTEGRATION.md) separate transport delivery from runner ACK and completed work. The included manual workflow is a dry-run template; live wakes and new schedules are not activated.
+
+
 | Capability | Status |
 | :-- | :-- |
 | Public repository and versioning foundation | **v001.00 / v001.01 tagged and GitHub Actions checked**; current release review pending |
+| Agent context package | **42 public context files pass integrity checks; 23 offline regression tests pass** |
+| Live Actions → Switch wake / target ACK | **UNKNOWN; endpoint, network and runtime tests required** |
 | Switch deployment and room availability | **Not verified** |
 | Native agent join + real responses | **Not verified** |
 | Boons custom host bridge | **In development** |
@@ -112,30 +121,41 @@ python3 scripts/verify_repo.py
 
 For now, cloning the **review branch** may be necessary to see these files before they are approved for `main`. A complete, tested setup will include the pinned Switch version, host configuration, provider prerequisites, sample non-sensitive decision and exact verification commands.
 
+### Verify the agent package
+
+On the package review branch `work/buddy-agent-memory-package` (pending independent review):
+
+```bash
+python3 scripts/council_package.py verify
+python3 -m unittest discover -s tests/council -v
+python3 scripts/council_package.py packet Buddy-Switch
+```
+
+[Cora’s setup and two-runtime acceptance](agents/CORA_SETUP.md) · [Memory and provenance](agents/MEMORY.md) · [Identity and avatar contract](agents/AVATARS.md) · [Temperature proposals and actual-setting limits](agents/SAMPLING.md)
+
+The packet command emits public context only. Private operational state and provider credentials stay outside this repository. Original/channel names remain Buddy, Cora, Gem and so on; runners use `Buddy-Switch`, `Cora-Switch`, etc. Proposed temperatures do not imply a setting was applied. [Diary/lessons learned](agents/BUDDY_TOWN_FUTURE.md) is a deferred Buddy Town template, outside hackathon acceptance.
+
 [Reproduction runbook and known gaps](docs/REPRODUCE.md)
 
 ## Repository map
 
-```text
-.
-├── README.md                  # Product narrative and truthful status
-├── VERSION                    # Current zero-padded Orocue version
-├── CHANGELOG.md               # Immutable chronological change record
-├── CONTRIBUTING.md            # Public contribution and review rules
-├── SECURITY.md                # Reporting and credential hygiene
-├── docs/
-│   ├── ARCHITECTURE.md        # Host and responsibility boundaries
-│   ├── WORKFLOW.md            # The single business decision workflow
-│   ├── REPRODUCE.md           # Fresh-clone reproduction plan
-│   ├── TESTING.md             # Acceptance and proof ledger
-│   └── DEMO.md                # Live demonstration storyboard
-├── scripts/verify_repo.py     # Public hygiene/documentation check
-└── .github/workflows/         # Version check and immutable tag automation
-```
+| Path | Purpose |
+|---|---|
+| README.md / VERSION / CHANGELOG.md | Narrative, current version and immutable history |
+| CONTRIBUTING.md / SECURITY.md | Review and public contribution rules |
+| agents/ | Startup, eight personas, memory, relay and recovery package |
+| agents/templates/ | Blank private-state structures and dry-run workflow |
+| docs/ | Architecture, workflow, reproduction, testing and demonstration |
+| scripts/verify_repo.py | Public hygiene/documentation checks |
+| scripts/council_package.py | Offline integrity, bootstrap and envelope tools |
+| tests/council/ | Offline contract failure-case tests |
+| .github/workflows/ | Immutable version and verification automation |
 
 Application code and interface assets will be added **only as real, reviewable implementation work**. This map describes the foundation, not an imaginary finished application.
 
 ## Versioning
+
+We release features individually under the **Orocue one-version / one-commit rule**. Each feature has its own tag and rollback record; unrelated features are not bundled into a single release. See the [feature-release contract](agents/FEATURE_RELEASES.md).
 
 We use the **Orocue one-version / one-commit rule**:
 
@@ -154,7 +174,9 @@ The prior repository initialization commit predates Orocue and is recorded trans
 
 | Test | What it actually proves | Recorded outcome |
 | :-- | :-- | :-- |
-| `python3 scripts/verify_repo.py` | Public-file hygiene and documentation integrity only | **Execution evidence pending** |
+| `python3 scripts/verify_repo.py` | Public-file hygiene and documentation integrity only | **PASS locally; CI recorded on review commits** |
+| `python3 scripts/council_package.py verify` | 42 public context file hashes and identity registry | **PASS locally** |
+| `python3 -m unittest discover -s tests/council -v` | 23 offline contract/failure cases | **23/23 PASS locally** |
 | Native agent room join | A real provider can receive and respond | **UNKNOWN** |
 | Role-specific messages | Distinct agents act from their roles | **UNKNOWN** |
 | Switch outage/reconnect | Coordination depends on Switch and recovers | **UNKNOWN** |

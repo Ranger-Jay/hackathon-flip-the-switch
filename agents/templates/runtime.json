@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "persona_id": "finch",
+  "runtime_name": "Finch-Switch",
+  "boot_id": null,
+  "package_sha": null,
+  "switch_agent_id": null,
+  "switch_handle": null,
+  "owner_ref": null,
+  "connection_model": "unknown",
+  "checkpoint_ref": null,
+  "provider": null,
+  "model_id": null,
+  "reasoning_mode": null,
+  "sampling": {
+    "requested_temperature": 0.25,
+    "support": "unknown",
+    "applied_temperature": null,
+    "evidence": null,
+    "observed_at": null
+  },
+  "capabilities": [],
+  "status": "unconfigured"
+}

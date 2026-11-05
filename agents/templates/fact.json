@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "fact_id": null,
+  "classification": "unknown",
+  "value": null,
+  "source_ref": null,
+  "observed_at": null,
+  "author_runtime": null,
+  "confidence": null,
+  "verification": "unknown",
+  "fresh_until": null,
+  "supersedes": null
+}

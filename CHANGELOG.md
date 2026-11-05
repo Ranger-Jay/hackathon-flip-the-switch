@@ -1,5 +1,41 @@
 # Changelog
 
+## v003.08
+
+- Define source-linked public assessment/decision traces and a reusable assessment template. Separate user-facing rationale, observable evidence and optional provider summaries from private internal reasoning and simulated authorization.
+
+## v003.07
+
+- Specify feature-by-feature releases, immutable tagged history and per-feature dependency/deployment/rollback records. Distinguish a code tag from restoring running services and compatible data.
+
+## v003.06
+
+- Make Switch charter compliance, bounded additional-model invocation, no-DM/no-loop rules and enforcement evidence mandatory. Preserve the distinction between published policy and tested host enforcement.
+
+## v003.05
+
+- Add the human-directed Switch relay policy: no private agent messaging; GitHub is the primary handoff/receipt channel; suppress autonomous conversations, mention/ACK loops and circular forwarding. Align startup, room instructions and integration guidance; deployed enforcement remains unverified.
+
+## v003.04
+
+- Document package usage, verified offline scope, relay integration findings and the deferred Buddy Town diary template. Live integration remains UNKNOWN; no merge, deployment or paid invocation.
+
+## v003.03
+
+- Add 23 semantic regression tests for stale/cancelled/mismatched wake envelopes, receipt correlation, honest sampling state, integrity and non-overwrite behavior. These are offline checks, not live Switch acceptance.
+
+## v003.02
+
+- Add offline package integrity, bootstrap packet, exclusive private-template creation and wake/receipt contract validation. No network or provider execution.
+
+## v003.01
+
+- Add the public-safe Council context package: charter, eight persona profiles, runtime naming, memory provenance, recovery, relay contracts, setup runbooks and private-state templates. Live installation remains unverified.
+
+## v003.00
+
+- Extend immutable version automation to the agent package review branch and run package checks when present. No runtime wake-ups or deployment added.
+
 This is the canonical, chronological public release history. Each numbered entry corresponds to exactly one independently scoped Git commit and an immutable annotated Git tag. An entry does not assert that application features or integration tests already work.
 
 ## v002.00 — Conceptual Council Room visual identity — 2026-11-03

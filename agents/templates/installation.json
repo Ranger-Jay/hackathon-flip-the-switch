@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "approved_package_sha": null,
+  "approved_by_ref": null,
+  "private_relay_repo": null,
+  "canonical_issue_ref": null,
+  "switch_version": null,
+  "bridge_endpoint_config_ref": null,
+  "credential_secret_ref": null,
+  "room_config_ref": null,
+  "runner_network": "unknown",
+  "runtime_mapping": [],
+  "paid_invocation_authority_ref": null,
+  "live_wake_status": "unknown",
+  "acceptance_report_ref": null
+}
