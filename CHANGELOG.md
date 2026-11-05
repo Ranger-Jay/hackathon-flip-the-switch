@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.06
+
+- Keep the MCP verifier fail-closed: `aud` must be the resource string, and `openid` does not become `council:read` or `council:write`. Record the Nexus Dex gap for Allen. No live Dex change and no token is issued.
+
 ## v004.05
 
 - Bind each Council MCP process to one seat, `buddy` or `finch`, with its own resource URL, OAuth client, Core sender, subject allowlist and state file. Finch cannot reuse the Buddy resource or the shared client, and a token with no client id is denied. Live Dex and Funnel remain unwired.

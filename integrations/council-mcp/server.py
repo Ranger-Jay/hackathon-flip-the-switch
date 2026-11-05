@@ -19,9 +19,7 @@ from urllib.parse import urlsplit
 
 from config import CouncilError, Settings, require
 from core import Council
-
-READ = "council:read"
-WRITE = "council:write"
+from issuer.token_requirements import READ, WRITE, council_scopes
 
 
 class StrictFastMCP(FastMCP):
@@ -87,22 +85,11 @@ class OAuthVerifier(TokenVerifier):
             c = await anyio.to_thread.run_sync(self.decode, token)
             if c["sub"] not in self.s.subjects:
                 return None
-            client_id = c.get("client_id")
-            azp = c.get("azp")
-            # No subject fallback. A missing or swapped client is a different grant.
-            if azp is not None and client_id is not None and azp != client_id:
+            scopes = council_scopes(c, self.s.resource, self.s.oauth_client_id)
+            if scopes is None:
                 return None
-            client = azp if isinstance(azp, str) else client_id
-            if not isinstance(client, str) or client != self.s.oauth_client_id:
-                return None
-            raw_scopes = c.get("scope", "")
-            if not isinstance(raw_scopes, str):
-                return None
-            scopes = raw_scopes.split()
-            if READ not in scopes:
-                return None
-            return AccessToken(token=token, client_id=client, subject=c["sub"], scopes=scopes,
-                               expires_at=c["exp"], resource=self.s.resource)
+            return AccessToken(token=token, client_id=self.s.oauth_client_id, subject=c["sub"],
+                               scopes=scopes, expires_at=c["exp"], resource=self.s.resource)
         except (jwt.PyJWTError, ValueError, TypeError, KeyError):
             return None
 

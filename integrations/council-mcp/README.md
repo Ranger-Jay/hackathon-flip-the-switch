@@ -35,7 +35,7 @@ python3 scripts/verify_repo.py
 
 Lane B tags continue the immutable `v004.xx` series. Each fix is one commit and one annotated tag. Do not recycle a tag.
 
-The tested environment is fully pinned in `requirements.lock`, including test and SDK dependencies; `requirements.txt` lists the three direct runtime dependencies. This intentionally uses the tested MCP Python SDK 1.30.0 API. Do not silently substitute the SDK's current main branch or major version. Tests make no paid calls, require no production credentials, and use fake origins plus an ephemeral loopback upstream for the official SDK stdio client. Expected result: **40 MCP tests, 23 existing context-package tests and 42 context-file integrity checks pass**. The locked Starlette test client emits one upstream httpx deprecation warning; it does not affect assertions.
+The tested environment is fully pinned in `requirements.lock`, including test and SDK dependencies; `requirements.txt` lists the three direct runtime dependencies. This intentionally uses the tested MCP Python SDK 1.30.0 API. Do not silently substitute the SDK's current main branch or major version. Tests make no paid calls, require no production credentials, and use fake origins plus an ephemeral loopback upstream for the official SDK stdio client. Expected result: **41 MCP tests, 23 existing context-package tests and 42 context-file integrity checks pass**. The locked Starlette test client emits one upstream httpx deprecation warning; it does not affect assertions.
 
 Coverage includes JWT signatures/issuer/resource/subject/scopes, HTTP discovery and read-only access, stdio initialization/list/read/post, the two-tool list, fixed identities, DM denial, unknown arguments, persistence and concurrent duplicates, source/hour limits, timeout/cancellation barriers, rejection of non-`sw_` ids and of marker-only confirmation, file permissions and HTTP client lifecycle. These are not live product acceptance results.
 
@@ -57,7 +57,7 @@ Set `COUNCIL_TRANSPORT=streamable-http`. The process listens only on `127.0.0.1:
 
 - Exact issuer, including any realm path or trailing slash.
 - HTTPS JWKS URL controlled by that issuer; only RS256/ES256 signatures are accepted.
-- JWT audience/resource equal to the public MCP URL, for example `https://council.example.invalid/mcp`.
+- JWT `aud` equal to the public MCP URL as a string, for example `https://council.example.invalid/mcp`. A client-id audience, or an array that only contains the resource, is denied. `openid` is not `council:read` or `council:write`. The deny rule lives in [issuer/token_requirements.py](issuer/token_requirements.py). Nexus Dex v2.43.1 does not issue this token today; the operator checklist is [issuer/NEXUS_DEX_CHECKLIST.md](issuer/NEXUS_DEX_CHECKLIST.md). Do not loosen this verifier to match Dex.
 - `COUNCIL_SEAT` is `buddy` or `finch`. One process serves one seat. There is no shared-subject fallback and no caller-selectable seat.
 - Explicit subject allowlist containing only that seat's principals. The same subject must not be listed on both instances.
 - `COUNCIL_OAUTH_CLIENT_ID` is required for HTTP. Proposed ids are `chatgpt-council-buddy` and `council-finch`. The historical shared id `chatgpt-council-mcp` is rejected. A token without `azp`/`client_id`, or with a different client, is denied. The subject is not used as a client id.

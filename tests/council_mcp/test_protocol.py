@@ -50,14 +50,34 @@ def signer(remote):
     return verifier, token
 
 
+def test_scope_policy_does_not_invent_write_or_accept_client_audience():
+    from issuer.token_requirements import council_scopes
+    resource = "https://council.example/mcp"
+    client = "chatgpt-council-buddy"
+    assert council_scopes(
+        {"aud": resource, "azp": client, "scope": "openid council:read"}, resource, client
+    ) == ["openid", "council:read"]
+    assert council_scopes(
+        {"aud": client, "azp": client, "scope": "openid council:read council:write"}, resource, client
+    ) is None
+    assert council_scopes(
+        {"aud": [client, resource], "azp": client, "scope": "council:read council:write"}, resource, client
+    ) is None
+    assert council_scopes({"aud": resource, "azp": client, "scope": "openid"}, resource, client) is None
+
+
 def test_real_jwt_signature_and_subject_resource_checks(signer):
     verifier, token = signer
     good = asyncio.run(verifier.verify_token(token()))
     assert good.subject == "jay" and WRITE in good.scopes
     assert good.client_id == "chatgpt-council-buddy"
+    read_only = asyncio.run(verifier.verify_token(token(scope="openid council:read")))
+    assert read_only is not None and READ in read_only.scopes and WRITE not in read_only.scopes
     cases = [token(aud="https://foreign.example/mcp"), token(aud="chatgpt-council-buddy"),
+             token(aud=["chatgpt-council-buddy", "https://council.example/mcp"]),
              token(iss="https://other.example"), token(sub="other"), token(azp="council-finch"),
              token(drop=("azp",)), token(exp=int(time.time()) - 10), token(scope=WRITE),
+             token(scope="openid"), token(scope="openid profile email"),
              token(iat=int(time.time()) + 3600), "opaque-mattermost-token"]
     for value in cases:
         assert asyncio.run(verifier.verify_token(value)) is None
