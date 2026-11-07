@@ -15,7 +15,8 @@
  * Security & Truthfulness:
  * - Zero agent bearer tokens or privileged keys in browser bundle.
  * - Preserves the single canonical Mattermost channel conversation (switch/council).
- * - Explicitly distinguishes DEMO_SPECIMEN, VERIFIED_RECEIPTS, and LIVE_READONLY modes.
+ * - Functional RHS mounts live channel post provenance, Human Decision Gate status,
+ *   and 7-role Engineering Readiness Summaries with interactive post selection.
  */
 (function () {
   "use strict";
@@ -27,13 +28,41 @@
   var ACTION_SET_MODE = PLUGIN_ID + "/SET_MODE";
   var ACTION_WS_EVENT = PLUGIN_ID + "/WS_EVENT";
 
+  var ROLE_READINESS_SUMMARIES = [
+    { seat: "Finch", role: "Runtime & Verification", mode: "Direct-Seat MCP", status: "PASS", ref: "sw_9f3f6de5d9774c43914093ae1be5187e" },
+    { seat: "Cora", role: "Operations & Infra", mode: "Mode-A One-Seat", status: "PASS", ref: "OWN-PROVE-cora-20261105-162607" },
+    { seat: "Gem", role: "Creative & UX Lead", mode: "Pattern-B Own-Runtime", status: "PASS", ref: "sw_e3abd2912ee949338cfd0ce4a4a6a00f" },
+    { seat: "Boons", role: "Bridge & Demo Lead", mode: "Pattern-B Own-Runtime", status: "PASS", ref: "OWN-PROVE-boons-20261105-171733" },
+    { seat: "Allen", role: "Engineering Squad", mode: "Mode-A One-Seat", status: "PASS", ref: "OWN-PROVE-allen-20261105-162512" },
+    { seat: "Bucky", role: "Evidence Auditor", mode: "Mode-A One-Seat", status: "PASS", ref: "OWN-PROVE-bucky-20261105-164414" },
+    { seat: "Charlie", role: "Product & Creatives", mode: "Mode-A One-Seat", status: "PASS", ref: "OWN-PROVE-charlie-20261105-164326" }
+  ];
+
   var initialState = {
     isChamberOpen: false,
     selectedPostId: null,
     operatingMode: "VERIFIED_RECEIPTS",
     lastWsEventAt: null,
-    wsEventCount: 0
+    wsEventCount: 0,
+    wsIngestedPosts: []
   };
+
+  function parseWsPostPayload(eventMsg) {
+    if (!eventMsg) return null;
+    var data = eventMsg.data || eventMsg;
+    if (data && data.post) {
+      if (typeof data.post === "string") {
+        try { return JSON.parse(data.post); } catch (_) { return null; }
+      }
+      if (typeof data.post === "object") {
+        return data.post;
+      }
+    }
+    if (data && data.id && data.message) {
+      return data;
+    }
+    return null;
+  }
 
   function councilPluginReducer(state, action) {
     if (typeof state === "undefined") {
@@ -52,9 +81,16 @@
       case ACTION_SET_MODE:
         return Object.assign({}, state, { operatingMode: action.mode || "VERIFIED_RECEIPTS" });
       case ACTION_WS_EVENT:
+        var parsedPost = parseWsPostPayload(action.event);
+        var nextWsPosts = (state.wsIngestedPosts || []).slice();
+        if (parsedPost && parsedPost.id) {
+          var exists = nextWsPosts.some(function (p) { return p.id === parsedPost.id; });
+          if (!exists) nextWsPosts.push(parsedPost);
+        }
         return Object.assign({}, state, {
           lastWsEventAt: action.timestamp || Date.now(),
-          wsEventCount: (state.wsEventCount || 0) + 1
+          wsEventCount: (state.wsEventCount || 0) + 1,
+          wsIngestedPosts: nextWsPosts
         });
       default:
         return state;
@@ -63,6 +99,7 @@
 
   /**
    * Safely derive channel context & viewer permissions from Mattermost 12.0.1 Redux store
+   * (merging any live WebSocket-ingested posts for the active channel).
    */
   function getChannelContextFromStore(store) {
     if (!store || typeof store.getState !== "function") {
@@ -85,9 +122,17 @@
     var users = (entities.users && entities.users.profiles) || {};
     var currentUserId = (entities.users && entities.users.currentUserId) || null;
     var currentUser = (currentUserId && users[currentUserId]) || {};
-    var postsMap = (entities.posts && entities.posts.posts) || {};
+    var postsMap = Object.assign({}, (entities.posts && entities.posts.posts) || {});
+
+    var pState = st["plugins-" + PLUGIN_ID] || initialState;
+    (pState.wsIngestedPosts || []).forEach(function (wp) {
+      if (wp && wp.id && !postsMap[wp.id]) {
+        postsMap[wp.id] = wp;
+      }
+    });
+
     var postList = Object.keys(postsMap).map(function (k) { return postsMap[k]; }).filter(function (p) {
-      return !currentChannelId || p.channel_id === currentChannelId;
+      return !currentChannelId || !p.channel_id || p.channel_id === currentChannelId;
     }).sort(function (a, b) {
       return (a.create_at || 0) - (b.create_at || 0);
     });
@@ -112,9 +157,6 @@
     return st["plugins-" + PLUGIN_ID] || initialState;
   }
 
-  /**
-   * Create Header Button Icon using window.React (or DOM fallback)
-   */
   function createHeaderIcon(symbol, label) {
     var React = (typeof window !== "undefined" && window.React) ? window.React : null;
     if (React && typeof React.createElement === "function") {
@@ -139,7 +181,7 @@
   }
 
   /**
-   * Right-Hand Sidebar (RHS) Evidence & Decision Component
+   * Functional Right-Hand Sidebar (RHS) Evidence & Decision Component (P1.5)
    */
   function createRHSComponent(pluginRef) {
     var React = (typeof window !== "undefined" && window.React) ? window.React : null;
@@ -151,6 +193,76 @@
       var store = pluginRef.store;
       var ctx = getChannelContextFromStore(store);
       var pState = getPluginSlice(store);
+      var selectedPost = null;
+      if (pState.selectedPostId) {
+        for (var i = 0; i < ctx.posts.length; i++) {
+          if (ctx.posts[i].id === pState.selectedPostId) {
+            selectedPost = ctx.posts[i];
+            break;
+          }
+        }
+      }
+
+      var postNodes = ctx.posts.map(function (p) {
+        var isSelected = p.id === pState.selectedPostId;
+        return React.createElement(
+          "div",
+          {
+            key: p.id,
+            className: "mm-rhs-post-item" + (isSelected ? " selected" : ""),
+            style: {
+              padding: "8px 10px",
+              marginBottom: "6px",
+              borderRadius: "6px",
+              background: isSelected ? "rgba(0, 240, 255, 0.14)" : "rgba(255,255,255,0.04)",
+              border: isSelected ? "1px solid #00F0FF" : "1px solid rgba(255,255,255,0.08)",
+              fontSize: "12px",
+              cursor: "pointer"
+            },
+            onClick: function () {
+              if (store) {
+                store.dispatch({ type: ACTION_SELECT_POST, postId: p.id });
+              }
+            }
+          },
+          React.createElement(
+            "div",
+            { style: { display: "flex", justifyContent: "space-between", marginBottom: "4px" } },
+            React.createElement("strong", { style: { color: "#00F0FF" } }, "@" + (p.sender_name || p.user_id || "seat")),
+            React.createElement("code", { style: { fontSize: "11px", color: "#9CA3AF" } }, p.id)
+          ),
+          React.createElement("div", { style: { color: "#E5E7EB", fontSize: "11px" } }, p.message || "")
+        );
+      });
+
+      var readinessNodes = ROLE_READINESS_SUMMARIES.map(function (r) {
+        return React.createElement(
+          "div",
+          {
+            key: r.seat,
+            className: "mm-rhs-readiness-row",
+            style: {
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "6px 8px",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              fontSize: "11px"
+            }
+          },
+          React.createElement(
+            "span",
+            null,
+            React.createElement("strong", { style: { color: "#F3F4F6" } }, r.seat),
+            " · " + r.mode
+          ),
+          React.createElement(
+            "span",
+            { style: { color: "#10B981", fontFamily: "monospace" } },
+            "[" + r.status + "] " + r.ref
+          )
+        );
+      });
 
       return React.createElement(
         "div",
@@ -194,10 +306,10 @@
           React.createElement(
             "span",
             { style: { color: "#9CA3AF" } },
-            "Channel: " + ctx.channelDisplayName + " (" + ctx.postsCount + " posts)"
+            "Channel: " + ctx.channelDisplayName + " (" + ctx.postsCount + " posts · WS:" + pState.wsEventCount + ")"
           )
         ),
-        // Launch Full Chamber Overlay CTA
+        // Action Bar
         React.createElement(
           "div",
           {
@@ -264,40 +376,91 @@
             "Switch Mode"
           )
         ),
-        // Selected Post / Evidence Trace Body
+        // Functional Evidence & Decision Content
         React.createElement(
           "div",
           {
             className: "mm-council-rhs-body",
+            id: "mmPluginEvidenceMount",
             style: {
               padding: "14px",
               overflowY: "auto",
               flex: 1,
-              fontSize: "13px",
+              fontSize: "12px",
               lineHeight: 1.5
             }
           },
+          // 1. Fail-Closed Human Decision Gate Card
+          React.createElement(
+            "div",
+            {
+              className: "mm-rhs-decision-gate",
+              style: {
+                padding: "10px 12px",
+                marginBottom: "12px",
+                borderRadius: "8px",
+                background: "rgba(245, 158, 11, 0.1)",
+                border: "1px solid rgba(245, 158, 11, 0.4)"
+              }
+            },
+            React.createElement(
+              "div",
+              { style: { fontWeight: 700, color: "#FBBF24", fontSize: "11px", marginBottom: "4px" } },
+              "🔒 HUMAN DECISION GATE: AWAITING_HUMAN_DECISION"
+            ),
+            React.createElement(
+              "div",
+              { style: { fontSize: "11px", color: "#D1D5DB" } },
+              "Fail-closed gate active. Requires an authenticated live human decision event (APPROVED / DECLINED / DEFERRED) from @jay in " + ctx.channelDisplayName + "."
+            )
+          ),
+          // 2. Cited / Selected Post Detail
           pState.selectedPostId
             ? React.createElement(
                 "div",
                 {
+                  className: "mm-rhs-selected-post-card",
                   style: {
                     padding: "10px",
                     marginBottom: "12px",
-                    background: "rgba(0, 240, 255, 0.08)",
-                    border: "1px solid rgba(0, 240, 255, 0.3)",
+                    background: "rgba(0, 240, 255, 0.1)",
+                    border: "1px solid rgba(0, 240, 255, 0.4)",
                     borderRadius: "6px",
                     fontSize: "12px"
                   }
                 },
-                React.createElement("strong", null, "Cited Post ID: "),
-                React.createElement("code", null, pState.selectedPostId)
+                React.createElement("strong", { style: { color: "#00F0FF" } }, "Cited Channel Post: "),
+                React.createElement("code", null, pState.selectedPostId),
+                selectedPost
+                  ? React.createElement(
+                      "div",
+                      { style: { marginTop: "6px", color: "#F3F4F6", fontSize: "11px" } },
+                      "@" + (selectedPost.sender_name || "seat") + ": " + selectedPost.message
+                    )
+                  : null
               )
             : null,
+          // 3. Channel Posts in Store
           React.createElement(
             "div",
-            { id: "mmPluginEvidenceMount" },
-            "Council Evidence & Decision trace mounted for channel " + ctx.channelDisplayName + "."
+            { style: { marginBottom: "14px" } },
+            React.createElement(
+              "div",
+              { style: { fontWeight: 700, fontSize: "11px", color: "#9CA3AF", textTransform: "uppercase", marginBottom: "6px" } },
+              "Channel Post Provenance (" + ctx.postsCount + " in Redux Store)"
+            ),
+            postNodes
+          ),
+          // 4. Curated Role Readiness Summaries
+          React.createElement(
+            "div",
+            null,
+            React.createElement(
+              "div",
+              { style: { fontWeight: 700, fontSize: "11px", color: "#9CA3AF", textTransform: "uppercase", marginBottom: "6px" } },
+              "Curated Engineering Readiness Summaries (Nov 5–6)"
+            ),
+            readinessNodes
           )
         )
       );
@@ -359,7 +522,7 @@
             React.createElement(
               "span",
               { style: { fontSize: "12px", color: "#9CA3AF", fontFamily: "'JetBrains Mono', monospace" } },
-              "Bound to Mattermost Channel: " + ctx.channelDisplayName
+              "Bound to Mattermost Channel: " + ctx.channelDisplayName + " (" + ctx.postsCount + " posts)"
             )
           ),
           React.createElement(
@@ -401,9 +564,6 @@
     };
   }
 
-  /**
-   * Post Action Component to cite/inspect a Mattermost post in the Council Evidence RHS
-   */
   function createPostActionComponent(pluginRef) {
     var React = (typeof window !== "undefined" && window.React) ? window.React : null;
     if (!React || typeof React.createElement !== "function") {
@@ -442,9 +602,6 @@
     };
   }
 
-  /**
-   * Main Mattermost 12.0.1 WebApp Plugin Class
-   */
   function CouncilChamberPlugin() {
     this.id = PLUGIN_ID;
     this.store = null;
@@ -465,13 +622,11 @@
     this.registry = registry;
     this.store = store;
 
-    // 1. Register plugin Redux reducer
     if (registry && typeof registry.registerReducer === "function") {
       registry.registerReducer(councilPluginReducer);
       this.registeredHooks.reducer = true;
     }
 
-    // 2. Register Right-Hand Sidebar (RHS) Evidence & Decision Component
     if (registry && typeof registry.registerRightHandSidebarComponent === "function") {
       var RHSComp = createRHSComponent(this);
       this.rhs = registry.registerRightHandSidebarComponent(
@@ -481,7 +636,6 @@
       this.registeredHooks.rhs = Boolean(this.rhs);
     }
 
-    // 3. Register Channel Header Button Actions (Evidence RHS + Full Chamber Overlay)
     if (registry && typeof registry.registerChannelHeaderButtonAction === "function") {
       registry.registerChannelHeaderButtonAction(
         createHeaderIcon("📜", "Council Evidence & Decision Panel"),
@@ -514,21 +668,18 @@
       this.registeredHooks.channelHeaderButtons += 1;
     }
 
-    // 4. Register Full-Chamber Root Component
     if (registry && typeof registry.registerRootComponent === "function") {
       var RootComp = createRootOverlayComponent(this);
       registry.registerRootComponent(RootComp);
       this.registeredHooks.rootComponent = true;
     }
 
-    // 5. Register Post Action Component for direct message-to-evidence citation
     if (registry && typeof registry.registerPostActionComponent === "function") {
       var PostActionComp = createPostActionComponent(this);
       registry.registerPostActionComponent(PostActionComp);
       this.registeredHooks.postAction = true;
     }
 
-    // 6. Register WebSocket Event Handlers for live channel updates
     if (registry && typeof registry.registerWebSocketEventHandler === "function") {
       registry.registerWebSocketEventHandler("posted", function (msg) {
         if (self.store) {
@@ -550,7 +701,6 @@
     }
   };
 
-  // Expose constructor for unit testing & local harness
   if (typeof window !== "undefined") {
     window.CouncilChamberPlugin = CouncilChamberPlugin;
     window.COUNCIL_PLUGIN_ID = PLUGIN_ID;

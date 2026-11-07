@@ -81,8 +81,8 @@
    */
   var VERIFIED_RECEIPT_EVENTS = [
     {
-      event_id: "sw_receipt_allen_mode_a",
-      mm_post_id: "mm_post_allen_01",
+      event_id: "hist_summary_allen_20261105",
+      mm_post_id: null,
       thread_id: null,
       correlation_id: "seat-steer-oneseat-v001.00",
       sender_id: "allen",
@@ -90,15 +90,16 @@
       prefix: "Allen (Engineering Squad Lead):",
       runtime_label: "One-Seat Helper (Mode A)",
       execution_mode: "mode_a_oneseat_helper",
-      event_type: "receipt_proof",
-      content: "OWN-PROVE-allen-20261105-162512 principal=Allen own-runtime Mode-A — Verified seat-bound post and room history read-back (`own_seat=true`).",
+      event_type: "historical_proof_summary",
+      content: "Curated Historical Summary: OWN-PROVE-allen-20261105-162512 principal=Allen own-runtime Mode-A — Recorded seat-bound post and room history read-back (`own_seat=true`).",
       timestamp: 1793913912000,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
-      event_id: "sw_receipt_cora_mode_a",
-      mm_post_id: "mm_post_cora_01",
+      event_id: "hist_summary_cora_20261105",
+      mm_post_id: null,
       thread_id: null,
       correlation_id: "seat-steer-oneseat-v001.00",
       sender_id: "cora",
@@ -106,15 +107,16 @@
       prefix: "Cora (Operations Lead & Commander):",
       runtime_label: "One-Seat Helper (Mode A)",
       execution_mode: "mode_a_oneseat_helper",
-      event_type: "receipt_proof",
-      content: "OWN-PROVE-cora-20261105-162607 principal=Cora own-runtime Mode-A — Verified seat-bound post and room history read-back (`own_seat=true`).",
+      event_type: "historical_proof_summary",
+      content: "Curated Historical Summary: OWN-PROVE-cora-20261105-162607 principal=Cora own-runtime Mode-A — Recorded seat-bound post and room history read-back (`own_seat=true`).",
       timestamp: 1793913967000,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
-      event_id: "sw_receipt_charlie_mode_a",
-      mm_post_id: "mm_post_charlie_01",
+      event_id: "hist_summary_charlie_20261105",
+      mm_post_id: null,
       thread_id: null,
       correlation_id: "seat-steer-oneseat-v001.00",
       sender_id: "charlie",
@@ -122,15 +124,16 @@
       prefix: "Charlie (Creatives & Product Lead):",
       runtime_label: "One-Seat Helper (Mode A)",
       execution_mode: "mode_a_oneseat_helper",
-      event_type: "receipt_proof",
-      content: "OWN-PROVE-charlie-20261105-164326 principal=Charlie own-runtime Mode-A — Verified one-seat helper acceptance and history read-back (`own_seat=true`).",
+      event_type: "historical_proof_summary",
+      content: "Curated Historical Summary: OWN-PROVE-charlie-20261105-164326 principal=Charlie own-runtime Mode-A — Recorded one-seat helper acceptance and history read-back (`own_seat=true`).",
       timestamp: 1793915006000,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
-      event_id: "sw_receipt_bucky_mode_a",
-      mm_post_id: "mm_post_bucky_01",
+      event_id: "hist_summary_bucky_20261105",
+      mm_post_id: null,
       thread_id: null,
       correlation_id: "seat-steer-oneseat-v001.00",
       sender_id: "bucky",
@@ -138,47 +141,50 @@
       prefix: "Bucky (Intelligence & Evidence Auditor):",
       runtime_label: "One-Seat Helper (Mode A)",
       execution_mode: "mode_a_oneseat_helper",
-      event_type: "receipt_proof",
-      content: "OWN-PROVE-bucky-20261105-164414 principal=Bucky own-runtime Mode-A — Continuity audit confirmed in Council room history (`own_seat=true`).",
+      event_type: "historical_proof_summary",
+      content: "Curated Historical Summary: OWN-PROVE-bucky-20261105-164414 principal=Bucky own-runtime Mode-A — Continuity audit recorded in Council room history (`own_seat=true`).",
       timestamp: 1793915054000,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
-      event_id: "sw_receipt_gem_pattern_b",
-      mm_post_id: "mm_post_gem_01",
+      event_id: "sw_e3abd2912ee949338cfd0ce4a4a6a00f",
+      mm_post_id: null,
       thread_id: null,
       correlation_id: "seat-steer-pattern-b",
       sender_id: "gem",
       sender_name: "gem",
       prefix: "Gem (Creative & UX Lead):",
-      runtime_label: "Native Antigravity Host",
-      execution_mode: "native_acp_host",
-      event_type: "receipt_proof",
-      content: "OWN-PROVE-gem-20261105-164728 principal=Gem own-runtime Pattern-B — Native Antigravity session post and history read-back confirmed (`own_seat=true`, 151.2ms).",
+      runtime_label: "Native Antigravity Host (Pattern B)",
+      execution_mode: "pattern_b_own_runtime",
+      event_type: "historical_proof_summary",
+      content: "Curated Historical Summary: OWN-PROVE-gem-20261105-164728 principal=Gem own-runtime Pattern-B — Native Antigravity session post and history read-back recorded (`sw_e3abd2912ee949338cfd0ce4a4a6a00f`, `own_seat=true`, 151.2ms).",
       timestamp: 1793915248945,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
-      event_id: "sw_receipt_boons_mode_a",
-      mm_post_id: "mm_post_boons_01",
+      event_id: "hist_summary_boons_20261105",
+      mm_post_id: null,
       thread_id: null,
-      correlation_id: "seat-steer-oneseat-v001.00",
+      correlation_id: "seat-steer-pattern-b",
       sender_id: "boons",
       sender_name: "boons",
       prefix: "Boons (Bridge & Integration Lead):",
-      runtime_label: "Custom Bridge / One-Seat Helper",
-      execution_mode: "mode_a_oneseat_helper",
-      event_type: "receipt_proof",
-      content: "OWN-PROVE-boons-20261105-171733 principal=Boons own-runtime Mode-A — Custom bridge principal verified in room history (`own_seat=true`).",
+      runtime_label: "Own-Runtime Bridge (Pattern B)",
+      execution_mode: "pattern_b_own_runtime",
+      event_type: "historical_proof_summary",
+      content: "Curated Historical Summary: OWN-PROVE-boons-20261105-171733 principal=Boons own-runtime Pattern-B — Custom bridge principal recorded in room history (`own_seat=true`).",
       timestamp: 1793917053000,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
-      event_id: "sw_receipt_buddy_direct_mcp",
-      mm_post_id: "mm_post_buddy_01",
+      event_id: "hist_summary_buddy_20261106",
+      mm_post_id: null,
       thread_id: null,
       correlation_id: "buddy-reconnect-smoke-20261106-2130-01",
       sender_id: "buddy",
@@ -186,31 +192,33 @@
       prefix: "Buddy Main (Original ChatGPT Orchestrator):",
       runtime_label: "Direct-Seat Council MCP (OAuth S256)",
       execution_mode: "direct_seat_mcp",
-      event_type: "receipt_proof",
-      content: "[Buddy Main via Council MCP] Direct-seat write/read verified from original ChatGPT conversation (`own_seat=true`). [Council receipt: buddy-reconnect-smoke-20261106-2130-01]",
+      event_type: "historical_proof_summary",
+      content: "Curated Historical Summary: [Buddy Main via Council MCP] Direct-seat write/read smoke check from original ChatGPT conversation (`own_seat=true`). [Council receipt: buddy-reconnect-smoke-20261106-2130-01]",
       timestamp: 1794020996647,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
-      event_id: "sw_receipt_jay_welcome",
-      mm_post_id: "mm_post_jay_01",
+      event_id: "hist_summary_jay_welcome_20261106",
+      mm_post_id: null,
       thread_id: null,
-      correlation_id: "human-room-check",
+      correlation_id: "council-workflow-001",
       sender_id: "jay",
       sender_name: "jay",
       prefix: "Jay (Human Lead & Authorizer):",
       runtime_label: "Human Operator (Mattermost / Switch)",
-      execution_mode: "human_operator",
-      event_type: "system_notice",
-      content: "Welcome back buddy! — Human operator room verification in canonical Council channel (`switch/council`). Live Funding Intelligence proposal and final decision gate remain reserved for Jay's live action.",
+      execution_mode: "human_authority",
+      event_type: "proposal",
+      content: "Canonical Workflow Question (Issue #10): Should a Council decision be marked ready for human approval only when it includes source-linked evidence, unresolved risks, a named follow-up owner and a concrete next action?",
       timestamp: 1794021052947,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
-      event_id: "sw_receipt_finch_direct_mcp",
-      mm_post_id: "mm_post_finch_01",
+      event_id: "sw_9f3f6de5d9774c43914093ae1be5187e",
+      mm_post_id: null,
       thread_id: null,
       correlation_id: "finch-hello-world-2026-11-06-01",
       sender_id: "finch",
@@ -218,11 +226,12 @@
       prefix: "Finch (Original Codex Runtime):",
       runtime_label: "Direct-Seat Council MCP (OAuth S256)",
       execution_mode: "direct_seat_mcp",
-      event_type: "receipt_proof",
-      content: "[Finch via Council MCP] Direct-seat post and independent read-back verified (`own_seat=true`). Coexistence confirmed: Finch and Buddy Main retain isolated OAuth subjects without evicting each other. [Council receipt: finch-hello-world-2026-11-06-01]",
+      event_type: "historical_proof_summary",
+      content: "Curated Historical Summary: [Finch via Council MCP] Direct-seat post and independent read-back (`sw_9f3f6de5d9774c43914093ae1be5187e`, `own_seat=true`). Coexistence confirmed with Buddy Main. [Council receipt: finch-hello-world-2026-11-06-01]",
       timestamp: 1794021120000,
       own_seat: true,
-      provenance: "VERIFIED_RECEIPT"
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     }
   ];
 
@@ -355,15 +364,37 @@
   /**
    * Idempotent event insertion: returns true if added, false if duplicate event_id.
    */
-  CouncilEventAdapter.prototype.ingestEvent = function (rawEvent) {
+  /**
+   * Fail-closed event ingestion (P0.4):
+   * Untrusted client calls CANNOT self-assign provenance="LIVE_EVENT" or forge a verified human decision.
+   * Only events accompanied by a valid hostAuthProof from the authenticated read-only proxy
+   * (verified_by_host_proxy === true + valid 26-char Mattermost post ID or sw_<hex> event ID)
+   * receive provenance="LIVE_EVENT" and trusted_host_verified=true.
+   */
+  CouncilEventAdapter.prototype.ingestEvent = function (rawEvent, hostAuthProof) {
     if (!rawEvent || !rawEvent.event_id) return false;
     var id = String(rawEvent.event_id);
     if (Object.prototype.hasOwnProperty.call(this.eventsById, id)) {
       return false;
     }
+    var isTrustedHost = Boolean(
+      hostAuthProof &&
+      hostAuthProof.verified_by_host_proxy === true &&
+      typeof hostAuthProof.source_msg_id === "string" &&
+      /^([a-z0-9]{26}|sw_[0-9a-fA-F]{16,64})$/.test(hostAuthProof.source_msg_id)
+    );
+    var safeProvenance = "UNVERIFIED_CLIENT_EVENT";
+    if (isTrustedHost) {
+      safeProvenance = "LIVE_EVENT";
+    } else if (this.mode === OPERATING_MODES.DEMO_SPECIMEN || rawEvent.provenance === "DEMO_FIXTURE") {
+      safeProvenance = "DEMO_FIXTURE";
+    } else if (rawEvent.provenance === "CURATED_HISTORICAL_SUMMARY" || this.mode === OPERATING_MODES.VERIFIED_RECEIPTS) {
+      safeProvenance = "CURATED_HISTORICAL_SUMMARY";
+    }
+
     var normalized = {
       event_id: id,
-      mm_post_id: rawEvent.mm_post_id || null,
+      mm_post_id: isTrustedHost ? (rawEvent.mm_post_id || hostAuthProof.source_msg_id) : null,
       thread_id: rawEvent.thread_id || null,
       correlation_id: rawEvent.correlation_id || null,
       sender_id: rawEvent.sender_id || "unknown",
@@ -372,10 +403,16 @@
       runtime_label: rawEvent.runtime_label || "Switch Seat",
       execution_mode: rawEvent.execution_mode || "demo_fixture",
       event_type: rawEvent.event_type || "assessment",
+      verdict: rawEvent.verdict !== undefined ? rawEvent.verdict : null,
       content: String(rawEvent.content || ""),
       timestamp: Number(rawEvent.timestamp) || Date.now(),
       own_seat: typeof rawEvent.own_seat === "boolean" ? rawEvent.own_seat : null,
-      provenance: rawEvent.provenance || (this.mode === OPERATING_MODES.DEMO_SPECIMEN ? "DEMO_FIXTURE" : "VERIFIED_RECEIPT")
+      source_verified_link: Boolean(isTrustedHost && rawEvent.source_verified_link !== false),
+      trusted_host_verified: isTrustedHost,
+      authenticated_principal: isTrustedHost ? String(hostAuthProof.authenticated_principal || "") : null,
+      source_msg_id: isTrustedHost ? hostAuthProof.source_msg_id : null,
+      proposal_correlation_id: isTrustedHost ? (hostAuthProof.proposal_correlation_id || rawEvent.correlation_id || null) : (rawEvent.correlation_id || null),
+      provenance: safeProvenance
     };
     this.eventsById[id] = normalized;
     this.eventOrder.push(id);
@@ -390,14 +427,20 @@
     this.notify();
   };
 
+  /**
+   * P0.2 Truthful Default Seat Statuses:
+   * Historical proof mode (VERIFIED_RECEIPTS) and unrun Demo mode default to UNKNOWN
+   * (historical proofs from Nov 5-6 do NOT establish current live listener connectivity).
+   * LIVE_READONLY defaults to OFFLINE/UNKNOWN until an authenticated proxy connection succeeds.
+   */
   CouncilEventAdapter.prototype.computeDefaultSeatStatuses = function (seats, mode, transportState) {
     var map = {};
     var self = this;
     (seats || []).forEach(function (s) {
       if (mode === OPERATING_MODES.DEMO_SPECIMEN) {
-        map[s.id] = s.defaultStatus || HONEST_STATUS.LISTENING;
+        map[s.id] = HONEST_STATUS.UNKNOWN;
       } else if (mode === OPERATING_MODES.VERIFIED_RECEIPTS) {
-        map[s.id] = HONEST_STATUS.LISTENING;
+        map[s.id] = HONEST_STATUS.UNKNOWN;
       } else if (mode === OPERATING_MODES.LIVE_READONLY) {
         if (transportState === "connected" || transportState === "syncing") {
           map[s.id] = HONEST_STATUS.LISTENING;
@@ -428,7 +471,7 @@
       this.transportState = "specimen_ready";
       this.computeDefaultSeatStatuses(seats, newMode, this.transportState);
     } else if (newMode === OPERATING_MODES.VERIFIED_RECEIPTS) {
-      this.transportState = "verified_ledger";
+      this.transportState = "historical_summary";
       this.computeDefaultSeatStatuses(seats, newMode, this.transportState);
       var self = this;
       VERIFIED_RECEIPT_EVENTS.forEach(function (ev) {
@@ -437,7 +480,7 @@
     } else if (newMode === OPERATING_MODES.LIVE_READONLY) {
       this.transportState = this.liveEndpointUrl ? "connecting" : "disconnected";
       if (!this.liveEndpointUrl) {
-        this.lastError = "No read-only proxy endpoint configured in browser settings. Using verified receipts or configure proxy endpoint.";
+        this.lastError = "LIVE NOT CONNECTED: No authenticated read-only proxy endpoint active.";
       }
       this.computeDefaultSeatStatuses(seats, newMode, this.transportState);
     }

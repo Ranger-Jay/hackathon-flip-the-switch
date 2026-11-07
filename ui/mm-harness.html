@@ -122,7 +122,7 @@
 <body class="mm-harness-body">
   <div class="mm-top-bar">
     <div>
-      <strong>Mattermost v12.0.1 WebApp Plugin Host Harness</strong>
+      <strong style="color:#FBBF24;">⚠️ LOCAL MATTERMOST v12.0.1 PLUGIN HOST HARNESS (OFFLINE SIMULATION — PRODUCTION SERVER INSTALL UNVERIFIED)</strong>
       <span style="margin-left:10px; color:#9CA3AF; font-family:monospace;">Plugin: com.switch.council-chamber</span>
     </div>
     <div id="mmHarnessStatus" style="color:#10B981; font-family:monospace;">Initializing PluginRegistry...</div>
@@ -283,6 +283,7 @@
       var registeredRHS = null;
       var registeredRoot = null;
       var registeredPostAction = null;
+      var wsHandlers = {};
       var headerMount = document.getElementById("mmHeaderActionsMount");
       var rhsSlot = document.getElementById("mmRhsSlot");
       var rootSlot = document.getElementById("mmRootOverlaySlot");
@@ -320,13 +321,15 @@
         registerPostActionComponent: function (comp) {
           registeredPostAction = comp;
         },
-        registerWebSocketEventHandler: function () {}
+        registerWebSocketEventHandler: function (evName, handler) { wsHandlers[evName] = handler; }
       };
 
       function renderHarness() {
         // Render posts with PostActionComponent
         postsList.innerHTML = "";
-        var postsMap = state.entities.posts.posts;
+        var ctxPosts = window.getCouncilChannelContextFromStore(store).posts;
+        var postsMap = {};
+        ctxPosts.forEach(function(p) { postsMap[p.id] = p; });
         Object.keys(postsMap).forEach(function (pid) {
           var post = postsMap[pid];
           var row = document.createElement("div");
@@ -389,6 +392,8 @@
       pluginInstance.initialize(registry, store);
       window.__MM_HARNESS_PLUGIN__ = pluginInstance;
       window.__MM_HARNESS_STORE__ = store;
+      window.__MM_HARNESS_WS_HANDLERS__ = wsHandlers;
+      window.__MM_HARNESS_TRIGGER_WS__ = function (evName, payload) { if (wsHandlers[evName]) wsHandlers[evName](payload); };
 
       renderHarness();
       document.getElementById("mmHarnessStatus").textContent =

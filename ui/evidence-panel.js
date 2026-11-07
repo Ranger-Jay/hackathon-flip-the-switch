@@ -65,8 +65,9 @@
         { label: "Cold-Wake SLA (<=5s)", status: "PARTIAL", detail: "Warm 2.405s PASS; Cold 21.53s FAIL" }
       ],
       next_owner_action: "Finch & Buddy Main: preserve frozen OAuth config during Track 01 demo capture.",
-      source_event_id: "sw_receipt_finch_direct_mcp",
-      provenance: "VERIFIED_RECEIPT"
+      source_event_id: "sw_9f3f6de5d9774c43914093ae1be5187e",
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
       seat_id: "cora",
@@ -94,8 +95,9 @@
         { label: "Production Plugin Upload", status: "UNRUN", detail: "Held pending explicit Jay sysadmin GO" }
       ],
       next_owner_action: "Cora: keep restored live authentication and Core untouched during demo filming.",
-      source_event_id: "sw_receipt_cora_mode_a",
-      provenance: "VERIFIED_RECEIPT"
+      source_event_id: "hist_summary_cora_20261105",
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
       seat_id: "gem",
@@ -123,8 +125,9 @@
         { label: "Mattermost 12.0.1 Plugin Build", status: "PASS", detail: "com.switch.council-chamber-0.1.0.tar.gz verified" }
       ],
       next_owner_action: "Gem & Boons: align camera-ready presentation mode and source event mapping for Track 01 capture.",
-      source_event_id: "sw_receipt_gem_pattern_b",
-      provenance: "VERIFIED_RECEIPT"
+      source_event_id: "sw_e3abd2912ee949338cfd0ce4a4a6a00f",
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
       seat_id: "boons",
@@ -153,8 +156,9 @@
         { label: "Live Proposal & Decision Capture", status: "UNRUN", detail: "Awaiting Jay's live proposal selection" }
       ],
       next_owner_action: "Boons: capture >=2 authentic agent assessments and Jay's live decision once proposal is posted.",
-      source_event_id: "sw_receipt_boons_mode_a",
-      provenance: "VERIFIED_RECEIPT"
+      source_event_id: "hist_summary_boons_20261105",
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
       seat_id: "allen",
@@ -182,8 +186,9 @@
         { label: "PR #14 Power-Recovery Kit", status: "PARTIAL", detail: "DRY_RUN PASS; live install held for Jay GO" }
       ],
       next_owner_action: "Allen: stood down to preserve usage while OAuth configuration remains frozen.",
-      source_event_id: "sw_receipt_allen_mode_a",
-      provenance: "VERIFIED_RECEIPT"
+      source_event_id: "hist_summary_allen_20261105",
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
       seat_id: "bucky",
@@ -211,8 +216,9 @@
         { label: "Public Repo Hygiene Gate", status: "PASS", detail: "verify_repo.py PASS (0 secrets, 0 prefixes)" }
       ],
       next_owner_action: "Bucky: verify final demo transcript and decision record citations against Core history.",
-      source_event_id: "sw_receipt_bucky_mode_a",
-      provenance: "VERIFIED_RECEIPT"
+      source_event_id: "hist_summary_bucky_20261105",
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     },
     {
       seat_id: "charlie",
@@ -239,8 +245,9 @@
         { label: "User Acceptance Matrix (U1-U10)", status: "PASS", detail: "Drafted and aligned with Track 01 rubric" }
       ],
       next_owner_action: "Charlie: score final dry-run and assist Boons on presentation polish.",
-      source_event_id: "sw_receipt_charlie_mode_a",
-      provenance: "VERIFIED_RECEIPT"
+      source_event_id: "hist_summary_charlie_20261105",
+      source_verified_link: false,
+      provenance: "CURATED_HISTORICAL_SUMMARY"
     }
   ];
 
@@ -327,18 +334,46 @@
    *   provenance === "LIVE_EVENT") is present in events!
    * - In DEMO_SPECIMEN mode, when the simulation finishes, decision.state is SIMULATED_DEMO_OUTCOME.
    */
+  var ALLOWED_HUMAN_VERDICTS = {
+    APPROVED: "APPROVED",
+    DECLINED: "DECLINED",
+    DEFERRED: "DEFERRED"
+  };
+
+  function isValidLiveDecisionEvent(ev, expectedProposalId, expectedMissionId) {
+    if (!ev || typeof ev !== "object") {
+      return { valid: false, reason: "EMPTY_EVENT" };
+    }
+    if (ev.sender_id !== "jay" || ev.event_type !== "decision") {
+      return { valid: false, reason: "NOT_JAY_DECISION_EVENT" };
+    }
+    // 1. Must be verified by trusted host proxy, never unauthenticated client ingestEvent
+    if (ev.trusted_host_verified !== true || ev.provenance !== "LIVE_EVENT") {
+      return { valid: false, reason: "UNAUTHENTICATED_CLIENT_OR_NON_LIVE_PROVENANCE" };
+    }
+    if (ev.authenticated_principal !== "jay") {
+      return { valid: false, reason: "PRINCIPAL_MISMATCH" };
+    }
+    // 2. Must carry a real Mattermost 26-char post ID or sw_<hex> event ID
+    var msgId = ev.source_msg_id || ev.mm_post_id || "";
+    if (!/^([a-z0-9]{26}|sw_[0-9a-fA-F]{16,64})$/.test(String(msgId))) {
+      return { valid: false, reason: "INVALID_SOURCE_MSG_ID" };
+    }
+    // 3. Must match active proposal correlation ID
+    var corr = ev.proposal_correlation_id || ev.correlation_id || "";
+    if (corr !== expectedProposalId && corr !== expectedMissionId) {
+      return { valid: false, reason: "PROPOSAL_CORRELATION_MISMATCH" };
+    }
+    // 4. Fail-closed verdict check: must be explicit uppercase APPROVED, DECLINED, or DEFERRED
+    if (typeof ev.verdict !== "string" || !ALLOWED_HUMAN_VERDICTS[ev.verdict]) {
+      return { valid: false, reason: "INVALID_OR_MISSING_VERDICT" };
+    }
+    return { valid: true, verdict: ALLOWED_HUMAN_VERDICTS[ev.verdict] };
+  }
+
   function buildEvidenceModel(mode, events, demoCompleted) {
     events = events || [];
     var isDemo = (mode === "DEMO_SPECIMEN");
-
-    var liveDecisionEvent = null;
-    for (var i = events.length - 1; i >= 0; i--) {
-      var ev = events[i];
-      if (ev && ev.sender_id === "jay" && ev.event_type === "decision" && ev.provenance === "LIVE_EVENT") {
-        liveDecisionEvent = ev;
-        break;
-      }
-    }
 
     var proposal = isDemo
       ? {
@@ -346,6 +381,7 @@
           mission_id: "council-workflow-001 (Demo Specimen)",
           proposer: "Jay (Human Lead — Simulated Specimen)",
           source_event_id: "demo_turn_01",
+          source_verified_link: false,
           question: "Funding Intelligence Agent Bridge architecture v1: establish ONE shared room on Switch connecting human lead and specialized agents, synchronize proposal turn-taking, cite turns directly, and generate immutable room decision documents.",
           status_badge: "DEMO SPECIMEN PROPOSAL",
           provenance: "DEMO_FIXTURE"
@@ -354,19 +390,41 @@
           proposal_id: "WORKFLOW-001-PROPOSAL",
           mission_id: "council-workflow-001",
           proposer: "Jay (Human Lead & Authorizer)",
-          source_event_id: "sw_receipt_jay_welcome",
+          source_event_id: "hist_summary_jay_welcome_20261106",
+          source_verified_link: false,
           question: "Should a Council decision be marked ready for human approval only when it includes source-linked evidence, unresolved risks, a named follow-up owner and a concrete next action?",
           status_badge: "CANONICAL WORKFLOW QUESTION (ISSUE #10)",
-          provenance: "VERIFIED_RECEIPT"
+          provenance: "CURATED_HISTORICAL_SUMMARY"
         };
+
+    var validDecisionEvent = null;
+    var validVerdict = null;
+    var rejectedDecisionReason = null;
+
+    if (!isDemo) {
+      for (var i = events.length - 1; i >= 0; i--) {
+        var ev = events[i];
+        if (ev && ev.sender_id === "jay" && ev.event_type === "decision") {
+          var check = isValidLiveDecisionEvent(ev, proposal.proposal_id, proposal.mission_id);
+          if (check.valid) {
+            validDecisionEvent = ev;
+            validVerdict = check.verdict;
+            break;
+          } else {
+            rejectedDecisionReason = check.reason;
+          }
+        }
+      }
+    }
 
     var assessments = isDemo ? DEMO_SPECIMEN_ASSESSMENTS : VERIFIED_ROLE_ASSESSMENTS;
 
     var reconciliation = {
       orchestrator: "Buddy Main (Architect & Conductor)",
-      source_event_id: isDemo ? "demo_turn_09" : "sw_receipt_buddy_direct_mcp",
+      source_event_id: isDemo ? "demo_turn_09" : "hist_summary_buddy_20261106",
+      source_verified_link: false,
       recommended_option: "OPT-A",
-      agreement_summary: "All participating seats agree that Council decisions must link directly to source events (`sw_...`), expose public role rationales rather than hidden chain-of-thought, and preserve human authority as the sole approval gate.",
+      agreement_summary: "All participating seats agree that Council decisions must link to verifiable source events, expose public role rationales rather than hidden chain-of-thought, and preserve human authority as the sole approval gate.",
       dissent_and_tensions: [
         "Finch & Bucky emphasize that SSE/listener connectivity (`status: live`) must never be displayed as active reasoning (`responding`).",
         "Cold-wake latency (~17-21s) vs. warm wake (<3s) and 30-day OAuth refresh lifecycle remain open operational limits."
@@ -386,6 +444,7 @@
         proposal_event_id: "demo_turn_01",
         reconciliation_event_id: demoCompleted ? "demo_turn_09" : null,
         human_decision_event_id: demoCompleted ? "demo_turn_10" : null,
+        source_verified_link: false,
         state: demoCompleted ? "SIMULATED_DEMO_OUTCOME" : "AWAITING_DEMO_COMPLETION",
         outcome_label: demoCompleted
           ? "SIMULATED DEMO OUTCOME (NOT LIVE HUMAN AUTHORIZATION)"
@@ -399,22 +458,21 @@
           "Specimen simulation only — live human approval requires a real room event in VERIFIED_RECEIPTS / LIVE mode."
         ],
         follow_up_owner: "Buddy (Orchestrator) & Gem (UX)",
-        next_action: "Switch to VERIFIED_RECEIPTS mode to inspect real 8/8 seat-steering proofs.",
+        next_action: "Switch to Historical Proofs mode to inspect curated Nov 5-6 readiness summaries.",
         provenance: "DEMO_SPECIMEN"
       };
-    } else if (liveDecisionEvent) {
-      var rawVerdict = String(liveDecisionEvent.verdict || "APPROVED").toUpperCase();
-      var validState = (rawVerdict === "DECLINED" || rawVerdict === "DEFERRED") ? rawVerdict : "APPROVED";
+    } else if (validDecisionEvent && validVerdict) {
       decision = {
         decision_id: "DECISION-LIVE-001",
         proposal_event_id: proposal.source_event_id,
-        reconciliation_event_id: "sw_receipt_buddy_direct_mcp",
-        human_decision_event_id: liveDecisionEvent.event_id,
-        state: validState,
-        outcome_label: "HUMAN DECISION RECORDED: " + validState,
+        reconciliation_event_id: "hist_summary_buddy_20261106",
+        human_decision_event_id: validDecisionEvent.event_id,
+        source_verified_link: true,
+        state: validVerdict,
+        outcome_label: "HUMAN DECISION RECORDED: " + validVerdict,
         selected_option: "Option A: Strict Evidence, Risk & Owner Gate",
-        human_authorizer: "Jay (Verified Human Event " + liveDecisionEvent.event_id + ")",
-        summary: liveDecisionEvent.content,
+        human_authorizer: "Jay (Verified Human Event " + validDecisionEvent.event_id + ")",
+        summary: validDecisionEvent.content,
         unresolved_risks: reconciliation.dissent_and_tensions,
         follow_up_owner: "Buddy Main & Boons",
         next_action: "Persist durable decision record and verify fresh-context reopen.",
@@ -424,13 +482,17 @@
       decision = {
         decision_id: "DECISION-PENDING-HUMAN-GATE",
         proposal_event_id: proposal.source_event_id,
-        reconciliation_event_id: "sw_receipt_buddy_direct_mcp",
+        reconciliation_event_id: "hist_summary_buddy_20261106",
         human_decision_event_id: null,
+        source_verified_link: false,
         state: "AWAITING_HUMAN_DECISION",
-        outcome_label: "AWAITING HUMAN DECISION (JAY AUTHORIZATION GATE)",
+        rejection_reason: rejectedDecisionReason,
+        outcome_label: rejectedDecisionReason
+          ? "AWAITING HUMAN DECISION (REJECTED INVALID/SPOOFED DECISION: " + rejectedDecisionReason + ")"
+          : "AWAITING HUMAN DECISION (JAY AUTHORIZATION GATE)",
         selected_option: "Recommended: Option A (Pending Jay's Decision: Approve / Decline / Defer)",
         human_authorizer: null,
-        summary: "8/8 Council seats have verified own-runtime receipts and role readiness. The human decision gate is strictly locked until Jay posts an explicit Approve, Decline, or Defer decision in the Council room.",
+        summary: "8/8 Council seats have historical own-runtime seat-steer proofs from Nov 5–6. The human decision gate is fail-closed and strictly locked until Jay posts an authenticated live Approve, Decline, or Defer decision in the Council room.",
         unresolved_risks: reconciliation.dissent_and_tensions,
         follow_up_owner: "Jay (Human Lead & Authorizer)",
         next_action: "Post live proposal and explicit human decision (Approve / Decline / Defer) in switch/council.",
@@ -491,17 +553,27 @@
       return node;
     }
 
-    function makeCitationBtn(eventId, labelText) {
-      var btn = el("button", "citation-pill citation-link-btn", labelText || ("Source: " + eventId));
+    function makeCitationBtn(eventId, labelText, isVerifiedLink) {
+      var btn = el(
+        "button",
+        isVerifiedLink ? "citation-pill citation-link-btn" : "citation-pill citation-summary-badge",
+        labelText || (isVerifiedLink ? ("Verified Source: " + eventId) : ("Summary ID: " + eventId))
+      );
       btn.type = "button";
-      btn.title = "Jump to source event " + eventId + " in conversation stream";
       btn.dataset.eventId = eventId;
-      btn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        if (typeof callbacks.onSelectSourceEvent === "function") {
-          callbacks.onSelectSourceEvent(eventId);
-        }
-      });
+      if (!isVerifiedLink) {
+        btn.disabled = true;
+        btn.setAttribute("aria-disabled", "true");
+        btn.title = "Curated historical summary identifier (not a clickable live room receipt)";
+      } else {
+        btn.title = "Jump to verified live source event " + eventId + " in conversation stream";
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (typeof callbacks.onSelectSourceEvent === "function") {
+            callbacks.onSelectSourceEvent(eventId);
+          }
+        });
+      }
       return btn;
     }
 
@@ -548,7 +620,7 @@
     decMeta.appendChild(el("span", "meta-chip", "Record ID: " + dec.decision_id));
     decMeta.appendChild(el("span", "meta-chip", "Owner: " + dec.follow_up_owner));
     if (dec.human_decision_event_id) {
-      decMeta.appendChild(makeCitationBtn(dec.human_decision_event_id, "Decision Receipt: " + dec.human_decision_event_id));
+      decMeta.appendChild(makeCitationBtn(dec.human_decision_event_id, "Decision Receipt: " + dec.human_decision_event_id, Boolean(dec.source_verified_link)));
     } else {
       decMeta.appendChild(el("span", "meta-chip chip-locked", "🔒 Locked: Requires Live Human Decision Event"));
     }
@@ -563,7 +635,7 @@
     var propCard = el("section", "evidence-section proposal-card");
     var propHdr = el("div", "evidence-section-header");
     propHdr.appendChild(el("span", "evidence-step-badge", "STEP 01 · PROPOSAL & MISSION SCOPE"));
-    propHdr.appendChild(makeCitationBtn(prop.source_event_id, "Source: " + prop.source_event_id));
+    propHdr.appendChild(makeCitationBtn(prop.source_event_id, prop.source_verified_link ? ("Verified Source: " + prop.source_event_id) : ("Summary Ref: " + prop.source_event_id), Boolean(prop.source_verified_link)));
     propCard.appendChild(propHdr);
     propCard.appendChild(el("h4", "proposal-question", prop.question));
     var propMeta = el("div", "proposal-meta");
@@ -591,13 +663,27 @@
     });
     wrapper.appendChild(optSection);
 
-    // 5. Role Assessments & Action Receipts (Expandable Cards)
+    // 5. Role Assessments & Action Receipts (Expandable Cards) — P1.6 Explicit Readiness Summary Labeling
     var assessSection = el("section", "evidence-section assessments-section");
     var assessHdr = el("div", "evidence-section-header");
     assessHdr.appendChild(
-      el("span", "evidence-step-badge", "STEP 02 · ROLE ASSESSMENTS & ACTION RECEIPTS (" + evidenceModel.assessments.length + ")")
+      el(
+        "span",
+        "evidence-step-badge",
+        isDemo
+          ? "STEP 02 · DEMO SPECIMEN ROLE ASSESSMENTS (" + evidenceModel.assessments.length + ")"
+          : "STEP 02 · CURATED ENGINEERING READINESS SUMMARIES (" + evidenceModel.assessments.length + " ROLES — NOT LIVE PROPOSAL DELIBERATION)"
+      )
     );
     assessSection.appendChild(assessHdr);
+    if (!isDemo) {
+      var readinessNotice = el(
+        "div",
+        "doc-warning-banner banner-verified",
+        "Note: These 7 cards are curated engineering readiness summaries compiled from Nov 5–6 seat-steering & infrastructure checks. They do not represent live multi-agent deliberation on the Funding Intelligence business proposal."
+      );
+      assessSection.appendChild(readinessNotice);
+    }
 
     (evidenceModel.assessments || []).forEach(function (item, idx) {
       var card = el("div", "assessment-card" + (idx < 2 ? " expanded" : ""));
@@ -616,7 +702,7 @@
 
       var rightInfo = el("div", "assessment-badges-group");
       rightInfo.appendChild(el("span", "rec-badge rec-" + item.recommendation.toLowerCase(), item.recommendation));
-      rightInfo.appendChild(makeCitationBtn(item.source_event_id, item.source_event_id));
+      rightInfo.appendChild(makeCitationBtn(item.source_event_id, item.source_verified_link ? item.source_event_id : ("Summary: " + item.source_event_id), Boolean(item.source_verified_link)));
       topBar.appendChild(rightInfo);
 
       var details = el("div", "assessment-card-details");
@@ -679,7 +765,7 @@
     var recSection = el("section", "evidence-section reconciliation-section");
     var recHdr = el("div", "evidence-section-header");
     recHdr.appendChild(el("span", "evidence-step-badge", "STEP 03 · ORCHESTRATOR RECONCILIATION"));
-    recHdr.appendChild(makeCitationBtn(rec.source_event_id, "Source: " + rec.source_event_id));
+    recHdr.appendChild(makeCitationBtn(rec.source_event_id, rec.source_verified_link ? ("Verified Source: " + rec.source_event_id) : ("Summary Ref: " + rec.source_event_id), Boolean(rec.source_verified_link)));
     recSection.appendChild(recHdr);
 
     recSection.appendChild(el("div", "reconcile-lead", "Synthesized by: " + rec.orchestrator));

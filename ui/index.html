@@ -17,17 +17,17 @@
           <span class="brand-title">SWITCH COUNCIL</span>
         </div>
         <span class="room-pill" title="Target Mattermost 12.0.1 Channel &amp; Switch Room">
-          <span class="status-dot pulse-green" id="headerStatusDot"></span>
+          <span class="status-dot" id="headerStatusDot"></span>
           Channel: <strong>switch/council</strong>
-          <span class="pill-channel-hash">(44dwjxtf...)</span>
+          <span class="pill-channel-hash">(Public Preview)</span>
         </span>
       </div>
 
       <div class="nav-center">
         <span class="track-badge">Flip the Switch — Track 01</span>
         <div class="mode-switcher" id="modeSwitcherBar" role="group" aria-label="Operating Mode Switcher">
-          <button type="button" class="mode-btn active" data-mode="VERIFIED_RECEIPTS" id="modeVerifiedBtn" title="Show genuine verified Switch event receipts (8/8 seats)">
-            🛡️ Verified Receipts
+          <button type="button" class="mode-btn active" data-mode="VERIFIED_RECEIPTS" id="modeVerifiedBtn" title="Show curated Nov 5–6 historical seat-steer proof summaries (8/8 seats)">
+            📋 Historical Proofs
           </button>
           <button type="button" class="mode-btn" data-mode="DEMO_SPECIMEN" id="modeDemoBtn" title="Run offline multi-agent Track 01 workflow demonstration">
             🧪 Demo Specimen
@@ -36,7 +36,7 @@
             📡 Live Transport
           </button>
         </div>
-        <span class="demo-specimen-pill" id="topModePill">[VERIFIED RECEIPTS]</span>
+        <span class="demo-specimen-pill" id="topModePill">[HISTORICAL PROOF SUMMARY]</span>
       </div>
 
       <div class="nav-right">
@@ -62,19 +62,19 @@
     <!-- Persistent Truthfulness & Provenance Banner -->
     <div class="truthfulness-strip mode-verified" id="truthfulnessBanner" role="status" aria-live="polite">
       <div class="truth-strip-main">
-        <span class="truth-badge" id="truthBadge">[VERIFIED SWITCH RECEIPTS]</span>
+        <span class="truth-badge" id="truthBadge">[CURATED HISTORICAL PROOF SUMMARY]</span>
         <span class="truth-text" id="truthText">
-          Displaying 9 genuine recorded Switch events (8/8 own-runtime Pattern-B seat proofs). Connected listeners do NOT imply active model reasoning. Human decision status: AWAITING_HUMAN_DECISION.
+          Displaying 9 curated historical proof summaries from Nov 5–6 seat-steering verification (4 Mode-A · 2 Pattern-B · 2 Direct-MCP · 1 Human). Current live seat status: UNKNOWN. Human decision status: AWAITING_HUMAN_DECISION.
         </span>
       </div>
       <!-- Live Transport State Simulator (visible when LIVE_READONLY mode is active) -->
       <div class="transport-sim-bar" id="transportSimBar" hidden>
-        <span class="sim-label">Simulate Transport State:</span>
-        <button type="button" class="sim-state-btn active" data-sim-state="connected">Connected</button>
-        <button type="button" class="sim-state-btn" data-sim-state="stale">Stale (42s)</button>
-        <button type="button" class="sim-state-btn" data-sim-state="denied">401 Denied</button>
-        <button type="button" class="sim-state-btn" data-sim-state="disconnected">Disconnected</button>
-        <button type="button" class="sim-state-btn retry-btn" id="transportRetryBtn">↻ Retry Sync</button>
+        <span class="sim-label">Fault-Injection Controls:</span>
+        <button type="button" class="sim-state-btn active" data-sim-state="disconnected">Live Not Connected (Default)</button>
+        <button type="button" class="sim-state-btn" data-sim-state="stale">SIMULATE: Stale (42s)</button>
+        <button type="button" class="sim-state-btn" data-sim-state="denied">SIMULATE: 401 Denied</button>
+        <button type="button" class="sim-state-btn" data-sim-state="connected">SIMULATE: Connected</button>
+        <button type="button" class="sim-state-btn retry-btn" id="transportRetryBtn">↻ Probe Live Proxy</button>
       </div>
     </div>
 
@@ -103,7 +103,7 @@
             <h2>COUNCIL CHAMBER</h2>
             <span class="chamber-sub" id="chamberSubLabel">Click any seat to inspect runtime identity, receipt proof &amp; role assessment</span>
           </div>
-          <span class="participant-count" id="seatCounter">9 Seats Configured (8 Verified)</span>
+          <span class="participant-count" id="seatCounter">9 Configured · 8 Historical Own-Seat Proofs · Current Online: UNKNOWN</span>
         </div>
 
         <div class="viewport-stage" id="viewportStage">
@@ -120,7 +120,7 @@
             <div class="nexus-ring"></div>
             <div class="nexus-core">
               <span class="nexus-icon">⚡</span>
-              <span class="nexus-label" id="nexusStatus">VERIFIED</span>
+              <span class="nexus-label" id="nexusStatus">HISTORICAL</span>
             </div>
           </div>
 
@@ -153,11 +153,11 @@
         <div class="bridge-diagnostics">
           <div class="diag-item">
             <span class="diag-label">Target Room:</span>
-            <span class="diag-val font-mono" id="diagRoomId">4fac4eab...</span>
+            <span class="diag-val font-mono" id="diagRoomId">switch-council-track01 (Public Preview)</span>
           </div>
           <div class="diag-item">
             <span class="diag-label">Runtime Mode:</span>
-            <span class="diag-val badge-green" id="diagCore">Verified Switch Receipts</span>
+            <span class="diag-val badge-amber" id="diagCore">Curated Historical Proofs (Offline)</span>
           </div>
           <div class="diag-item">
             <span class="diag-label">Channel:</span>
@@ -165,7 +165,7 @@
           </div>
           <div class="diag-item">
             <span class="diag-label">Bridge Transport:</span>
-            <span class="diag-val badge-green" id="diagTransport">8/8 Own-Runtime Pattern-B</span>
+            <span class="diag-val badge-green" id="diagTransport">4 Mode-A · 2 Pattern-B · 2 Direct-MCP</span>
           </div>
         </div>
       </section>

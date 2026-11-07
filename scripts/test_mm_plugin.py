@@ -132,6 +132,17 @@ if (!state['plugins-com.switch.council-chamber'].isChamberOpen) {
   console.error('Reducer failed to toggle chamber state');
   process.exit(1);
 }
+// P1.5 Verify WebSocket 'posted' event ingestion into Redux store & channel context
+storeMock.dispatch({
+  type: 'com.switch.council-chamber/WS_EVENT',
+  timestamp: Date.now(),
+  event: { data: { post: JSON.stringify({ id: 'ws_post_99', channel_id: 'c1', sender_name: 'finch', create_at: 200, message: 'Live WS post' }) } }
+});
+const ctxAfterWs = windowMock.getCouncilChannelContextFromStore(storeMock);
+if (ctxAfterWs.postsCount !== 2 || !ctxAfterWs.posts.some(p => p.id === 'ws_post_99')) {
+  console.error('WebSocket posted event was not ingested into channel context:', ctxAfterWs);
+  process.exit(1);
+}
 console.log('NODE_VM_MOUNT_OK');
 """
 node_res = subprocess.run(["node", "-e", node_test, bundle_path], capture_output=True, text=True, encoding="utf-8")

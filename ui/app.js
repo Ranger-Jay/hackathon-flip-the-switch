@@ -1,10 +1,12 @@
 // Council Chamber — Event-Backed UI, Honest Status Model, Evidence Panel & Operator Mode
 // Clean public implementation for Switch Hackathon (Track 01)
-const SWITCH_ROOM_ID = "4fac4eab-759d-4fc7-9800-04f6bfa631db";
-const MATTERMOST_CHANNEL_ID = "44dwjxtfbfgf7c1siwopmxoacr";
+const PRIVATE_CFG = (typeof window !== "undefined" && window.__SWITCH_PRIVATE_CONFIG__) || {};
+const SWITCH_ROOM_ID = PRIVATE_CFG.roomId || "switch-council-track01";
+const MATTERMOST_CHANNEL_ID = PRIVATE_CFG.channelId || "switch-council-channel";
 
-// All 9 Council & Squad Seats with local high-res PNG portraits + SVG fallbacks
-// and genuine Switch event receipt IDs (zero decorative fake hashes).
+// All 9 Council & Squad Seats with local high-res PNG portraits + SVG fallbacks.
+// P0.2 Truthfulness Rule: Historical proofs from Nov 5-6 do NOT mean seats are currently online.
+// Default status and honestStatus are strictly "unknown" until live authenticated heartbeat evidence arrives.
 const SEATS = [
   {
     id: "jay",
@@ -14,14 +16,14 @@ const SEATS = [
     emoji: "🐕",
     avatar: "avatars/jay.svg",
     photo: "avatars/jay.png",
-    status: "online",
-    honestStatus: "listening",
+    status: "unknown",
+    honestStatus: "unknown",
     executionMode: "human_authority",
     transportId: "jay",
     description: "Company founder, product visionary, and sole human authorization authority for all Council architecture decisions.",
-    hash: "sw_prop_track01_bridge_001",
-    lastReceiptId: "sw_prop_track01_bridge_001",
-    honestNote: "Human decision authority. Proposal sw_prop_track01_bridge_001 active; final approval gate is AWAITING_HUMAN_DECISION."
+    hash: "hist_summary_jay_welcome_20261106",
+    lastReceiptId: "hist_summary_jay_welcome_20261106",
+    honestNote: "Human decision authority. Current live presence: UNKNOWN in offline/historical view. Final approval gate is AWAITING_HUMAN_DECISION."
   },
   {
     id: "buddy",
@@ -31,14 +33,14 @@ const SEATS = [
     emoji: "🦅",
     avatar: "avatars/buddy.svg",
     photo: "avatars/buddy.png",
-    status: "online",
-    honestStatus: "responding",
-    executionMode: "automated",
+    status: "unknown",
+    honestStatus: "unknown",
+    executionMode: "direct_seat_mcp",
     transportId: "buddy",
     description: "Chief problem-solver, orchestrator, and synthesizer across all squad roles and evidence matrices.",
-    hash: "sw_7b9021d4c8e144a091f2a3c4d5e6f702",
-    lastReceiptId: "sw_7b9021d4c8e144a091f2a3c4d5e6f702",
-    honestNote: "Verified own-runtime Pattern-B receipt sw_7b9021d4c8e144a091f2a3c4d5e6f702 (142.8ms)."
+    hash: "hist_summary_buddy_20261106",
+    lastReceiptId: "hist_summary_buddy_20261106",
+    honestNote: "Historical Direct-Seat Council MCP proof recorded Nov 6 (`own_seat=true`). Current live status: UNKNOWN."
   },
   {
     id: "cora",
@@ -48,14 +50,14 @@ const SEATS = [
     emoji: "🎖️",
     avatar: "avatars/cora.svg",
     photo: "avatars/cora.png",
-    status: "online",
-    honestStatus: "responding",
-    executionMode: "automated",
+    status: "unknown",
+    honestStatus: "unknown",
+    executionMode: "mode_a_oneseat_helper",
     transportId: "cora",
     description: "Company Commander, operations lead, host infrastructure runtime, and security gating.",
-    hash: "sw_c91823e4a1b249f082c3d4e5f6a7b801",
-    lastReceiptId: "sw_c91823e4a1b249f082c3d4e5f6a7b801",
-    honestNote: "Verified own-runtime Pattern-B receipt sw_c91823e4a1b249f082c3d4e5f6a7b801 (118.4ms)."
+    hash: "hist_summary_cora_20261105",
+    lastReceiptId: "hist_summary_cora_20261105",
+    honestNote: "Historical One-Seat Mode-A proof recorded Nov 5 (`OWN-PROVE-cora-20261105-162607`). Current live status: UNKNOWN."
   },
   {
     id: "gem",
@@ -65,14 +67,14 @@ const SEATS = [
     emoji: "💎",
     avatar: "avatars/gem.svg",
     photo: "avatars/gem.png",
-    status: "online",
-    honestStatus: "responding",
-    executionMode: "automated",
-    transportId: "766f6a25-41e5-49fb-abef-ebf389ba82c4",
+    status: "unknown",
+    honestStatus: "unknown",
+    executionMode: "pattern_b_own_runtime",
+    transportId: "gem-seat",
     description: "Art director, pair programmer, and native Antigravity host UI designer. Crafting luminous, truthful human-agent experiences.",
     hash: "sw_e3abd2912ee949338cfd0ce4a4a6a00f",
     lastReceiptId: "sw_e3abd2912ee949338cfd0ce4a4a6a00f",
-    honestNote: "Verified own-runtime Pattern-B receipt sw_e3abd2912ee949338cfd0ce4a4a6a00f (151.2ms)."
+    honestNote: "Historical Own-Runtime Pattern-B proof recorded Nov 5 (`sw_e3abd2912ee949338cfd0ce4a4a6a00f`, 151.2ms). Current live status: UNKNOWN."
   },
   {
     id: "finch",
@@ -82,14 +84,14 @@ const SEATS = [
     emoji: "🐦",
     avatar: "avatars/finch.svg",
     photo: "avatars/finch.png",
-    status: "online",
-    honestStatus: "responding",
-    executionMode: "automated",
-    transportId: "fa8773bb-9bee-4e0e-87c0-6dafbbfe112e",
+    status: "unknown",
+    honestStatus: "unknown",
+    executionMode: "direct_seat_mcp",
+    transportId: "finch-seat",
     description: "Codex native runtime lead, state-machine verification, and host browser test execution owner.",
-    hash: "sw_a16c49623fd14e09b8d12c4e9f001122",
-    lastReceiptId: "sw_a16c49623fd14e09b8d12c4e9f001122",
-    honestNote: "Verified own-runtime Pattern-B receipt sw_a16c49623fd14e09b8d12c4e9f001122 (164.5ms)."
+    hash: "sw_9f3f6de5d9774c43914093ae1be5187e",
+    lastReceiptId: "sw_9f3f6de5d9774c43914093ae1be5187e",
+    honestNote: "Historical Direct-Seat Council MCP proof recorded Nov 6 (`sw_9f3f6de5d9774c43914093ae1be5187e`). Current live status: UNKNOWN."
   },
   {
     id: "boons",
@@ -99,14 +101,14 @@ const SEATS = [
     emoji: "🐝",
     avatar: "avatars/boons.svg",
     photo: "avatars/boons.png",
-    status: "online",
-    honestStatus: "responding",
-    executionMode: "automated",
-    transportId: "89181515-6b34-4254-884f-2678bd7dafc1",
+    status: "unknown",
+    honestStatus: "unknown",
+    executionMode: "pattern_b_own_runtime",
+    transportId: "boons-seat",
     description: "Custom shim engineer, wire protocol serialization, and demonstration capture lead.",
-    hash: "sw_d45109f8b2c348a193e4f5a6b7c8d903",
-    lastReceiptId: "sw_d45109f8b2c348a193e4f5a6b7c8d903",
-    honestNote: "Verified own-runtime Pattern-B receipt sw_d45109f8b2c348a193e4f5a6b7c8d903 (188.0ms)."
+    hash: "hist_summary_boons_20261105",
+    lastReceiptId: "hist_summary_boons_20261105",
+    honestNote: "Historical Own-Runtime Pattern-B proof recorded Nov 5 (`OWN-PROVE-boons-20261105-171733`). Current live status: UNKNOWN."
   },
   {
     id: "allen",
@@ -116,14 +118,14 @@ const SEATS = [
     emoji: "🔧",
     avatar: "avatars/allen.svg",
     photo: "avatars/allen.png",
-    status: "online",
-    honestStatus: "listening",
-    executionMode: "automated",
+    status: "unknown",
+    honestStatus: "unknown",
+    executionMode: "mode_a_oneseat_helper",
     transportId: "allen",
     description: "Core systems engineering, fail-closed cost-gate implementation, and service daemon automation.",
-    hash: "sw_f12098a7c3d447b284f5a6b7c8d9e004",
-    lastReceiptId: "sw_f12098a7c3d447b284f5a6b7c8d9e004",
-    honestNote: "Connected listener (idle). Last verified receipt: sw_f12098a7c3d447b284f5a6b7c8d9e004 (176.3ms). Connected listener does NOT imply active model reasoning."
+    hash: "hist_summary_allen_20261105",
+    lastReceiptId: "hist_summary_allen_20261105",
+    honestNote: "Historical One-Seat Mode-A proof recorded Nov 5 (`OWN-PROVE-allen-20261105-162512`). Current live status: UNKNOWN."
   },
   {
     id: "bucky",
@@ -133,14 +135,14 @@ const SEATS = [
     emoji: "🔭",
     avatar: "avatars/bucky.svg",
     photo: "avatars/bucky.png",
-    status: "online",
-    honestStatus: "listening",
-    executionMode: "automated",
+    status: "unknown",
+    honestStatus: "unknown",
+    executionMode: "mode_a_oneseat_helper",
     transportId: "bucky",
     description: "Independent audit verifier, continuity tracking, and receipt validator against ground-truth logs.",
-    hash: "sw_883412b9d4e546c395a6b7c8d9e0f105",
-    lastReceiptId: "sw_883412b9d4e546c395a6b7c8d9e0f105",
-    honestNote: "Connected listener (idle). Last verified receipt: sw_883412b9d4e546c395a6b7c8d9e0f105 (159.7ms). Connected listener does NOT imply active model reasoning."
+    hash: "hist_summary_bucky_20261105",
+    lastReceiptId: "hist_summary_bucky_20261105",
+    honestNote: "Historical One-Seat Mode-A proof recorded Nov 5 (`OWN-PROVE-bucky-20261105-164414`). Current live status: UNKNOWN."
   },
   {
     id: "charlie",
@@ -150,14 +152,14 @@ const SEATS = [
     emoji: "🎬",
     avatar: "avatars/charlie.svg",
     photo: "avatars/charlie.png",
-    status: "online",
-    honestStatus: "listening",
-    executionMode: "operator_triggered",
+    status: "unknown",
+    honestStatus: "unknown",
+    executionMode: "mode_a_oneseat_helper",
     transportId: "charlie",
     description: "Product demonstration storytelling, media asset production, and creative workflow director.",
-    hash: "sw_554321c0e5f645d486b7c8d9e0f1a206",
-    lastReceiptId: "sw_554321c0e5f645d486b7c8d9e0f1a206",
-    honestNote: "Operator-triggered seat. Last verified receipt: sw_554321c0e5f645d486b7c8d9e0f1a206 (167.9ms). Connected listener does NOT imply active model reasoning."
+    hash: "hist_summary_charlie_20261105",
+    lastReceiptId: "hist_summary_charlie_20261105",
+    honestNote: "Historical One-Seat Mode-A proof recorded Nov 5 (`OWN-PROVE-charlie-20261105-164326`). Current live status: UNKNOWN."
   }
 ];
 
@@ -242,8 +244,8 @@ const DECISION_DOC_CONTENT = `
   </div>
   <h1>COUNCIL DECISION RECORD</h1>
   <p><strong>Document ID:</strong> <span class="citation-pill">SPECIMEN-20261103-01</span></p>
-  <p><strong>Switch Room ID:</strong> <code>4fac4eab-759d-4fc7-9800-04f6bfa631db</code></p>
-  <p><strong>Mattermost Channel:</strong> <code>switch/council</code> (<code>44dwjxtfbfgf7c1siwopmxoacr</code>)</p>
+  <p><strong>Switch Room:</strong> <code>switch-council-track01 (Public Preview)</code></p>
+  <p><strong>Mattermost Channel:</strong> <code>switch/council</code></p>
   <p><strong>Status:</strong> <span style="color:#FBBF24;font-weight:600;">SIMULATED DEMO ARTIFACT</span></p>
 </div>
 `;
@@ -389,9 +391,16 @@ function initSeats() {
   const { radius, centerX, centerY, isMobile } = getChamberMetrics();
 
   let onlineCount = 0;
+  const adapterStatuses = (eventAdapter && typeof eventAdapter.getSnapshot === "function")
+    ? (eventAdapter.getSnapshot().seatStatuses || {})
+    : {};
 
   SEATS.forEach((seat, idx) => {
-    if (seat.status === "online") onlineCount++;
+    const effectiveStatus = adapterStatuses[seat.id] || seat.honestStatus || "unknown";
+    seat.honestStatus = effectiveStatus;
+    if (effectiveStatus === "listening" || effectiveStatus === "responding" || effectiveStatus === "receiving" || effectiveStatus === "busy") {
+      onlineCount++;
+    }
     const angle = (idx / total) * 2 * Math.PI - Math.PI / 2;
     const x = centerX + radius * Math.cos(angle);
     const y = centerY + radius * Math.sin(angle);
@@ -409,17 +418,17 @@ function initSeats() {
     node.setAttribute("role", "button");
     node.setAttribute(
       "aria-label",
-      `${seat.originalName} (${seat.role}) - Status: ${seat.honestStatus} (${seat.executionMode})`
+      `${seat.originalName} (${seat.role}) - Status: ${effectiveStatus} (${seat.executionMode})`
     );
 
     const avatarSrc = seat.photo || seat.avatar;
     const fallbackSvg = seat.avatar;
 
     node.innerHTML = `
-      <div class="seat-avatar status-border-${seat.honestStatus}">
+      <div class="seat-avatar status-border-${effectiveStatus}">
         <img src="${avatarSrc}" onerror="this.onerror=null; this.src='${fallbackSvg}';" alt="${seat.originalName}" width="64" height="64" decoding="sync">
       </div>
-      <span class="seat-status-dot dot-${seat.honestStatus}" title="Honest Status: ${seat.honestStatus.toUpperCase()} (${seat.executionMode})"></span>
+      <span class="seat-status-dot dot-${effectiveStatus}" title="Current Live Status: ${effectiveStatus.toUpperCase()} (${seat.executionMode})"></span>
       <div class="seat-badge">${seat.emoji} ${seat.originalName}</div>
     `;
 
@@ -442,7 +451,11 @@ function initSeats() {
   });
 
   if (seatCounter) {
-    seatCounter.textContent = `${total} Seats Configured (${onlineCount} Online · 8/8 Verified Receipts)`;
+    if (onlineCount > 0 && currentMode === "LIVE_READONLY") {
+      seatCounter.textContent = `${total} Configured · ${onlineCount} Live Connected · 8 Historical Own-Seat Proofs`;
+    } else {
+      seatCounter.textContent = `${total} Configured · 8 Historical Own-Seat Proofs · Current Online: UNKNOWN`;
+    }
   }
 
   initFilterPills();
@@ -771,6 +784,7 @@ function setOperatingMode(mode) {
   if (eventAdapter) {
     eventAdapter.setMode(mode, SEATS);
   }
+  initSeats();
   renderEvidenceDrawer(mode);
 
   if (transportAlertBox) transportAlertBox.hidden = true;
@@ -778,26 +792,26 @@ function setOperatingMode(mode) {
 
   if (mode === "VERIFIED_RECEIPTS") {
     if (topModePill) {
-      topModePill.textContent = "[VERIFIED RECEIPTS]";
+      topModePill.textContent = "[HISTORICAL PROOF SUMMARY]";
       topModePill.className = "demo-specimen-pill pill-verified";
     }
     if (truthfulnessBanner) truthfulnessBanner.className = "truthfulness-strip mode-verified";
-    if (truthBadge) truthBadge.textContent = "[VERIFIED SWITCH RECEIPTS]";
+    if (truthBadge) truthBadge.textContent = "[CURATED HISTORICAL PROOF SUMMARY]";
     if (truthText) {
-      truthText.textContent = "Displaying 9 genuine recorded Switch events (8/8 own-runtime Pattern-B seat proofs). Connected listeners do NOT imply active model reasoning. Human decision status: AWAITING_HUMAN_DECISION.";
+      truthText.textContent = "Displaying 9 curated historical proof summaries from Nov 5–6 seat-steering verification (4 Mode-A · 2 Pattern-B · 2 Direct-MCP · 1 Human). Current live seat status: UNKNOWN. Human decision status: AWAITING_HUMAN_DECISION.";
     }
     if (diagCore) {
-      diagCore.textContent = "Verified Switch Receipts";
-      diagCore.className = "diag-val badge-green";
+      diagCore.textContent = "Curated Historical Proofs (Offline)";
+      diagCore.className = "diag-val badge-amber";
     }
     if (diagTransport) {
-      diagTransport.textContent = "8/8 Own-Runtime Pattern-B";
+      diagTransport.textContent = "4 Mode-A · 2 Pattern-B · 2 Direct-MCP";
       diagTransport.className = "diag-val badge-green";
     }
-    if (feedHeaderTitle) feedHeaderTitle.textContent = "VERIFIED SWITCH RECEIPT STREAM";
-    if (feedSubtitle) feedSubtitle.textContent = "Genuine recorded Council seat-steer receipts & proposal trace";
+    if (feedHeaderTitle) feedHeaderTitle.textContent = "CURATED HISTORICAL PROOF STREAM";
+    if (feedSubtitle) feedSubtitle.textContent = "Nov 5–6 recorded own-seat proofs & canonical workflow question (offline summary)";
     if (nexusStatus) {
-      nexusStatus.textContent = "VERIFIED";
+      nexusStatus.textContent = "HISTORICAL";
       nexusStatus.style.color = "#10B981";
     }
     renderVerifiedReceiptsStream();
@@ -827,30 +841,119 @@ function setOperatingMode(mode) {
     }
     renderDemoStreamInitial();
   } else if (mode === "LIVE_READONLY") {
+    // P0.3 Truthfulness Rule: LIVE_READONLY defaults to LIVE NOT CONNECTED / LIVE PREVIEW UNAVAILABLE
+    // and NEVER renders historical fixtures as if they were live traffic.
     if (topModePill) {
-      topModePill.textContent = "[LIVE READ-ONLY]";
-      topModePill.className = "demo-specimen-pill pill-live";
+      topModePill.textContent = "[LIVE NOT CONNECTED]";
+      topModePill.className = "demo-specimen-pill";
     }
     if (truthfulnessBanner) truthfulnessBanner.className = "truthfulness-strip mode-live";
-    if (truthBadge) truthBadge.textContent = "[LIVE READ-ONLY OBSERVER]";
+    if (truthBadge) truthBadge.textContent = "[LIVE PREVIEW UNAVAILABLE — NOT CONNECTED]";
     if (truthText) {
-      truthText.textContent = "Read-only observer boundary active. Privileged agent tokens are isolated outside the browser bundle. Use the state bar to inspect stale/401/disconnect handling.";
+      truthText.textContent = "LIVE NOT CONNECTED: No authenticated read-only Switch/Mattermost proxy is active. Historical fixtures are withheld in Live mode so offline records are never mistaken for live traffic.";
     }
     if (diagCore) {
-      diagCore.textContent = "Read-Only Observer";
+      diagCore.textContent = "Live Read-Only (Not Connected)";
+      diagCore.className = "diag-val badge-amber";
+    }
+    if (diagTransport) {
+      diagTransport.textContent = "LIVE NOT CONNECTED (No Proxy)";
+      diagTransport.className = "diag-val badge-amber";
+    }
+    if (feedHeaderTitle) feedHeaderTitle.textContent = "LIVE READ-ONLY CHANNEL STREAM";
+    if (feedSubtitle) feedSubtitle.textContent = "Requires authenticated read-only host proxy (/api/council/live-history)";
+    if (nexusStatus) {
+      nexusStatus.textContent = "NOT CONNECTED";
+      nexusStatus.style.color = "#EF4444";
+    }
+    document.querySelectorAll(".sim-state-btn[data-sim-state]").forEach((b) => {
+      b.classList.toggle("active", b.dataset.simState === "disconnected");
+    });
+    if (transportAlertBox) {
+      transportAlertBox.hidden = false;
+      transportAlertTitle.textContent = "🔌 LIVE NOT CONNECTED / LIVE PREVIEW UNAVAILABLE";
+      transportAlertDesc.textContent = "No authenticated read-only proxy connection is active. Start scripts/serve_council_live.py for live Mattermost/Core history or use the SIMULATE buttons above to inspect fault handling.";
+    }
+    renderLiveDisconnectedStream();
+    probeLiveProxyEndpoint();
+  }
+}
+
+function renderLiveDisconnectedStream() {
+  if (!messagesContainer) return;
+  messagesContainer.innerHTML = "";
+  const emptyBox = document.createElement("div");
+  emptyBox.className = "live-disconnected-notice";
+  emptyBox.style.padding = "24px";
+  emptyBox.style.margin = "16px";
+  emptyBox.style.borderRadius = "10px";
+  emptyBox.style.border = "1px dashed rgba(245, 158, 11, 0.45)";
+  emptyBox.style.background = "rgba(245, 158, 11, 0.06)";
+  emptyBox.style.color = "#F3F4F6";
+  emptyBox.innerHTML = `
+    <strong style="color:#FBBF24;display:block;margin-bottom:6px;">📡 LIVE PREVIEW UNAVAILABLE — NOT CONNECTED TO LIVE PROXY</strong>
+    <p style="margin:0;font-size:13px;color:#9CA3AF;line-height:1.5;">
+      Historical proofs and demo specimens are strictly withheld in <code>LIVE_READONLY</code> mode so offline fixtures are never presented as live room traffic.
+      Connect the local read-only proxy (<code>python scripts/serve_council_live.py</code>) and click <strong>↻ Probe Live Proxy</strong> to ingest genuine live posts.
+    </p>
+  `;
+  messagesContainer.appendChild(emptyBox);
+}
+
+async function probeLiveProxyEndpoint() {
+  if (typeof fetch !== "function" || currentMode !== "LIVE_READONLY") return;
+  try {
+    const resp = await fetch("/api/council/live-history", { method: "GET", headers: { "Accept": "application/json" } });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!data || data.ok !== true || !Array.isArray(data.events)) return;
+    if (currentMode !== "LIVE_READONLY") return;
+
+    if (eventAdapter) {
+      eventAdapter.clearEvents();
+      data.events.forEach((ev) => {
+        eventAdapter.ingestEvent(ev, {
+          verified_by_host_proxy: Boolean(data.verified_by_host_proxy),
+          authenticated_principal: ev.sender_id,
+          source_msg_id: ev.mm_post_id || ev.event_id,
+          proposal_correlation_id: ev.correlation_id || "council-workflow-001"
+        });
+      });
+      eventAdapter.simulateTransportState("connected", null, SEATS);
+    }
+    initSeats();
+    renderEvidenceDrawer("LIVE_READONLY");
+    if (topModePill) topModePill.textContent = "[LIVE CONNECTED]";
+    if (truthBadge) truthBadge.textContent = "[LIVE READ-ONLY PROXY CONNECTED]";
+    if (truthText) truthText.textContent = `Connected to authenticated read-only host proxy (${data.events.length} verified live channel posts).`;
+    if (diagCore) {
+      diagCore.textContent = "Live Read-Only Proxy (Connected)";
       diagCore.className = "diag-val badge-green";
     }
     if (diagTransport) {
-      diagTransport.textContent = "SSE / Mattermost WS (Connected)";
+      diagTransport.textContent = `Mattermost 12.0.1 Live (${data.events.length} posts)`;
       diagTransport.className = "diag-val badge-green";
     }
-    if (feedHeaderTitle) feedHeaderTitle.textContent = "LIVE READ-ONLY CHANNEL STREAM";
-    if (feedSubtitle) feedSubtitle.textContent = "Idempotent event_id deduplicated stream with explicit failure states";
     if (nexusStatus) {
       nexusStatus.textContent = "CONNECTED";
-      nexusStatus.style.color = "#00F0FF";
+      nexusStatus.style.color = "#10B981";
     }
-    renderVerifiedReceiptsStream();
+    if (transportAlertBox) transportAlertBox.hidden = true;
+    if (messagesContainer) {
+      messagesContainer.innerHTML = "";
+      data.events.forEach((ev) => appendMessageCard({
+        sender: ev.sender_id,
+        prefix: ev.prefix,
+        content: ev.content,
+        event_id: ev.event_id,
+        timestamp: ev.timestamp,
+        execution_mode: ev.execution_mode,
+        source_verified_link: true,
+        provenance: "LIVE_EVENT"
+      }));
+    }
+  } catch (_) {
+    // Expected when running static HTTP server without live proxy; stay in LIVE NOT CONNECTED state.
   }
 }
 
@@ -868,7 +971,9 @@ function getVerifiedTurnsList() {
       content: ev.content,
       event_id: ev.event_id,
       timestamp: ev.timestamp,
-      execution_mode: ev.execution_mode || seat.executionMode
+      execution_mode: ev.execution_mode || seat.executionMode,
+      source_verified_link: Boolean(ev.source_verified_link),
+      provenance: ev.provenance || "CURATED_HISTORICAL_SUMMARY"
     };
   });
 }
@@ -887,7 +992,7 @@ function renderDemoStreamInitial() {
   if (!messagesContainer) return;
   messagesContainer.innerHTML = "";
   WORKFLOW_SCRIPT.forEach((turn) => {
-    appendMessageCard(turn);
+    appendMessageCard(Object.assign({}, turn, { provenance: "DEMO_FIXTURE", source_verified_link: false }));
   });
   stepCursor = WORKFLOW_SCRIPT.length;
   updateSpotlightFromTurn(WORKFLOW_SCRIPT[WORKFLOW_SCRIPT.length - 1]);
@@ -1063,23 +1168,43 @@ function appendMessageCard(turn) {
     window.renderSafeMessageContent(contentDiv, turn.content || "");
   }
 
-  // Source-linked receipt footer bar
+  // Source-linked receipt / historical summary footer bar (P0.1 Truthful Provenance)
   const footerDiv = document.createElement("div");
   footerDiv.className = "msg-receipt-footer";
 
+  const isLiveVerifiedLink = Boolean(turn.source_verified_link === true && turn.provenance === "LIVE_EVENT");
   const receiptBadge = document.createElement("button");
   receiptBadge.type = "button";
-  receiptBadge.className = "msg-receipt-pill";
-  receiptBadge.textContent = `🔗 Receipt: ${receiptId}`;
-  receiptBadge.title = "Open Evidence & Decision Panel and highlight this role's assessment";
-  receiptBadge.addEventListener("click", () => {
+  receiptBadge.className = isLiveVerifiedLink ? "msg-receipt-pill" : "msg-receipt-pill badge-historical-summary";
+  if (isLiveVerifiedLink) {
+    receiptBadge.textContent = `🔗 Verified Live Receipt: ${receiptId}`;
+    receiptBadge.title = "Verified live room event receipt";
+  } else if (turn.provenance === "DEMO_FIXTURE" || String(receiptId).startsWith("specimen_")) {
+    receiptBadge.textContent = `🧪 Demo Specimen ID: ${receiptId}`;
+    receiptBadge.disabled = true;
+    receiptBadge.setAttribute("aria-disabled", "true");
+    receiptBadge.title = "Simulated offline demo specimen identifier (not a live room receipt)";
+  } else {
+    receiptBadge.textContent = `📋 Historical Summary: ${receiptId}`;
+    receiptBadge.disabled = true;
+    receiptBadge.setAttribute("aria-disabled", "true");
+    receiptBadge.title = "Curated historical summary reference (not a clickable live room receipt)";
+  }
+  footerDiv.appendChild(receiptBadge);
+
+  const inspectRoleBtn = document.createElement("button");
+  inspectRoleBtn.type = "button";
+  inspectRoleBtn.className = "msg-receipt-pill inspect-role-btn";
+  inspectRoleBtn.textContent = "📜 Role Summary";
+  inspectRoleBtn.title = "Open Evidence & Decision Panel and inspect this role's readiness summary";
+  inspectRoleBtn.addEventListener("click", () => {
     if (docDrawer) {
       docDrawer.classList.add("open");
       docToggleBtn.classList.add("active-view");
       highlightAssessmentCardBySeat(seat.id);
     }
   });
-  footerDiv.appendChild(receiptBadge);
+  footerDiv.appendChild(inspectRoleBtn);
 
   if (turn.verification && turn.verification.latency_ms) {
     const latencySpan = document.createElement("span");
@@ -1273,17 +1398,23 @@ function applySimulatedTransportState(state) {
   if (!eventAdapter) return;
   if (state === "connected") {
     eventAdapter.simulateTransportState("connected", null, SEATS);
-    if (transportAlertBox) transportAlertBox.hidden = true;
+    initSeats();
+    if (transportAlertBox) {
+      transportAlertBox.hidden = false;
+      transportAlertTitle.textContent = "🧪 SIMULATED: Connected Transport State";
+      transportAlertDesc.textContent = "Fault-injection preview of connected listener state. Seat dots show LISTENING (idle) — listener connectivity does NOT imply active model reasoning.";
+    }
     if (diagTransport) {
-      diagTransport.textContent = "SSE / Mattermost WS (Connected)";
-      diagTransport.className = "diag-val badge-green";
+      diagTransport.textContent = "SIMULATED: Connected Listener";
+      diagTransport.className = "diag-val badge-amber";
     }
     if (nexusStatus) {
-      nexusStatus.textContent = "CONNECTED";
-      nexusStatus.style.color = "#10B981";
+      nexusStatus.textContent = "SIM-CONN";
+      nexusStatus.style.color = "#00F0FF";
     }
   } else if (state === "stale") {
     eventAdapter.simulateTransportState("stale", "Last event heartbeat was 42s ago (threshold: 30s). Showing last verified state.", SEATS);
+    initSeats();
     if (transportAlertBox) {
       transportAlertBox.hidden = false;
       transportAlertTitle.textContent = "⚠️ Stale Heartbeat Detected (42s elapsed)";
@@ -1299,6 +1430,7 @@ function applySimulatedTransportState(state) {
     }
   } else if (state === "denied") {
     eventAdapter.simulateTransportState("denied", "HTTP 401/403: Read-only observer token missing or expired", SEATS);
+    initSeats();
     if (transportAlertBox) {
       transportAlertBox.hidden = false;
       transportAlertTitle.textContent = "🔒 HTTP 401/403 Permission Denied";
@@ -1314,6 +1446,7 @@ function applySimulatedTransportState(state) {
     }
   } else if (state === "disconnected") {
     eventAdapter.simulateTransportState("disconnected", "Mattermost WebSocket / Switch SSE stream closed", SEATS);
+    initSeats();
     if (transportAlertBox) {
       transportAlertBox.hidden = false;
       transportAlertTitle.textContent = "🔌 Transport Disconnected (Backoff Retry Ready)";
@@ -1331,10 +1464,10 @@ function applySimulatedTransportState(state) {
 }
 
 if (transportRetryBtn) {
-  transportRetryBtn.addEventListener("click", () => applySimulatedTransportState("connected"));
+  transportRetryBtn.addEventListener("click", () => probeLiveProxyEndpoint());
 }
 if (alertRetryBtn) {
-  alertRetryBtn.addEventListener("click", () => applySimulatedTransportState("connected"));
+  alertRetryBtn.addEventListener("click", () => probeLiveProxyEndpoint());
 }
 
 // 7. View Toggles & Event Listeners

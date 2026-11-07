@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Automated verification suite for Council Evidence & Decision Panel (Slice 4)."""
+'''Automated verification suite for Council Evidence & Decision Panel (Slice 4 + P0.4 Fail-Closed Gate).'''
 
 import os
 import subprocess
@@ -16,9 +16,9 @@ else:
 EVIDENCE_JS = os.path.join(UI_DIR, "evidence-panel.js")
 ADAPTER_JS = os.path.join(UI_DIR, "event-adapter.js")
 
-print(f"=== COUNCIL EVIDENCE & DECISION PANEL TEST SUITE ({EVIDENCE_JS}) ===")
+print(f"=== COUNCIL EVIDENCE & FAIL-CLOSED DECISION GATE TEST SUITE ({EVIDENCE_JS}) ===")
 
-node_test = """
+node_test = '''
 const evMod = require(process.argv[1]);
 const adMod = require(process.argv[2]);
 
@@ -40,7 +40,7 @@ if (citationCheck.verifiedCount !== citationCheck.total) {
   console.error('FAIL: Not all assessment citations matched event ledger:', citationCheck);
   process.exit(1);
 }
-console.log(`  [PASS] All ${citationCheck.verifiedCount}/${citationCheck.total} role assessments trace to verified event IDs`);
+console.log(`  [PASS] All ${citationCheck.verifiedCount}/${citationCheck.total} role summaries trace to event ledger IDs`);
 
 // 3. Verify DEMO_SPECIMEN mode labels simulated outcome truthfully
 const demoIdle = evMod.buildEvidenceModel('DEMO_SPECIMEN', [], false);
@@ -55,29 +55,101 @@ if (demoDone.decision.state !== 'SIMULATED_DEMO_OUTCOME' || !demoDone.decision.o
 }
 console.log('  [PASS] DEMO_SPECIMEN mode explicitly labels simulated approval as SIMULATED_DEMO_OUTCOME');
 
-// 4. Verify live human decision unlock only when authentic jay decision event is ingested
-const eventsWithDecision = adMod.VERIFIED_RECEIPT_EVENTS.concat([{
-  event_id: 'sw_live_jay_decision_01',
+// 4. P0.4 Negative Tests: Unauthenticated, invalid-verdict, or mismatched-correlation decisions MUST FAIL CLOSED
+const adapter = new adMod.CouncilEventAdapter({ initialMode: 'LIVE_READONLY' });
+
+// 4a. Unauthenticated client ingestEvent spoof attempt
+adapter.ingestEvent({
+  event_id: 'sw_spoof_jay_01',
   sender_id: 'jay',
   event_type: 'decision',
   verdict: 'APPROVED',
-  content: 'Approved Option A with explicit source-linked receipts.',
-  provenance: 'LIVE_EVENT'
-}]);
-const unlockedModel = evMod.buildEvidenceModel('LIVE_READONLY', eventsWithDecision, false);
-if (unlockedModel.decision.state !== 'APPROVED' || unlockedModel.decision.human_decision_event_id !== 'sw_live_jay_decision_01') {
-  console.error('FAIL: Live decision event failed to unlock decision gate properly');
+  provenance: 'LIVE_EVENT',
+  correlation_id: 'council-workflow-001',
+  content: 'Unauthenticated spoofed approval'
+});
+const spoofModel = evMod.buildEvidenceModel('LIVE_READONLY', adapter.getEvents(), false);
+if (spoofModel.decision.state !== 'AWAITING_HUMAN_DECISION' || spoofModel.decision.rejection_reason !== 'UNAUTHENTICATED_CLIENT_OR_NON_LIVE_PROVENANCE') {
+  console.error('FAIL: P0.4 violation — Unauthenticated spoofed decision was not rejected:', spoofModel.decision);
   process.exit(1);
 }
-console.log('  [PASS] Live human decision gate unlocks ONLY with verified jay decision event ID');
+console.log('  [PASS] P0.4 Negative Check 4a: Unauthenticated client jay decision blocked (UNAUTHENTICATED_CLIENT_OR_NON_LIVE_PROVENANCE)');
 
-// 5. Verify Safe DOM rendering of Evidence Panel
+// 4b. Missing / empty / invalid verdict (null, "", "YES", "MAYBE") must NEVER default to APPROVED
+for (const badVerdict of [null, undefined, '', 'YES', 'MAYBE', 'approved_typo']) {
+  const badEv = {
+    event_id: 'sw_bad_verdict_01',
+    sender_id: 'jay',
+    event_type: 'decision',
+    verdict: badVerdict,
+    provenance: 'LIVE_EVENT',
+    trusted_host_verified: true,
+    authenticated_principal: 'jay',
+    source_msg_id: 'sw_1234567890abcdef1234',
+    proposal_correlation_id: 'council-workflow-001',
+    content: 'Decision with invalid verdict'
+  };
+  const m = evMod.buildEvidenceModel('LIVE_READONLY', [badEv], false);
+  if (m.decision.state !== 'AWAITING_HUMAN_DECISION' || m.decision.rejection_reason !== 'INVALID_OR_MISSING_VERDICT') {
+    console.error('FAIL: P0.4 violation — Invalid verdict was not rejected:', badVerdict, m.decision);
+    process.exit(1);
+  }
+}
+console.log('  [PASS] P0.4 Negative Check 4b: Missing/invalid verdicts (null, "", "YES", "MAYBE") fail closed (never default to APPROVED)');
+
+// 4c. Mismatched proposal_correlation_id must be rejected
+const mismatchEv = {
+  event_id: 'sw_mismatch_corr_01',
+  sender_id: 'jay',
+  event_type: 'decision',
+  verdict: 'APPROVED',
+  provenance: 'LIVE_EVENT',
+  trusted_host_verified: true,
+  authenticated_principal: 'jay',
+  source_msg_id: 'sw_1234567890abcdef1234',
+  proposal_correlation_id: 'wrong-proposal-999',
+  content: 'Decision for a different proposal'
+};
+const mismatchModel = evMod.buildEvidenceModel('LIVE_READONLY', [mismatchEv], false);
+if (mismatchModel.decision.state !== 'AWAITING_HUMAN_DECISION' || mismatchModel.decision.rejection_reason !== 'PROPOSAL_CORRELATION_MISMATCH') {
+  console.error('FAIL: P0.4 violation — Mismatched proposal_correlation_id was not rejected:', mismatchModel.decision);
+  process.exit(1);
+}
+console.log('  [PASS] P0.4 Negative Check 4c: Mismatched proposal_correlation_id blocked (PROPOSAL_CORRELATION_MISMATCH)');
+
+// 5. Positive Test: Host-proxy authenticated jay decision with valid source_msg_id, correlation_id, and explicit verdict unlocks gate
+adapter.clearEvents();
+adapter.ingestEvent(
+  {
+    event_id: 'sw_1234567890abcdef1234',
+    sender_id: 'jay',
+    event_type: 'decision',
+    verdict: 'APPROVED',
+    correlation_id: 'council-workflow-001',
+    content: 'Approved Option A with explicit source-linked receipts.'
+  },
+  {
+    verified_by_host_proxy: true,
+    authenticated_principal: 'jay',
+    source_msg_id: 'sw_1234567890abcdef1234',
+    proposal_correlation_id: 'council-workflow-001'
+  }
+);
+const unlockedModel = evMod.buildEvidenceModel('LIVE_READONLY', adapter.getEvents(), false);
+if (unlockedModel.decision.state !== 'APPROVED' || unlockedModel.decision.human_decision_event_id !== 'sw_1234567890abcdef1234') {
+  console.error('FAIL: Host-proxy verified live decision event failed to unlock decision gate:', unlockedModel.decision);
+  process.exit(1);
+}
+console.log('  [PASS] Host-proxy verified jay decision event (APPROVED/DECLINED/DEFERRED) unlocks gate');
+
+// 6. Verify Safe DOM rendering, P1.6 Readiness Summary header, and disabled historical summary badges
 function makeMockDoc() {
   function makeNode(tag, text) {
     return {
       tagName: tag,
       textContent: text || '',
       className: '',
+      disabled: false,
       dataset: {},
       attributes: {},
       children: [],
@@ -97,15 +169,28 @@ function makeMockDoc() {
   root.ownerDocument = doc;
   return root;
 }
+function collectAllNodes(n, acc = []) {
+  acc.push(n);
+  for (const c of (n.children || [])) collectAllNodes(c, acc);
+  return acc;
+}
+
 const domRoot = makeMockDoc();
 evMod.renderEvidencePanelDOM(domRoot, verifiedModel, {});
-if (domRoot.children.length !== 1 || domRoot.children[0].children.length < 5) {
-  console.error('FAIL: Evidence panel DOM failed to render all sections');
+const allNodes = collectAllNodes(domRoot);
+const allText = allNodes.map(n => n.textContent || '').join(' ');
+if (!allText.includes('CURATED ENGINEERING READINESS SUMMARIES (7 ROLES — NOT LIVE PROPOSAL DELIBERATION)')) {
+  console.error('FAIL: P1.6 Step 02 header missing CURATED ENGINEERING READINESS SUMMARIES label');
   process.exit(1);
 }
-console.log('  [PASS] Safe DOM rendering of Proposal, Options, 7 Assessments, Reconciliation, and Decision Gate PASS');
+const summaryBtns = allNodes.filter(n => n.tagName === 'BUTTON' && (n.className || '').includes('citation-summary-badge'));
+if (summaryBtns.length < 7 || summaryBtns.some(b => !b.disabled)) {
+  console.error('FAIL: P0.1 Historical summary badges in Evidence Panel must be disabled (non-clickable)');
+  process.exit(1);
+}
+console.log('  [PASS] P1.6 & P0.1 DOM check: Step 02 labeled CURATED ENGINEERING READINESS SUMMARIES & all historical summary badges are disabled');
 console.log('ALL_EVIDENCE_PANEL_TESTS_PASS');
-"""
+'''
 
 res = subprocess.run(["node", "-e", node_test, EVIDENCE_JS, ADAPTER_JS], capture_output=True, text=True, encoding="utf-8")
 print(res.stdout.strip())

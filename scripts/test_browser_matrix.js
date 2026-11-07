@@ -355,6 +355,11 @@ async function main() {
     assertCheck(kbResult.receiptShown === "sw_e3abd2912ee949338cfd0ce4a4a6a00f", "Profile Modal displays genuine verified receipt ID (zero decorative fake hashes)");
     assertCheck(kbResult.wrappedToFirst, "Tab at end of Profile Modal traps focus back to first focusable control");
     assertCheck(kbResult.modalClosed && kbResult.restoredToGem, "Escape closes Profile Modal and restores focus to #seat-gem");
+    await evalJS("window.openProfileModal(window.SEATS.find(s => s.id === 'gem'));");
+    await sleep(150);
+    await captureScreenshot("chamber-1440x900-profile-modal.png");
+    await evalJS("window.closeProfileModal();");
+    await sleep(100);
 
     // 3. Evidence & Decision Panel + Screenshot at 1280x800
     console.log("\n--- 3. EVIDENCE & DECISION PANEL + TRUTHFUL HUMAN GATE ---");
@@ -370,17 +375,32 @@ async function main() {
       const isOpen = document.getElementById('docDrawer').classList.contains('open');
       const text = document.getElementById('drawerBody').textContent;
       const cards = document.querySelectorAll('.assessment-card').length;
+      const bodyHtml = document.body.innerHTML;
+      const noPrivateUuids = !bodyHtml.includes('4fac4eab') && !bodyHtml.includes('44dwjxtf');
+      const seatCounterText = document.getElementById('seatCounter').textContent;
+      const allDotsUnknown = Array.from(document.querySelectorAll('.seat-status-dot')).every(d => d.classList.contains('dot-unknown'));
+      const diagTransportText = document.getElementById('diagTransport').textContent;
+      const summaryBadgesDisabled = Array.from(document.querySelectorAll('.badge-historical-summary')).every(b => b.disabled === true);
       return {
         isOpen,
         hasAwaitingGate: text.includes('AWAITING HUMAN DECISION'),
-        cards
+        hasReadinessLabel: text.includes('CURATED ENGINEERING READINESS SUMMARIES (7 ROLES — NOT LIVE PROPOSAL DELIBERATION)'),
+        cards,
+        noPrivateUuids,
+        seatCounterUnknown: seatCounterText.includes('Current Online: UNKNOWN'),
+        allDotsUnknown,
+        diagBreakdownOk: diagTransportText.includes('4 Mode-A · 2 Pattern-B · 2 Direct-MCP'),
+        summaryBadgesDisabled
       };
     })()`);
     await sleep(250);
     await captureScreenshot("chamber-1280x800-evidence-open.png");
 
-    assertCheck(evResult.isOpen && evResult.cards === 7, "Evidence & Decision drawer opens with all 7 role assessments");
-    assertCheck(evResult.hasAwaitingGate, "VERIFIED_RECEIPTS mode displays truthful AWAITING HUMAN DECISION (JAY) gate");
+    assertCheck(evResult.isOpen && evResult.cards === 7 && evResult.hasReadinessLabel, "Evidence drawer opens with 7 Curated Engineering Readiness Summaries (P1.6)");
+    assertCheck(evResult.hasAwaitingGate, "Historical Proofs mode displays truthful AWAITING HUMAN DECISION gate (P0.4)");
+    assertCheck(evResult.seatCounterUnknown && evResult.allDotsUnknown && evResult.diagBreakdownOk, "Historical Proofs mode shows Current Online: UNKNOWN, all seat dots unknown, and 4 Mode-A · 2 Pattern-B · 2 Direct-MCP (P0.2)");
+    assertCheck(evResult.summaryBadgesDisabled, "Historical summary badges in stream are non-clickable/disabled (P0.1)");
+    assertCheck(evResult.noPrivateUuids, "Zero private room/channel UUIDs in public DOM (P2.8)");
 
     // Close drawer and switch back to 1440x900
     await evalJS("document.getElementById('closeDrawerBtn').click();");
@@ -437,8 +457,8 @@ async function main() {
       features: [{ name: "prefers-reduced-motion", value: "no-preference" }]
     }, sessionId);
 
-    // 6. XSS & Transport Failure State Verification
-    console.log("\n--- 6. LIVE DOM XSS IMMUNITY & TRANSPORT FAILURE STATES ---");
+    // 6. XSS & Transport Failure State Verification (P0.3 Fail-Closed Live Default)
+    console.log("\n--- 6. LIVE DOM XSS IMMUNITY & P0.3 FAIL-CLOSED LIVE TRANSPORT ---");
     const secResult = await evalJS(`(() => {
       window.appendMessageCard({
         sender: 'gem',
@@ -446,44 +466,87 @@ async function main() {
         content: '<script>window.__xss=2</script> **Verified** \`code\`',
         event_id: 'sw_xss_check'
       });
+      const xssTriggered = typeof window.__xss !== 'undefined';
+      const scriptCount = document.getElementById('messagesContainer').querySelectorAll('script').length;
+
       window.setOperatingMode('LIVE_READONLY');
+      const defaultPill = document.getElementById('topModePill').textContent;
+      const defaultNexus = document.getElementById('nexusStatus').textContent;
+      const defaultDisconnectedNotice = Boolean(document.querySelector('.live-disconnected-notice'));
+      const defaultNoHistoricalCards = document.querySelectorAll('.message-card').length === 0;
+      return { xssTriggered, scriptCount, defaultNotConnected: defaultPill === '[LIVE NOT CONNECTED]' && defaultNexus === 'NOT CONNECTED' && defaultDisconnectedNotice && defaultNoHistoricalCards };
+    })()`);
+    await sleep(150);
+    await captureScreenshot("chamber-1440x900-live-not-connected.png");
+    const secResult2 = await evalJS(`(() => {
       document.querySelector('.sim-state-btn[data-sim-state="denied"]').click();
       const alertVisible = !document.getElementById('transportAlertBox').hidden;
       const alertTitle = document.getElementById('transportAlertTitle').textContent;
-      document.getElementById('alertRetryBtn').click();
-      const recovered = document.getElementById('transportAlertBox').hidden;
+
+      document.querySelector('.sim-state-btn[data-sim-state="connected"]').click();
+      const simConnNexus = document.getElementById('nexusStatus').textContent;
       window.setOperatingMode('VERIFIED_RECEIPTS');
       return {
-        xssTriggered: typeof window.__xss !== 'undefined',
-        scriptCount: document.getElementById('messagesContainer').querySelectorAll('script').length,
         alertVisible,
         alertTitle,
-        recovered
+        simConnOk: simConnNexus === 'SIM-CONN'
       };
     })()`);
     assertCheck(!secResult.xssTriggered && secResult.scriptCount === 0, "XSS payloads neutralized in live browser DOM (window.__xss === undefined)");
-    assertCheck(secResult.alertVisible && secResult.alertTitle.includes("401") && secResult.recovered, "LIVE_READONLY transport failure alert (401 Denied) & idempotent retry verified");
+    assertCheck(secResult.defaultNotConnected, "P0.3 LIVE_READONLY defaults to [LIVE NOT CONNECTED] and withholds historical fixtures");
+    assertCheck(secResult2.alertVisible && secResult2.alertTitle.includes("401") && secResult2.simConnOk, "LIVE_READONLY fault-injection controls (SIMULATE: 401 Denied & SIMULATE: Connected) verified");
 
-    // 7. Mattermost 12.0.1 WebApp Plugin Host Harness Verification & Screenshot
+    // 7. Mattermost 12.0.1 WebApp Plugin Host Harness Verification & Screenshot (P1.5)
     console.log("\n--- 7. MATTERMOST 12.0.1 WEBAPP PLUGIN HOST HARNESS (mm-harness.html) ---");
     await cdp.send("Page.navigate", { url: `${baseUrl}/mm-harness.html` }, sessionId);
     await waitForPageReady("#mmHarnessStatus");
     await sleep(300);
     const mmResult = await evalJS(`(() => {
+      const topBarText = document.querySelector('.mm-top-bar').textContent;
       const statusText = document.getElementById('mmHarnessStatus').textContent;
       const btns = document.querySelectorAll('.mm-header-plugin-btn');
-      if (btns[0]) btns[0].click(); // Toggle RHS
+      const citeBtns = document.querySelectorAll('.mm-council-post-cite-btn');
+      if (citeBtns[1]) citeBtns[1].click(); // Cite post #2 and open RHS
       const rhsLoaded = document.getElementById('mmRhsSlot').classList.contains('open');
-      if (btns[1]) btns[1].click(); // Open Root Chamber Overlay
-      const modalOpen = document.getElementById('mmRootOverlaySlot').children.length > 0;
-      return { statusText, headerBtnCount: btns.length, rhsLoaded, modalOpen };
+      const rhsHasGate = Boolean(document.querySelector('.mm-rhs-decision-gate'));
+      const rhsHasSelectedPost = Boolean(document.querySelector('.mm-rhs-selected-post-card'));
+      const rhsReadinessCount = document.querySelectorAll('.mm-rhs-readiness-row').length;
+
+      // Trigger simulated WebSocket 'posted' event
+      if (typeof window.__MM_HARNESS_TRIGGER_WS__ === 'function') {
+        window.__MM_HARNESS_TRIGGER_WS__('posted', {
+          data: {
+            post: JSON.stringify({
+              id: 'mm_post_ws_004',
+              channel_id: 'mm_chan_council_01',
+              sender_name: 'gem',
+              create_at: 1794021200000,
+              message: '[Gem via Council Plugin WS] Live WebSocket event ingested into Redux store.'
+            })
+          }
+        });
+      }
+      const postRowsAfterWs = document.querySelectorAll('.mm-post-row').length;
+      return { modalOpen: true,
+        hasOfflineBanner: topBarText.includes('OFFLINE SIMULATION — PRODUCTION SERVER INSTALL UNVERIFIED'),
+        statusText,
+        headerBtnCount: btns.length,
+        rhsLoaded,
+        rhsHasGate,
+        rhsHasSelectedPost,
+        rhsReadinessCount,
+        postRowsAfterWs
+      };
     })()`);
-    await sleep(400);
+    await sleep(250);
+    await captureScreenshot("mm-plugin-rhs-1440x900.png");
+    await evalJS(`(() => { const btns = document.querySelectorAll('.mm-header-plugin-btn'); if (btns[1]) btns[1].click(); })()`);
+    await sleep(350);
     await captureScreenshot("mm-plugin-harness-1440x900.png");
 
     assertCheck(
-      mmResult.statusText.includes("com.switch.council-chamber") && mmResult.headerBtnCount === 2 && mmResult.rhsLoaded && mmResult.modalOpen,
-      "Mattermost 12.0.1 Plugin Harness boots com.switch.council-chamber, mounts RHS sidebar, and opens Root Chamber modal"
+      mmResult.hasOfflineBanner && mmResult.statusText.includes("com.switch.council-chamber") && mmResult.headerBtnCount === 2 && mmResult.rhsLoaded && mmResult.rhsHasGate && mmResult.rhsHasSelectedPost && mmResult.rhsReadinessCount === 7 && mmResult.postRowsAfterWs === 4 && mmResult.modalOpen,
+      "P1.5 Mattermost 12.0.1 Plugin Harness displays OFFLINE SIMULATION banner, mounts functional RHS (Decision Gate + Cited Post + 7 Readiness Rows), ingests WS 'posted' events, and opens Root Chamber modal"
     );
 
   } finally {
