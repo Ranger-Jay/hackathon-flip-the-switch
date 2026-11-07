@@ -971,22 +971,24 @@ async function probeLiveProxyEndpoint() {
 }
 
 function getVerifiedTurnsList() {
-  const rawEvents = (window.CouncilEventAdapterModule && window.CouncilEventAdapterModule.VERIFIED_RECEIPT_EVENTS)
-    ? window.CouncilEventAdapterModule.VERIFIED_RECEIPT_EVENTS
-    : (eventAdapter ? eventAdapter.getEvents() : []);
-  if (!rawEvents || rawEvents.length === 0) return WORKFLOW_SCRIPT;
+  // Live mode draws ONLY authenticated live history. Never silently substitute
+  // archived receipts or scripted demo turns when the live proxy is missing.
+  const rawEvents = currentMode === "LIVE_READONLY"
+    ? (eventAdapter ? eventAdapter.getEvents() : [])
+    : ((window.CouncilEventAdapterModule && window.CouncilEventAdapterModule.VERIFIED_RECEIPT_EVENTS) || []);
+  if (!rawEvents || rawEvents.length === 0) return [];
   return rawEvents.map((ev) => {
-    const senderId = ev.sender_id || ev.seat_id || ev.sender || "gem";
-    const seat = SEATS.find(s => s.id === senderId) || SEATS[0];
+    const senderId = ev.sender_id || ev.seat_id || ev.sender || "unknown";
+    const seat = SEATS.find(s => s.id === senderId);
     return {
-      sender: senderId,
-      prefix: ev.prefix || `${seat.originalName} (${seat.runtimeName}):`,
+      sender: seat ? senderId : "unknown",
+      prefix: seat ? (ev.prefix || `${seat.originalName} (${seat.runtimeName}):`) : "Unknown Council Sender:",
       content: ev.content,
       event_id: ev.event_id,
       timestamp: ev.timestamp,
-      execution_mode: ev.execution_mode || seat.executionMode,
+      execution_mode: seat ? (ev.execution_mode || seat.executionMode) : "unverified",
       source_verified_link: Boolean(ev.source_verified_link),
-      provenance: ev.provenance || "CURATED_HISTORICAL_SUMMARY"
+      provenance: ev.provenance || "UNVERIFIED_CLIENT_EVENT"
     };
   });
 }
@@ -1082,6 +1084,14 @@ function stepWorkflow(direction = 1) {
     ? getVerifiedTurnsList()
     : WORKFLOW_SCRIPT;
 
+  if (!sourceList.length) {
+    // No verified live event means no step to play; don't fabricate one.
+    stepCursor = 0;
+    if (messagesContainer) messagesContainer.innerHTML = "";
+    updateDirectorStatus(0, 0);
+    return;
+  }
+
   if (stepCursor >= sourceList.length && direction > 0) {
     stepCursor = 1;
   } else {
@@ -1104,15 +1114,15 @@ function stepWorkflow(direction = 1) {
 function appendMessageCard(turn) {
   const seat = SEATS.find(s => s.id === turn.sender) || {
     id: "unknown",
-    originalName: "Agent",
-    runtimeName: "Agent-Switch",
-    role: "Council",
-    emoji: "⚡",
-    avatar: "avatars/buddy.svg",
-    photo: "avatars/buddy.png",
-    status: "online",
+    originalName: "Unknown Sender",
+    runtimeName: "Unverified",
+    role: "Council sender identity not verified",
+    emoji: "❔",
+    avatar: "avatars/unknown.svg",
+    photo: null,
+    status: "unknown",
     honestStatus: "unknown",
-    executionMode: "automated",
+    executionMode: "unverified",
     lastReceiptId: "unverified"
   };
 
@@ -1313,7 +1323,10 @@ function filterMessagesBySender(senderId) {
 // 5. Boons Operator Presentation Mode & Spotlight Controls
 function updateSpotlightFromTurn(turn) {
   if (!speakerSpotlightCard || !turn) return;
-  const seat = SEATS.find(s => s.id === (turn.seat_id || turn.sender)) || SEATS[0];
+  const seat = SEATS.find(s => s.id === (turn.seat_id || turn.sender)) || {
+    originalName: "Unknown Sender", role: "Unverified Council sender",
+    emoji: "❔", avatar: "avatars/unknown.svg", photo: null, lastReceiptId: "unverified"
+  };
   if (spotlightAvatar) {
     spotlightAvatar.src = seat.photo || seat.avatar;
     spotlightAvatar.onerror = () => { spotlightAvatar.src = seat.avatar; };
