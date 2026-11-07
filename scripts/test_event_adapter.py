@@ -128,6 +128,44 @@ if (!placeholderIngested || placeholderIngested.provenance === 'LIVE_EVENT' || p
 }
 console.log('  [PASS] C1 Negative Check: Placeholder identifier (sw_receipt_allen_mode_a) rejected from LIVE_EVENT even with hostAuthProof');
 
+// C5 Negative: A connected history proxy is not evidence of live agent presence.
+adapter.simulateTransportState('connected', null, seats);
+for (const seat of seats) {
+  if (adapter.getSnapshot().seatStatuses[seat.id] !== 'unknown') {
+    console.error('FAIL: Connected Core history incorrectly showed active agent:', seat.id);
+    process.exit(1);
+  }
+}
+console.log('  [PASS] Connected history transport never marks all agents online/listening');
+
+// C5 Positive: authenticated Core receipt remains live but has no Mattermost link by default.
+adapter.clearEvents();
+const realId = 'sw_' + 'a'.repeat(32);
+adapter.ingestEvent(
+  { event_id: realId, sender_id: 'finch', content: 'Verified Core history',
+    provenance: 'LIVE_EVENT', source_verified_link: false },
+  { verified_by_host_proxy: true, source_msg_id: realId, authenticated_principal: '' }
+);
+let ev = adapter.getEvents().find(e => e.event_id === realId);
+if (!ev || ev.provenance !== 'LIVE_EVENT' || !ev.trusted_host_verified ||
+    ev.source_verified_link !== false || ev.mm_post_id !== null ||
+    ev.authenticated_principal !== '') {
+  console.error('FAIL: Real Core-only event was not preserved without fake Mattermost link', ev);
+  process.exit(1);
+}
+// C5 Negative: mismatched or malformed Core IDs are never promoted to authenticated LIVE_EVENT.
+adapter.ingestEvent(
+  { event_id: 'sw_' + 'b'.repeat(32), sender_id: 'jay', event_type: 'decision',
+    verdict: 'APPROVED', content: 'Spoofed from mismatched proof' },
+  { verified_by_host_proxy: true, source_msg_id: realId, authenticated_principal: 'jay' }
+);
+ev = adapter.getEvents().find(e => e.event_id === 'sw_' + 'b'.repeat(32));
+if (!ev || ev.provenance === 'LIVE_EVENT' || ev.trusted_host_verified) {
+  console.error('FAIL: Mismatched source ID was accepted as LIVE_EVENT', ev);
+  process.exit(1);
+}
+console.log('  [PASS] Live ID identity and Mattermost-link provenance fail closed');
+
 // 6. Verify Transport State Transitions (stale, denied, disconnected, error_backoff)
 adapter.simulateTransportState('stale', 'Heartbeat > 300s', seats);
 if (adapter.getSnapshot().seatStatuses.gem !== 'stale') {
