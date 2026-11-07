@@ -496,6 +496,30 @@ async function main() {
     assertCheck(secResult.defaultNotConnected, "P0.3 LIVE_READONLY defaults to [LIVE NOT CONNECTED] and withholds historical fixtures");
     assertCheck(secResult2.alertVisible && secResult2.alertTitle.includes("401") && secResult2.simConnOk, "LIVE_READONLY fault-injection controls (SIMULATE: 401 Denied & SIMULATE: Connected) verified");
 
+    // Public production hotfix regression: the MM host is an offline
+    // test harness and must open in another tab without destroying Council.
+    const mmLinkBefore = await evalJS(`(() => {
+      const link = document.getElementById('mmHarnessLink');
+      return {
+        exists: !!link,
+        path: link ? new URL(link.href).pathname : null,
+        newTab: link?.target === '_blank',
+        noOpener: !!link?.relList.contains('noopener'),
+        noReferrer: !!link?.relList.contains('noreferrer'),
+        offlineLabel: !!link?.getAttribute('aria-label')?.includes('offline')
+      };
+    })()`);
+    assertCheck(
+      mmLinkBefore.exists && mmLinkBefore.path.endsWith('/mm-harness.html') &&
+      mmLinkBefore.newTab && mmLinkBefore.noOpener &&
+      mmLinkBefore.noReferrer && mmLinkBefore.offlineLabel,
+      "MM Host identifies OFFLINE test harness and opens secure new tab"
+    );
+    await evalJS("document.getElementById('mmHarnessLink').click(); true;");
+    await sleep(250);
+    const chamberStillOpen = await evalJS("Boolean(document.getElementById('mmHarnessLink') && document.title.includes('Council Chamber'))");
+    assertCheck(chamberStillOpen, "Clicking MM Host leaves Council Chamber mounted");
+
     // 7. Mattermost 12.0.1 WebApp Plugin Host Harness Verification & Screenshot (P1.5)
     console.log("\n--- 7. MATTERMOST 12.0.1 WEBAPP PLUGIN HOST HARNESS (mm-harness.html) ---");
     await cdp.send("Page.navigate", { url: `${baseUrl}/mm-harness.html` }, sessionId);
@@ -504,6 +528,10 @@ async function main() {
     const mmResult = await evalJS(`(() => {
       const topBarText = document.querySelector('.mm-top-bar').textContent;
       const statusText = document.getElementById('mmHarnessStatus').textContent;
+      const backLink = document.getElementById('mmReturnToChamberLink');
+      const hasReturn = !!backLink &&
+        new URL(backLink.href).pathname.endsWith('/index.html') &&
+        backLink.textContent.includes('Return to Council Chamber');
       const btns = document.querySelectorAll('.mm-header-plugin-btn');
       const citeBtns = document.querySelectorAll('.mm-council-post-cite-btn');
       if (citeBtns[1]) citeBtns[1].click(); // Cite post #2 and open RHS
@@ -530,6 +558,7 @@ async function main() {
       return { modalOpen: true,
         hasOfflineBanner: topBarText.includes('OFFLINE SIMULATION — PRODUCTION SERVER INSTALL UNVERIFIED'),
         statusText,
+        hasReturn,
         headerBtnCount: btns.length,
         rhsLoaded,
         rhsHasGate,
@@ -558,7 +587,7 @@ async function main() {
     );
 
     assertCheck(
-      mmResult.hasOfflineBanner && mmResult.statusText.includes("com.switch.council-chamber") && mmResult.headerBtnCount === 2 && mmResult.rhsLoaded && mmResult.rhsHasGate && mmResult.rhsHasSelectedPost && mmResult.rhsReadinessCount === 7 && mmResult.postRowsAfterWs === 4 && mmResult.modalOpen,
+      mmResult.hasReturn && mmResult.hasOfflineBanner && mmResult.statusText.includes("com.switch.council-chamber") && mmResult.headerBtnCount === 2 && mmResult.rhsLoaded && mmResult.rhsHasGate && mmResult.rhsHasSelectedPost && mmResult.rhsReadinessCount === 7 && mmResult.postRowsAfterWs === 4 && mmResult.modalOpen,
       "P1.5 Mattermost 12.0.1 Plugin Harness displays OFFLINE SIMULATION banner, mounts functional RHS (Decision Gate + Cited Post + 7 Readiness Rows), ingests WS 'posted' events, and opens Root Chamber modal"
     );
 
