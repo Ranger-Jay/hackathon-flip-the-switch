@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - work/buddy-gem-live-bridge-safety
+      - work/buddy-gem-integrated-preview-20261107
   pull_request:
     branches:
       - work/gem-council-chamber
