@@ -12,7 +12,7 @@ Built by **Jay** with AI-assisted engineering, design and testing.
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v005.02** · **Submission candidate, November 7, 2026.** The public Council Chamber interface is deployed; the real Council meeting was conducted; native Mattermost plugin installation, unattended wake-up of this ChatGPT session and an authenticated live feed into the public website are separate, unfinished acceptance gates.
+**Current repository version: v005.03** · **Submission candidate, November 7, 2026.** The public Council Chamber interface is deployed; the real Council meeting was conducted; native Mattermost plugin installation, unattended wake-up of this ChatGPT session and an authenticated live feed into the public website are separate, unfinished acceptance gates.
 
 ## Explore the demo
 

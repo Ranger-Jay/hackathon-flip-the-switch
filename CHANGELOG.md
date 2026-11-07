@@ -1,5 +1,11 @@
 # Changelog
 
+## v005.03 — Mobile chamber visibility and overflow hardening — 2026-11-07
+
+- Corrected the responsive single-column grid to use `minmax(0, 1fr)`, removed the minimum-content width floor, allowed message metadata to wrap and kept chamber/status/legend text within narrow viewports.
+- Extended real Chrome viewport tests to check actual visible panel, status, legend and seat bounds. Prior checks only checked document scroll width and incorrectly passed when a 484px child was clipped inside a 390px hidden-overflow page.
+- Styling and regression assertions only; no change to role identities, model execution, backend routing or approved desktop visual design.
+
 ## v005.02 — Correct localhost routing detection — 2026-11-07
 
 - Corrected over-escaped local-host detection in the MM harness route selection so local `127.0.0.1` and `localhost` continue to resolve `mm-harness.html`; the public hosted root still switches to clean URL `/mm-harness`.

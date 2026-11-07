@@ -290,6 +290,15 @@ async function main() {
         return {
           scrollWidth: docEl.scrollWidth,
           clientWidth: docEl.clientWidth,
+          viewportWidth: window.innerWidth,
+          chamberVisible: chamber.left >= -1 && chamber.right <= window.innerWidth + 1,
+          feedVisible: document.querySelector('.feed-panel').getBoundingClientRect().right <= window.innerWidth + 1,
+          legendVisible: document.querySelector('.status-legend-bar').getBoundingClientRect().right <= window.innerWidth + 1,
+          seatCounterVisible: document.getElementById('seatCounter').getBoundingClientRect().right <= window.innerWidth + 1,
+          viewportSeatClips: seats.filter(s => {
+            const r = s.getBoundingClientRect();
+            return r.left < -1 || r.right > window.innerWidth + 1;
+          }).map(s => s.id),
           seatCount: seats.length,
           outOfBounds,
           loadedImages
@@ -299,6 +308,11 @@ async function main() {
       assertCheck(
         metrics.scrollWidth <= metrics.clientWidth,
         `${vp.label}: Zero horizontal overflow (scrollWidth=${metrics.scrollWidth} <= clientWidth=${metrics.clientWidth})`
+      );
+      assertCheck(
+        metrics.chamberVisible && metrics.feedVisible && metrics.legendVisible &&
+          metrics.seatCounterVisible && metrics.viewportSeatClips.length === 0,
+        `${vp.label}: Actual visible chamber/feed/legend/status/seat bounds fit ${metrics.viewportWidth}px (not merely hidden document overflow)`
       );
       assertCheck(
         metrics.seatCount === 9 && metrics.outOfBounds.length === 0,

@@ -1936,3 +1936,53 @@ body {
     gap: 4px;
   }
 }
+
+/* v005.03: mobile grid/min-content containment.
+   A nowrap message-meta row previously forced a 484px grid track inside 390px. */
+@media (max-width: 960px) {
+  .main-layout {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    min-width: 0;
+  }
+  .chamber-panel,
+  .feed-panel,
+  .chamber-header,
+  .viewport-stage,
+  .messages-container,
+  .message-card,
+  .msg-body-col,
+  .msg-meta {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .msg-meta {
+    flex-wrap: wrap;
+  }
+  .msg-meta > * {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 600px) {
+  .chamber-title-group,
+  .chamber-sub,
+  .participant-count {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  .participant-count {
+    width: 100%;
+    flex-basis: 100%;
+  }
+  .status-legend-bar {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 6px;
+  }
+}
