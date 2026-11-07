@@ -1,5 +1,9 @@
 # Changelog
 
+## v004.11
+
+- Opt-in `COUNCIL_AUTH_DIAG=true` logs one secret-free line per auth rejection: timestamp, bearer present, and a category. Acceptance rules are unchanged. Off by default. This is the branch tip, on top of the server runbook. Tag v004.10 is the same patch parented on v004.09 and is not this tip.
+
 ## v004.09
 
 - Add the home-env check to the MCP suite. v004.08 introduced the helper and documented 43 tests; this commit is the test that count refers to. The helper still does not start the gateway.

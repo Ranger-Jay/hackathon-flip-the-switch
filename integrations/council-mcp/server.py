@@ -1,6 +1,8 @@
 """Council MCP: standard SDK stdio / OAuth-protected Streamable HTTP."""
 from contextlib import asynccontextmanager
+from contextvars import ContextVar
 import logging
+import time
 from typing import Annotated
 
 import anyio
@@ -20,6 +22,60 @@ from urllib.parse import urlsplit
 from config import CouncilError, Settings, require
 from core import Council
 from issuer.token_requirements import READ, WRITE, council_scopes
+
+_AUTH_LOG = logging.getLogger("council.auth")
+_AUTH_SEEN: ContextVar[str | None] = ContextVar("council_auth_seen", default=None)
+_AUTH_CATEGORIES = frozenset({
+    "missing_bearer", "signature", "expiry", "issuer", "audience",
+    "client", "scope", "subject", "jwks_fetch", "unknown",
+})
+
+
+def _log_auth_reject(category, bearer_present, remember=True):
+    """One fixed line. Never include the token, headers, claims, or exception text."""
+    if category not in _AUTH_CATEGORIES:
+        category = "unknown"
+    if remember:
+        _AUTH_SEEN.set(category)
+    _AUTH_LOG.warning(
+        "council_auth_reject ts=%s bearer_present=%s category=%s",
+        time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "true" if bearer_present else "false",
+        category,
+    )
+
+
+class _AuthRejectLog:
+    """When diagnostics are on, name a 401 the verifier did not already classify."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type") != "http":
+            await self.app(scope, receive, send)
+            return
+        bearer = False
+        for key, value in scope.get("headers") or ():
+            if key == b"authorization":
+                bearer = value[:7].lower() == b"bearer " and len(value.strip()) > 7
+                break
+        reset = _AUTH_SEEN.set(None)
+        status = None
+
+        async def send_wrapper(message):
+            nonlocal status
+            if message["type"] == "http.response.start":
+                status = message.get("status")
+            await send(message)
+
+        try:
+            await self.app(scope, receive, send_wrapper)
+        finally:
+            seen = _AUTH_SEEN.get()
+            _AUTH_SEEN.reset(reset)
+        if status == 401 and seen is None:
+            _log_auth_reject("missing_bearer" if not bearer else "unknown", bearer, remember=False)
 
 
 class StrictFastMCP(FastMCP):
@@ -48,6 +104,8 @@ class StrictFastMCP(FastMCP):
                 if self.http_shutdown:
                     await self.http_shutdown()
         app.router.lifespan_context = lifespan
+        if getattr(self, "_auth_diag", False):
+            return _AuthRejectLog(app)
         return app
 
     async def list_tools(self):
@@ -80,17 +138,57 @@ class OAuthVerifier(TokenVerifier):
                           audience=self.s.resource, issuer=self.s.issuer_url,
                           options={"require": ["exp", "iat", "iss", "aud", "sub"]})
 
+    def _reject(self, category):
+        if self.s.auth_diag:
+            _log_auth_reject(category, True)
+
+    @staticmethod
+    def _jwt_category(error):
+        if isinstance(error, jwt.PyJWKClientError):
+            return "jwks_fetch"
+        if isinstance(error, jwt.ExpiredSignatureError):
+            return "expiry"
+        if isinstance(error, jwt.InvalidIssuerError):
+            return "issuer"
+        if isinstance(error, jwt.InvalidAudienceError):
+            return "audience"
+        if isinstance(error, (jwt.InvalidSignatureError, jwt.InvalidAlgorithmError)):
+            return "signature"
+        if isinstance(error, jwt.MissingRequiredClaimError):
+            return {"exp": "expiry", "iss": "issuer", "aud": "audience", "sub": "subject"}.get(
+                getattr(error, "claim", None), "unknown")
+        return "unknown"
+
+    @staticmethod
+    def _claims_category(claims, resource, client_id):
+        if not isinstance(claims, dict) or claims.get("aud") != resource:
+            return "audience"
+        azp = claims.get("azp")
+        other = claims.get("client_id")
+        if azp is not None and other is not None and azp != other:
+            return "client"
+        client = azp if isinstance(azp, str) else other
+        if not isinstance(client, str) or client != client_id:
+            return "client"
+        raw = claims.get("scope")
+        if not isinstance(raw, str) or READ not in raw.split():
+            return "scope"
+        return "unknown"
+
     async def verify_token(self, token):
         try:
             c = await anyio.to_thread.run_sync(self.decode, token)
             if c["sub"] not in self.s.subjects:
+                self._reject("subject")
                 return None
             scopes = council_scopes(c, self.s.resource, self.s.oauth_client_id)
             if scopes is None:
+                self._reject(self._claims_category(c, self.s.resource, self.s.oauth_client_id))
                 return None
             return AccessToken(token=token, client_id=self.s.oauth_client_id, subject=c["sub"],
                                scopes=scopes, expires_at=c["exp"], resource=self.s.resource)
-        except (jwt.PyJWTError, ValueError, TypeError, KeyError):
+        except (jwt.PyJWTError, ValueError, TypeError, KeyError) as error:
+            self._reject(self._jwt_category(error))
             return None
 
 
@@ -133,6 +231,7 @@ def create_server(settings, council=None, verifier=None):
     )
     if owns_client and remote:
         mcp.http_shutdown = council.client.aclose
+    mcp._auth_diag = settings.auth_diag
 
     def caller(write=False):
         if not remote:
