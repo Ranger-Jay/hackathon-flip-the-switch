@@ -78,6 +78,44 @@ assertion in a report is not equivalent to an executed test.
    explicitly stated APPROVED/DECLINED/DEFERRED decision. The Nov 7 meeting
    paused before a complete human decision; do not manufacture its completion.
 
+## Nov 7 hardening addendum — Browser truth contract
+
+Additional browser-level safety changes on this review branch:
+- `ui/event-adapter.js`: a Core receipt is authenticated live only when
+  `event_id` is the exact `sw_` + 32 hexadecimal ID from the trusted host
+  response and the host source ID matches it. A real 26-character Mattermost
+  post ID is required separately before the UI may claim an MM source link.
+- A working `LIVE_READONLY` history proxy does **not** set all nine agents to
+  `listening` or `online`. Only separately verified, current heartbeat data
+  can support such a presence assertion.
+- `ui/app.js`: accepts only validated event lists returned by the
+  authenticated read-only host proxy; it does not infer `authenticated_principal`
+  from a sender display label. The current browser integration cannot itself
+  unlock Jay's decision gate. That requires a separately authenticated server
+  decision record.
+- The live stream/Boons operator stepping **never falls back** to curated
+  historical events or scripted demo turns when history is empty.
+- An unknown or unverified sender uses a neutral icon and explicit unknown
+  label, never Jay or Buddy's portrait.
+- The static Vercel host contains no live privileged backend. Switching to
+  LIVE on Vercel must display **LIVE NOT CONNECTED**, not fabricate transport.
+- A review-only workflow `.github/workflows/gem-council-integration.yml`
+  is installed on the feature branch, requiring GitHub Actions execution
+  evidence before the overall eight-suite UI gate can be declared PASS.
+
+### Independently executed source-level smoke checks
+
+Buddy Main executed the embedded JavaScript portions of Gem's
+`test_event_adapter.py` and `test_evidence_panel.py` against the exact
+fetched branch module source in an isolated JavaScript runtime: 10/10 adapter
+and 10/10 evidence-panel assertions PASSED. In addition, 4/4 standalone live
+stream selector/fallback assertions passed, and a simulated Mattermost
+PluginRegistry mounted the active nine-seat React root component.
+
+These checks are **not** equivalent to `python scripts/run_all_ui_checks.py`,
+real Chromium multi-viewport tests, a deployed Mattermost plugin installation,
+or a Vercel authenticated-browser rendering test. Those gates remain pending.
+
 ## Stop / rollback
 - If plugin install cannot be authorized, keep the UI in **local harness /
   offline specimen mode**; report the exact access or backend-auth blocker.
