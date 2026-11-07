@@ -7,6 +7,7 @@ Produces:
 3. Copies webapp bundle to ui/plugin-bundle.js (or council-room-ui/plugin-bundle.js) for local browser harness.
 """
 
+import gzip
 import hashlib
 import io
 import json
@@ -55,19 +56,35 @@ def build():
         if os.path.isdir(ui_dir):
             shutil.copy2(bundle_out, os.path.join(ui_dir, "plugin-bundle.js"))
 
-    # Package standard Mattermost plugin .tar.gz archive
+    # Deterministic, self-contained Mattermost .tar.gz (no filesystem/clock metadata).
+    # Mattermost expects the plugin ID as the single archive root.
     tar_filename = f"{plugin_id}-{version}.tar.gz"
     tar_path = os.path.join(DIST_PKG_DIR, tar_filename)
+    entries = (
+        (MANIFEST_PATH, f"{plugin_id}/plugin.json"),
+        (bundle_out, f"{plugin_id}/webapp/dist/main.js"),
+    )
 
-    with tarfile.open(tar_path, "w:gz") as tar:
-        tar.add(MANIFEST_PATH, arcname=f"{plugin_id}/plugin.json")
-        tar.add(bundle_out, arcname=f"{plugin_id}/webapp/dist/main.js")
+    with open(tar_path, "wb") as archive:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=archive,
+                           compresslevel=9, mtime=0) as compressed:
+            with tarfile.open(fileobj=compressed, mode="w", format=tarfile.USTAR_FORMAT) as tar:
+                for source_path, member_name in entries:
+                    payload = open(source_path, "rb").read()
+                    member = tarfile.TarInfo(name=member_name)
+                    member.size = len(payload)
+                    member.mtime = 0
+                    member.mode = 0o644
+                    member.uid = member.gid = 0
+                    member.uname = member.gname = ""
+                    tar.addfile(member, io.BytesIO(payload))
 
-    sha256_tar = hashlib.sha256(open(tar_path, "rb").read()).hexdigest()
+    with open(tar_path, "rb") as archive:
+        sha256_tar = hashlib.sha256(archive.read()).hexdigest()
 
     print(f"[BUILD PASS] Plugin ID: {plugin_id} v{version}")
     print(f"  WebApp Bundle: {bundle_out} ({len(bundle_content)} bytes, sha256={sha256_bundle[:16]})")
-    print(f"  Plugin Archive: {tar_path} ({os.path.getsize(tar_path)} bytes, sha256={sha256_tar[:16]})")
+    print(f"  Plugin Archive: {tar_path} ({os.path.getsize(tar_path)} bytes, sha256={sha256_tar})")
     return 0
 
 if __name__ == "__main__":
