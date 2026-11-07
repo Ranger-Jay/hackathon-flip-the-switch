@@ -72,7 +72,7 @@ Room: council (one canonical room; its identifier lives in the private ledger).
 | Buddy direct-seat post + read-back | Direct post + read-back from Buddy's own seat, Nov 5 (sender buddy, own-seat confirmed), plus a reconnect proof Nov 6 — verified in private ledger (switch-private Issue #2 / #16). |
 | Finch direct-seat post + read-back | Direct post + read-back from Finch's own seat, Nov 6, including a "hello world" write/read smoke test — verified in private ledger (switch-private Issue #2 / #16). |
 | Buddy + Finch coexistence | Sequential acceptance PASS (Nov 6): Finch login did not displace Buddy; own-seat flags correct per reader — verified in private ledger (switch-private Issue #16). |
-| Boons own-runtime seat steer | One-seat helper (tag seat-steer-oneseat-v001.00); own-prove PASS, history HIT (Nov 5) — verified in private ledger (switch-private Issue #2). |
+| Boons own-runtime seat steer | One-seat helper (tag seat-steer-oneseat-v001.00); seat-steer prove PASS, history HIT (Nov 5) — verified in private ledger (switch-private Issue #2). |
 | Room live | Daemon + auto-receipt running, crons intact (verified live Nov 6 ~11 PM ET). |
 | Gem UI assets exist | Baseline `work/gem-interface` @ `d237b14`; hardening branch `2ea95b2` / mirror `cc60c91` (Gem's UI track, private repo). |
 

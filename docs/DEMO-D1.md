@@ -123,7 +123,7 @@ messages. No sound effects on receipts.
 
 - Buddy write/read + reconnect — verified in private ledger (switch-private Issue #2 / #16), Nov 5–6.
 - Finch write/read + "hello world" smoke test — verified in private ledger (switch-private Issue #2 / #16), Nov 6.
-- Boons own-prove, history HIT — verified in private ledger (switch-private Issue #2), Nov 5.
+- Boons seat-steer prove, history HIT — verified in private ledger (switch-private Issue #2), Nov 5.
 - Boons receipt/wake: human 5-sample, agent 5-sample (Nov 5) — verified in private ledger (switch-private Issue #2).
 - **Still to capture at D2:** proposal event, ≥2 agent analyses, Buddy
   synthesis, Jay decision, decision record — all event IDs TBD, none invented.
