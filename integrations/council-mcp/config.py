@@ -90,6 +90,7 @@ class Settings:
     subjects: tuple[str, ...] = ()
     port: int = 8787
     allow_loopback_http: bool = False
+    auth_diag: bool = False
 
     def validate(self):
         for value in (self.mm_url, self.switch_url):
@@ -174,4 +175,5 @@ class Settings:
             subjects=tuple(json.loads(os.environ.get("COUNCIL_OAUTH_SUBJECTS", "[]"))),
             port=int(os.environ.get("COUNCIL_PORT", "8787")),
             allow_loopback_http=local,
+            auth_diag=os.environ.get("COUNCIL_AUTH_DIAG") == "true",
         ).labeled().validate()

@@ -109,6 +109,67 @@ def test_scope_policy_does_not_invent_write_or_accept_client_audience():
     assert council_scopes({"aud": resource, "azp": client, "scope": "openid"}, resource, client) is None
 
 
+def test_auth_diag_logs_category_without_secrets(remote, rig, caplog):
+    import logging
+    caplog.set_level(logging.WARNING, logger="council.auth")
+    diag = replace(remote, auth_diag=True)
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    jwks = SimpleNamespace(get_signing_key_from_jwt=lambda _token: SimpleNamespace(key=key.public_key()))
+    verifier = OAuthVerifier(diag, jwks)
+    quiet = OAuthVerifier(remote, jwks)
+
+    def token(**claims):
+        payload = dict(iss=diag.issuer_url, aud=diag.resource, sub="jay",
+                       azp=diag.oauth_client_id, iat=int(time.time()), exp=int(time.time()) + 300,
+                       scope=READ + " " + WRITE)
+        payload.update(claims)
+        return jwt.encode(payload, key, algorithm="RS256")
+
+    def category_for(value):
+        caplog.clear()
+        assert asyncio.run(verifier.verify_token(value)) is None
+        lines = [r.getMessage() for r in caplog.records if r.name == "council.auth"]
+        assert len(lines) == 1
+        assert lines[0].startswith("council_auth_reject ts=") and "bearer_present=true" in lines[0]
+        for secret in (value, "other-seat-subject", "council-finch",
+                       "foreign.example", "other.example", "eyJ", "%%%"):
+            assert secret not in lines[0]
+        return lines[0].rsplit("category=", 1)[1]
+
+    other = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    signed = token()
+    caplog.clear()
+    accepted = asyncio.run(verifier.verify_token(signed))
+    assert accepted is not None and accepted.subject == "jay" and not [
+        r for r in caplog.records if r.name == "council.auth"]
+    assert category_for(jwt.encode(jwt.decode(signed, options={"verify_signature": False}), other, algorithm="RS256")) == "signature"
+    assert category_for(token(exp=int(time.time()) - 10)) == "expiry"
+    assert category_for(token(iss="https://other.example")) == "issuer"
+    assert category_for(token(aud="https://foreign.example/mcp")) == "audience"
+    assert category_for(token(azp="council-finch")) == "client"
+    assert category_for(token(scope="openid")) == "scope"
+    assert category_for(token(sub="other-seat-subject")) == "subject"
+    assert category_for("%%%not-a-jwt%%%") == "unknown"
+    leaked = jwt.PyJWKClientError("https://keys.secret.example " + signed)
+    broken = SimpleNamespace(get_signing_key_from_jwt=lambda _token: (_ for _ in ()).throw(leaked))
+    caplog.clear()
+    assert asyncio.run(OAuthVerifier(diag, broken).verify_token(signed)) is None
+    assert caplog.records[-1].getMessage().endswith("category=jwks_fetch")
+    assert "keys.secret" not in caplog.text and signed not in caplog.text
+    caplog.clear()
+    assert asyncio.run(quiet.verify_token("%%%not-a-jwt%%%")) is None
+    assert not [r for r in caplog.records if r.name == "council.auth"]
+    council, _backend = rig
+    server = create_server(diag, council, verifier)
+    with TestClient(server.streamable_http_app(), base_url=diag.public_url) as client:
+        caplog.clear()
+        denied = rpc(client, "tools/list")
+        assert denied.status_code == 401
+        missing = [r.getMessage() for r in caplog.records if r.name == "council.auth"]
+        assert len(missing) == 1 and missing[0].endswith("bearer_present=false category=missing_bearer")
+        assert "authorization" not in missing[0].lower()
+
+
 def test_real_jwt_signature_and_subject_resource_checks(signer):
     verifier, token = signer
     good = asyncio.run(verifier.verify_token(token()))
