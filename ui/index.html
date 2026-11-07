@@ -290,7 +290,7 @@
   <script>
     (function () {
       const link = document.getElementById("mmHarnessLink");
-      const localHost = /^(localhost|127\\.0\\.0\\.1|::1)$/i.test(window.location.hostname);
+      const localHost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
       if (link && !localHost && !window.location.pathname.startsWith("/ui/")) {
         link.setAttribute("href", "/mm-harness");
       }

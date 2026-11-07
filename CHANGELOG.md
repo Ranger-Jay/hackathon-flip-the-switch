@@ -1,5 +1,11 @@
 # Changelog
 
+## v005.02 — Correct localhost routing detection — 2026-11-07
+
+- Corrected over-escaped local-host detection in the MM harness route selection so local `127.0.0.1` and `localhost` continue to resolve `mm-harness.html`; the public hosted root still switches to clean URL `/mm-harness`.
+- GitHub's Chrome matrix flagged the regression in v005.01 before production promotion. The immutable v005.01 tag remains preserved, explicitly recording an unpromoted failing build.
+- Existing click and navigation tests must pass at this new exact commit before deployment. No unrelated app or host behavior changed.
+
 ## v005.01 — Public MM host clean-URL compatibility — 2026-11-07
 
 - Corrected the public Mattermost test-harness button to use Vercel's verified `/mm-harness` route when served from a deployed root, while retaining the local static-server `mm-harness.html` path.
