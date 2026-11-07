@@ -117,6 +117,47 @@ if (mismatchModel.decision.state !== 'AWAITING_HUMAN_DECISION' || mismatchModel.
 }
 console.log('  [PASS] P0.4 Negative Check 4c: Mismatched proposal_correlation_id blocked (PROPOSAL_CORRELATION_MISMATCH)');
 
+// 4d. Placeholder decision event_id (sw_receipt_*) must be rejected even if other fields look valid
+const placeholderDecEv = {
+  event_id: 'sw_receipt_fake_jay_01',
+  sender_id: 'jay',
+  event_type: 'decision',
+  verdict: 'APPROVED',
+  provenance: 'LIVE_EVENT',
+  trusted_host_verified: true,
+  authenticated_principal: 'jay',
+  source_msg_id: 'sw_1234567890abcdef1234',
+  proposal_correlation_id: 'council-workflow-001',
+  content: 'Decision with placeholder event_id'
+};
+const placeholderDecModel = evMod.buildEvidenceModel('LIVE_READONLY', [placeholderDecEv], false);
+if (placeholderDecModel.decision.state !== 'AWAITING_HUMAN_DECISION' || placeholderDecModel.decision.rejection_reason !== 'INVALID_SOURCE_MSG_ID') {
+  console.error('FAIL: C1/C2 violation — Placeholder event_id on decision was not rejected:', placeholderDecModel.decision);
+  process.exit(1);
+}
+console.log('  [PASS] C1/C2 Negative Check 4d: Placeholder event_id on decision rejected (INVALID_SOURCE_MSG_ID)');
+
+// 4e. Verify 6-Category separation & WORKFLOW_COMPLETENESS_STATUS in buildEvidenceModel
+const requiredCats = [
+  'HISTORICAL_READINESS_SUMMARY',
+  'LIVE_COUNCIL_ASSESSMENT',
+  'DEMO_SPECIMEN_ASSESSMENT',
+  'ORCHESTRATOR_RECONCILIATION',
+  'HUMAN_DECISION_RECORD',
+  'WORKFLOW_COMPLETENESS_STATUS'
+];
+for (const cKey of requiredCats) {
+  if (!verifiedModel.evidence_categories || verifiedModel.evidence_categories[cKey] !== cKey) {
+    console.error('FAIL: Missing required evidence category:', cKey);
+    process.exit(1);
+  }
+}
+if (!verifiedModel.workflow_completeness || verifiedModel.workflow_completeness.state !== 'INCOMPLETE_WORKFLOW_AWAITING_LIVE_DELIBERATION_AND_DECISION') {
+  console.error('FAIL: Workflow completeness state did not report INCOMPLETE_WORKFLOW_AWAITING_LIVE_DELIBERATION_AND_DECISION:', verifiedModel.workflow_completeness);
+  process.exit(1);
+}
+console.log('  [PASS] C2 6-Category Separation & WORKFLOW_COMPLETENESS_STATUS verified');
+
 // 5. Positive Test: Host-proxy authenticated jay decision with valid source_msg_id, correlation_id, and explicit verdict unlocks gate
 adapter.clearEvents();
 adapter.ingestEvent(

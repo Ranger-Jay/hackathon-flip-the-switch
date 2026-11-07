@@ -340,6 +340,20 @@
     DEFERRED: "DEFERRED"
   };
 
+  var EVIDENCE_CATEGORIES = {
+    HISTORICAL_READINESS_SUMMARY: "HISTORICAL_READINESS_SUMMARY",
+    LIVE_COUNCIL_ASSESSMENT: "LIVE_COUNCIL_ASSESSMENT",
+    DEMO_SPECIMEN_ASSESSMENT: "DEMO_SPECIMEN_ASSESSMENT",
+    ORCHESTRATOR_RECONCILIATION: "ORCHESTRATOR_RECONCILIATION",
+    HUMAN_DECISION_RECORD: "HUMAN_DECISION_RECORD",
+    WORKFLOW_COMPLETENESS_STATUS: "WORKFLOW_COMPLETENESS_STATUS"
+  };
+
+  function isPlaceholderIdentifier(idStr) {
+    if (!idStr || typeof idStr !== "string") return true;
+    return /^(sw_receipt_|mm_post_|hist_summary_|demo_|specimen_|fake_|spoof_)/i.test(idStr.trim());
+  }
+
   function isValidLiveDecisionEvent(ev, expectedProposalId, expectedMissionId) {
     if (!ev || typeof ev !== "object") {
       return { valid: false, reason: "EMPTY_EVENT" };
@@ -347,24 +361,20 @@
     if (ev.sender_id !== "jay" || ev.event_type !== "decision") {
       return { valid: false, reason: "NOT_JAY_DECISION_EVENT" };
     }
-    // 1. Must be verified by trusted host proxy, never unauthenticated client ingestEvent
     if (ev.trusted_host_verified !== true || ev.provenance !== "LIVE_EVENT") {
       return { valid: false, reason: "UNAUTHENTICATED_CLIENT_OR_NON_LIVE_PROVENANCE" };
     }
     if (ev.authenticated_principal !== "jay") {
       return { valid: false, reason: "PRINCIPAL_MISMATCH" };
     }
-    // 2. Must carry a real Mattermost 26-char post ID or sw_<hex> event ID
-    var msgId = ev.source_msg_id || ev.mm_post_id || "";
-    if (!/^([a-z0-9]{26}|sw_[0-9a-fA-F]{16,64})$/.test(String(msgId))) {
+    var msgId = String(ev.source_msg_id || ev.mm_post_id || "");
+    if (isPlaceholderIdentifier(ev.event_id) || isPlaceholderIdentifier(msgId) || !/^([a-z0-9]{26}|sw_[0-9a-fA-F]{16,64})$/.test(msgId)) {
       return { valid: false, reason: "INVALID_SOURCE_MSG_ID" };
     }
-    // 3. Must match active proposal correlation ID
     var corr = ev.proposal_correlation_id || ev.correlation_id || "";
     if (corr !== expectedProposalId && corr !== expectedMissionId) {
       return { valid: false, reason: "PROPOSAL_CORRELATION_MISMATCH" };
     }
-    // 4. Fail-closed verdict check: must be explicit uppercase APPROVED, DECLINED, or DEFERRED
     if (typeof ev.verdict !== "string" || !ALLOWED_HUMAN_VERDICTS[ev.verdict]) {
       return { valid: false, reason: "INVALID_OR_MISSING_VERDICT" };
     }
@@ -384,6 +394,7 @@
           source_verified_link: false,
           question: "Funding Intelligence Agent Bridge architecture v1: establish ONE shared room on Switch connecting human lead and specialized agents, synchronize proposal turn-taking, cite turns directly, and generate immutable room decision documents.",
           status_badge: "DEMO SPECIMEN PROPOSAL",
+          evidence_category: EVIDENCE_CATEGORIES.DEMO_SPECIMEN_ASSESSMENT,
           provenance: "DEMO_FIXTURE"
         }
       : {
@@ -394,16 +405,35 @@
           source_verified_link: false,
           question: "Should a Council decision be marked ready for human approval only when it includes source-linked evidence, unresolved risks, a named follow-up owner and a concrete next action?",
           status_badge: "CANONICAL WORKFLOW QUESTION (ISSUE #10)",
+          evidence_category: EVIDENCE_CATEGORIES.HISTORICAL_READINESS_SUMMARY,
           provenance: "CURATED_HISTORICAL_SUMMARY"
         };
 
     var validDecisionEvent = null;
     var validVerdict = null;
     var rejectedDecisionReason = null;
+    var liveAssessmentEvents = [];
+    var liveReconciliationEvent = null;
 
     if (!isDemo) {
-      for (var i = events.length - 1; i >= 0; i--) {
-        var ev = events[i];
+      for (var i = 0; i < events.length; i++) {
+        var eItem = events[i];
+        if (!eItem) continue;
+        if (
+          eItem.trusted_host_verified === true &&
+          eItem.provenance === "LIVE_EVENT" &&
+          !isPlaceholderIdentifier(eItem.event_id)
+        ) {
+          if (eItem.event_type === "assessment" && eItem.sender_id !== "jay") {
+            liveAssessmentEvents.push(eItem);
+          } else if (eItem.event_type === "reconciliation" && eItem.sender_id === "buddy") {
+            liveReconciliationEvent = eItem;
+          }
+        }
+      }
+
+      for (var j = events.length - 1; j >= 0; j--) {
+        var ev = events[j];
         if (ev && ev.sender_id === "jay" && ev.event_type === "decision") {
           var check = isValidLiveDecisionEvent(ev, proposal.proposal_id, proposal.mission_id);
           if (check.valid) {
@@ -417,25 +447,57 @@
       }
     }
 
-    var assessments = isDemo ? DEMO_SPECIMEN_ASSESSMENTS : VERIFIED_ROLE_ASSESSMENTS;
+    var assessments = (isDemo ? DEMO_SPECIMEN_ASSESSMENTS : VERIFIED_ROLE_ASSESSMENTS).map(function (a) {
+      return Object.assign({}, a, {
+        evidence_category: isDemo
+          ? EVIDENCE_CATEGORIES.DEMO_SPECIMEN_ASSESSMENT
+          : EVIDENCE_CATEGORIES.HISTORICAL_READINESS_SUMMARY
+      });
+    });
 
-    var reconciliation = {
-      orchestrator: "Buddy Main (Architect & Conductor)",
-      source_event_id: isDemo ? "demo_turn_09" : "hist_summary_buddy_20261106",
-      source_verified_link: false,
-      recommended_option: "OPT-A",
-      agreement_summary: "All participating seats agree that Council decisions must link to verifiable source events, expose public role rationales rather than hidden chain-of-thought, and preserve human authority as the sole approval gate.",
-      dissent_and_tensions: [
-        "Finch & Bucky emphasize that SSE/listener connectivity (`status: live`) must never be displayed as active reasoning (`responding`).",
-        "Cold-wake latency (~17-21s) vs. warm wake (<3s) and 30-day OAuth refresh lifecycle remain open operational limits."
-      ],
-      remaining_blockers: isDemo
-        ? ["None in offline demo simulation."]
-        : [
-            "Awaiting Jay's live Funding Intelligence proposal turn and explicit human decision (`APPROVED` / `DECLINED` / `DEFERRED`) in the Council room.",
+    var reconciliation = isDemo
+      ? {
+          orchestrator: "Buddy Main (Simulated Specimen Orchestrator)",
+          source_event_id: "demo_turn_09",
+          source_verified_link: false,
+          evidence_category: EVIDENCE_CATEGORIES.DEMO_SPECIMEN_ASSESSMENT,
+          reconciliation_status: "SIMULATED_SPECIMEN_SYNTHESIS",
+          recommended_option: "OPT-A",
+          agreement_summary: "Simulated specimen synthesis across 4 demo role turns.",
+          dissent_and_tensions: ["Specimen simulation only — does not constitute live orchestrator reconciliation."],
+          remaining_blockers: ["None in offline demo simulation."]
+        }
+      : liveReconciliationEvent
+      ? {
+          orchestrator: "Buddy Main (Verified Live Orchestrator Event)",
+          source_event_id: liveReconciliationEvent.event_id,
+          source_verified_link: true,
+          evidence_category: EVIDENCE_CATEGORIES.ORCHESTRATOR_RECONCILIATION,
+          reconciliation_status: "VERIFIED_LIVE_RECONCILIATION",
+          recommended_option: "OPT-A",
+          agreement_summary: liveReconciliationEvent.content,
+          dissent_and_tensions: [
+            "Finch & Bucky emphasize that SSE/listener connectivity (`status: live`) must never be displayed as active reasoning (`responding`)."
+          ],
+          remaining_blockers: validDecisionEvent ? [] : ["Awaiting Jay's live human decision event."]
+        }
+      : {
+          orchestrator: "Buddy Main (Curated Architecture Synthesis — Awaiting Live Proposal Reconciliation)",
+          source_event_id: "hist_summary_buddy_20261106",
+          source_verified_link: false,
+          evidence_category: EVIDENCE_CATEGORIES.HISTORICAL_READINESS_SUMMARY,
+          reconciliation_status: "UNVERIFIED_AWAITING_LIVE_RECONCILIATION",
+          recommended_option: "OPT-A",
+          agreement_summary: "Curated synthesis of Nov 5–6 readiness checks: all participating seats agree that Council decisions must link to verifiable source events, expose public role rationales rather than hidden chain-of-thought, and preserve human authority as the sole approval gate. (Note: Live orchestrator reconciliation for the Funding Intelligence proposal has not yet been posted.)",
+          dissent_and_tensions: [
+            "Finch & Bucky emphasize that SSE/listener connectivity (`status: live`) must never be displayed as active reasoning (`responding`).",
+            "Cold-wake latency (~17-21s) vs. warm wake (<3s) and 30-day OAuth refresh lifecycle remain open operational limits."
+          ],
+          remaining_blockers: [
+            "Awaiting Jay's live Funding Intelligence proposal turn, >=2 live agent assessments, Buddy's live reconciliation, and Jay's explicit human decision (`APPROVED` / `DECLINED` / `DEFERRED`) in the Council room.",
             "Production Mattermost plugin upload remains gated on explicit human sysadmin approval."
           ]
-    };
+        };
 
     var decision;
     if (isDemo) {
@@ -445,6 +507,7 @@
         reconciliation_event_id: demoCompleted ? "demo_turn_09" : null,
         human_decision_event_id: demoCompleted ? "demo_turn_10" : null,
         source_verified_link: false,
+        evidence_category: EVIDENCE_CATEGORIES.DEMO_SPECIMEN_ASSESSMENT,
         state: demoCompleted ? "SIMULATED_DEMO_OUTCOME" : "AWAITING_DEMO_COMPLETION",
         outcome_label: demoCompleted
           ? "SIMULATED DEMO OUTCOME (NOT LIVE HUMAN AUTHORIZATION)"
@@ -465,9 +528,10 @@
       decision = {
         decision_id: "DECISION-LIVE-001",
         proposal_event_id: proposal.source_event_id,
-        reconciliation_event_id: "hist_summary_buddy_20261106",
+        reconciliation_event_id: liveReconciliationEvent ? liveReconciliationEvent.event_id : "hist_summary_buddy_20261106",
         human_decision_event_id: validDecisionEvent.event_id,
         source_verified_link: true,
+        evidence_category: EVIDENCE_CATEGORIES.HUMAN_DECISION_RECORD,
         state: validVerdict,
         outcome_label: "HUMAN DECISION RECORDED: " + validVerdict,
         selected_option: "Option A: Strict Evidence, Risk & Owner Gate",
@@ -485,6 +549,7 @@
         reconciliation_event_id: "hist_summary_buddy_20261106",
         human_decision_event_id: null,
         source_verified_link: false,
+        evidence_category: EVIDENCE_CATEGORIES.HUMAN_DECISION_RECORD,
         state: "AWAITING_HUMAN_DECISION",
         rejection_reason: rejectedDecisionReason,
         outcome_label: rejectedDecisionReason
@@ -500,10 +565,31 @@
       };
     }
 
+    var workflowCompleteness = {
+      evidence_category: EVIDENCE_CATEGORIES.WORKFLOW_COMPLETENESS_STATUS,
+      state: isDemo
+        ? "SIMULATED_DEMO_WORKFLOW"
+        : (validDecisionEvent && liveAssessmentEvents.length >= 2 && liveReconciliationEvent)
+        ? "COMPLETE_VERIFIED_LIVE_WORKFLOW"
+        : "INCOMPLETE_WORKFLOW_AWAITING_LIVE_DELIBERATION_AND_DECISION",
+      live_assessments_count: liveAssessmentEvents.length,
+      historical_readiness_count: VERIFIED_ROLE_ASSESSMENTS.length,
+      has_live_reconciliation: Boolean(liveReconciliationEvent),
+      has_live_human_decision: Boolean(validDecisionEvent),
+      explanation: isDemo
+        ? "Demonstration specimen workflow (offline simulation)."
+        : (validDecisionEvent && liveAssessmentEvents.length >= 2 && liveReconciliationEvent)
+        ? "Complete end-to-end live workflow verified with source-linked assessments, Buddy reconciliation, and Jay human decision."
+        : "Workflow Incomplete: Showing 7 historical Nov 5–6 engineering-readiness summaries. Live Funding Intelligence proposal deliberation, live Buddy reconciliation, and Jay's live human decision have not yet been recorded in this session."
+    };
+
     return {
       mode: mode,
+      evidence_categories: EVIDENCE_CATEGORIES,
+      workflow_completeness: workflowCompleteness,
       proposal: proposal,
       options: MATERIAL_OPTIONS,
+      live_assessments: liveAssessmentEvents,
       assessments: assessments,
       reconciliation: reconciliation,
       decision: decision
@@ -601,6 +687,15 @@
       )
     );
     wrapper.appendChild(banner);
+
+    // 1b. Explicit 6-Category Provenance & Workflow Completeness Status Card (Section 7)
+    if (evidenceModel.workflow_completeness) {
+      var wf = evidenceModel.workflow_completeness;
+      var wfBox = el("div", "doc-warning-banner banner-workflow-completeness");
+      wfBox.appendChild(el("strong", null, "📊 WORKFLOW STATUS [" + String(wf.state || "").replace(/_/g, " ") + "]: "));
+      wfBox.appendChild(doc.createTextNode(wf.explanation + " (Live Proposal Assessments: " + wf.live_assessments_count + " · Historical Readiness Summaries: " + wf.historical_readiness_count + " · Live Reconciliation: " + (wf.has_live_reconciliation ? "YES" : "NO") + " · Live Human Decision: " + (wf.has_live_human_decision ? "YES" : "NO") + ")"));
+      wrapper.appendChild(wfBox);
+    }
 
     // 2. Human Decision Gate Status Card (Top-level visibility)
     var dec = evidenceModel.decision;

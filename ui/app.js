@@ -1501,54 +1501,38 @@ if (stepWorkflowBtn) {
 }
 resetWorkflowBtn.addEventListener("click", resetWorkflow);
 
-// 8. Live Switch Core Read-Only Bridge (No browser-bundled tokens)
+// 8. Live Switch Core Read-Only Bridge (Section 4: Verified Host Proxy Boundary)
+// Verified against deployed Switch Core (:8000): direct unauthenticated browser SSE to
+// `/rooms/{id}/events` is invalid (HTTP 404) and Core `/agents/{id}/rooms/{room}/history`
+// requires a privileged agent Bearer token that must NEVER be bundled in browser code.
+// Therefore, SwitchCoreBridge connects strictly through the read-only host proxy endpoint
+// (`/api/council/live-history` served by `scripts/serve_council_live.py`) and fails closed
+// to `LIVE NOT CONNECTED` whenever the proxy is unavailable or unverified.
 class SwitchCoreBridge {
-  constructor(baseUrl = "http://localhost:8000") {
-    this.baseUrl = baseUrl;
-    this.eventSource = null;
+  constructor(proxyEndpoint = "/api/council/live-history") {
+    this.proxyEndpoint = proxyEndpoint;
+    this.pollTimer = null;
   }
 
-  connectReadOnly(roomId = SWITCH_ROOM_ID) {
-    const streamUrl = `${this.baseUrl}/rooms/${encodeURIComponent(roomId)}/events`;
-    try {
-      this.eventSource = new EventSource(streamUrl);
-      this.eventSource.onopen = () => {
-        nexusStatus.textContent = "CONNECTED";
-        nexusStatus.style.color = "#10B981";
-      };
-
-      this.eventSource.onmessage = (event) => {
-        try {
-          const payload = JSON.parse(event.data);
-          if (eventAdapter) {
-            const res = eventAdapter.ingestEvent(payload);
-            if (!res.accepted) return;
-          }
-          if (payload.type === "message.created" || payload.content) {
-            appendMessageCard({
-              sender: payload.seat_id || payload.sender_id || "buddy",
-              prefix: `${payload.sender_name || "Agent"}:`,
-              content: payload.content || "",
-              event_id: payload.event_id
-            });
-          }
-        } catch (e) {
-          console.error("Error parsing SSE payload:", e);
-        }
-      };
-
-      this.eventSource.onerror = () => {
-        applySimulatedTransportState("disconnected");
-      };
-    } catch (err) {
-      console.warn("EventSource stream closed or unavailable:", err);
+  async connectReadOnly() {
+    const ok = await probeLiveProxyEndpoint();
+    if (!ok && currentMode === "LIVE_READONLY") {
+      if (eventAdapter) {
+        eventAdapter.simulateTransportState(
+          "disconnected",
+          "LIVE NOT CONNECTED: Authenticated read-only host proxy (/api/council/live-history) is not active.",
+          SEATS
+        );
+      }
+      initSeats();
     }
+    return ok;
   }
 
   disconnect() {
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
     }
   }
 }
