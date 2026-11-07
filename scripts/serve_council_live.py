@@ -79,35 +79,47 @@ def discover_config():
     return core_url.rstrip("/"), room_id, agent_id, api_key
 
 
+# A displayed live receipt must originate from a real Core event ID, not message text.
+CORE_EVENT_ID = re.compile(r"^sw_[0-9a-fA-F]{32}$")
+MATTERMOST_POST_ID = re.compile(r"^[a-z0-9]{26}$")
+
+
 def normalize_live_event(raw_ev, idx):
+    """Reject events without authentic Core identity; never fabricate live evidence.
+
+    This function only runs on the server after a successful authenticated Core read.
+    A Mattermost post ID is an optional *different* identity and must never be
+    replaced by a Switch Core event ID. own_seat is observer-relative and unknown
+    unless Core explicitly provides it.
+    """
+    if not isinstance(raw_ev, dict):
+        return None
+    event_id = raw_ev.get("event_id") or raw_ev.get("id")
+    if not isinstance(event_id, str) or not CORE_EVENT_ID.fullmatch(event_id):
+        return None
+
+    ts = raw_ev.get("timestamp")
+    if type(ts) is not int or ts <= 0:
+        return None  # No artificial "just now" timestamp for unverifiable history.
+
     raw_sender = str(raw_ev.get("sender_name") or raw_ev.get("sender") or "unknown").lower().strip()
-    if raw_sender in ("user", "jay", "ranger-jay"):
-        seat_id = "jay"
-    else:
-        seat_id = raw_sender
-        for k in ROLE_LABELS:
-            if k in raw_sender:
-                seat_id = k
-                break
+    seat_id = "jay" if raw_sender in ("user", "jay", "ranger-jay") else raw_sender
+    if seat_id not in ROLE_LABELS:
+        seat_id = "unknown"
 
-    body = str(raw_ev.get("body") or raw_ev.get("content") or "").strip()
-    ts = int(raw_ev.get("timestamp") or raw_ev.get("created_at") or int(time.time() * 1000))
-
-    sw_match = re.search(r"\b(sw_[0-9a-fA-F]{16,64})\b", body)
-    if raw_ev.get("event_id") or raw_ev.get("id"):
-        event_id = str(raw_ev.get("event_id") or raw_ev.get("id"))
-    elif sw_match:
-        event_id = sw_match.group(1)
-    else:
-        digest = hashlib.sha256(f"{seat_id}:{ts}:{body}".encode("utf-8")).hexdigest()[:16]
-        event_id = f"sw_{digest}"
+    body = str(raw_ev.get("body") or raw_ev.get("content") or raw_ev.get("message") or "").strip()
+    mm_post = raw_ev.get("mm_post_id")
+    mm_post = mm_post if isinstance(mm_post, str) and MATTERMOST_POST_ID.fullmatch(mm_post) else None
+    own_seat = raw_ev.get("own_seat")
+    if type(own_seat) is not bool:
+        own_seat = None
 
     prefix, runtime_label, exec_mode = ROLE_LABELS.get(
-        seat_id, (f"{seat_id.capitalize()}:", "Switch Seat", "live_room_event")
+        seat_id, ("Unknown sender:", "Switch Core (sender unverified)", "live_room_event")
     )
     return {
         "event_id": event_id,
-        "mm_post_id": raw_ev.get("mm_post_id") or event_id,
+        "mm_post_id": mm_post,
         "sender_id": seat_id,
         "sender_name": seat_id,
         "prefix": prefix,
@@ -116,11 +128,10 @@ def normalize_live_event(raw_ev, idx):
         "event_type": "live_message",
         "content": body,
         "timestamp": ts,
-        "own_seat": True,
-        "source_verified_link": True,
-        "provenance": "LIVE_EVENT"
+        "own_seat": own_seat,
+        "source_verified_link": bool(mm_post),
+        "provenance": "LIVE_EVENT",
     }
-
 
 def fetch_switch_core_history(limit=40):
     core_url, room_id, agent_id, api_key = discover_config()
@@ -134,8 +145,16 @@ def fetch_switch_core_history(limit=40):
         with urllib.request.urlopen(req, timeout=6) as resp:
             latency_ms = round((time.time() - t0) * 1000, 1)
             payload = json.loads(resp.read().decode("utf-8"))
-            raw_events = payload.get("events") or payload.get("messages") or []
-            normalized = [normalize_live_event(ev, idx) for idx, ev in enumerate(raw_events)]
+            if not isinstance(payload, dict) or payload.get("ok") is False:
+                return {"ok": False, "status": 502, "error": "Invalid Core history response"}
+            raw_events = payload.get("events", payload.get("messages", []))
+            if not isinstance(raw_events, list):
+                return {"ok": False, "status": 502, "error": "Invalid Core history event list"}
+            normalized = []
+            for idx, event in enumerate(raw_events):
+                safe_event = normalize_live_event(event, idx)
+                if safe_event is not None:
+                    normalized.append(safe_event)
             return {
                 "ok": True,
                 "status": 200,
@@ -147,8 +166,8 @@ def fetch_switch_core_history(limit=40):
             }
     except urllib.error.HTTPError as e:
         return {"ok": False, "status": e.code, "error": f"Switch Core HTTP {e.code}"}
-    except Exception as e:
-        return {"ok": False, "status": 503, "error": f"Switch Core unreachable: {e}"}
+    except Exception:
+        return {"ok": False, "status": 503, "error": "Switch Core unavailable or returned invalid data"}
 
 
 class CouncilLiveHandler(http.server.SimpleHTTPRequestHandler):
