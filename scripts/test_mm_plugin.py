@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Automated build and contract test suite for Mattermost 12.0.1 WebApp Plugin (Slice 2)."""
 
+import hashlib
 import json
 import os
 import subprocess
 import sys
 import tarfile
+import time
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -55,6 +57,37 @@ if os.path.exists(tar_path):
 else:
     print("  [FAIL] Plugin tar.gz archive not found")
     all_passed = False
+
+# 3a. Reproducibility and safety: archive must be identical across different
+# wall-clock seconds and contain only two regular, normalized plugin files.
+with open(tar_path, "rb") as f:
+    first_digest = hashlib.sha256(f.read()).hexdigest()
+time.sleep(1.05)
+res_second = subprocess.run([sys.executable, BUILD_SCRIPT], capture_output=True, text=True, encoding="utf-8")
+if res_second.returncode != 0:
+    print(f"  [FAIL] Deterministic rebuild errored: {res_second.stdout} {res_second.stderr}")
+    all_passed = False
+else:
+    with open(tar_path, "rb") as f:
+        second_digest = hashlib.sha256(f.read()).hexdigest()
+    if first_digest == second_digest:
+        print(f"  [PASS] Reproducible archive hash unchanged across 1+ second: sha256={second_digest}")
+    else:
+        print(f"  [FAIL] Archive hash changes across builds: {first_digest} != {second_digest}")
+        all_passed = False
+
+with tarfile.open(tar_path, "r:gz") as tar:
+    members = tar.getmembers()
+    allowed = {
+        "com.switch.council-chamber/plugin.json",
+        "com.switch.council-chamber/webapp/dist/main.js",
+    }
+    if (len(members) != 2 or any(not m.isfile() or m.name not in allowed or
+            m.mtime != 0 or m.uid != 0 or m.gid != 0 for m in members)):
+        print("  [FAIL] Archive contains unsafe/unexpected entries or variable metadata")
+        all_passed = False
+    else:
+        print("  [PASS] Archive content exactly matches 2 safe normalized files")
 
 # 4. Verify Mattermost 12.0.1 PluginRegistry hooks in compiled bundle
 bundle_path = os.path.join(UI_DIR, "plugin-bundle.js")
