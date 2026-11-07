@@ -107,6 +107,27 @@ if (!spoofedEv || spoofedEv.provenance === 'LIVE_EVENT' || spoofedEv.trusted_hos
 }
 console.log('  [PASS] P0.4 Negative Check: Untrusted client ingestEvent strips LIVE_EVENT provenance and sets trusted_host_verified=false');
 
+// C1 Negative Check: Placeholder ID (sw_receipt_*, mm_post_*, hist_summary_*) rejected even WITH hostAuthProof
+adapter.ingestEvent(
+  {
+    event_id: 'sw_receipt_allen_mode_a',
+    sender_id: 'allen',
+    event_type: 'receipt',
+    content: 'Attempted placeholder receipt as live event'
+  },
+  {
+    verified_by_host_proxy: true,
+    authenticated_principal: 'allen',
+    source_msg_id: 'sw_receipt_allen_mode_a'
+  }
+);
+const placeholderIngested = adapter.getEvents().find(e => e.event_id === 'sw_receipt_allen_mode_a');
+if (!placeholderIngested || placeholderIngested.provenance === 'LIVE_EVENT' || placeholderIngested.trusted_host_verified !== false) {
+  console.error('FAIL: C1 violation — Placeholder identifier sw_receipt_allen_mode_a was accepted as LIVE_EVENT:', placeholderIngested);
+  process.exit(1);
+}
+console.log('  [PASS] C1 Negative Check: Placeholder identifier (sw_receipt_allen_mode_a) rejected from LIVE_EVENT even with hostAuthProof');
+
 // 6. Verify Transport State Transitions (stale, denied, disconnected, error_backoff)
 adapter.simulateTransportState('stale', 'Heartbeat > 300s', seats);
 if (adapter.getSnapshot().seatStatuses.gem !== 'stale') {

@@ -377,11 +377,16 @@
     if (Object.prototype.hasOwnProperty.call(this.eventsById, id)) {
       return false;
     }
+    var rawMsgId = (hostAuthProof && typeof hostAuthProof.source_msg_id === "string")
+      ? hostAuthProof.source_msg_id
+      : "";
+    var isPlaceholderId = /^(sw_receipt_|mm_post_|hist_summary_|demo_|specimen_|fake_|spoof_)/i.test(id) ||
+      /^(sw_receipt_|mm_post_|hist_summary_|demo_|specimen_|fake_|spoof_)/i.test(rawMsgId);
     var isTrustedHost = Boolean(
+      !isPlaceholderId &&
       hostAuthProof &&
       hostAuthProof.verified_by_host_proxy === true &&
-      typeof hostAuthProof.source_msg_id === "string" &&
-      /^([a-z0-9]{26}|sw_[0-9a-fA-F]{16,64})$/.test(hostAuthProof.source_msg_id)
+      /^([a-z0-9]{26}|sw_[0-9a-fA-F]{16,64})$/.test(rawMsgId)
     );
     var safeProvenance = "UNVERIFIED_CLIENT_EVENT";
     if (isTrustedHost) {
