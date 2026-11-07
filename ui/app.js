@@ -1192,6 +1192,11 @@ function appendMessageCard(turn) {
   if (isLiveVerifiedLink) {
     receiptBadge.textContent = `🔗 Verified Live Receipt: ${receiptId}`;
     receiptBadge.title = "Verified live room event receipt";
+  } else if (turn.provenance === "LIVE_EVENT") {
+    receiptBadge.textContent = `✓ Verified Core Event (Mattermost link unavailable): ${receiptId}`;
+    receiptBadge.disabled = true;
+    receiptBadge.setAttribute("aria-disabled", "true");
+    receiptBadge.title = "Authenticated read-only Core event; no verified Mattermost post URL";
   } else if (turn.provenance === "DEMO_FIXTURE" || String(receiptId).startsWith("specimen_")) {
     receiptBadge.textContent = `🧪 Demo Specimen ID: ${receiptId}`;
     receiptBadge.disabled = true;
