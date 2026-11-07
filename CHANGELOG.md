@@ -1,5 +1,11 @@
 # Changelog
 
+## v005.04 — Prominent hackathon demo and video links — 2026-11-07
+
+- Added the entrant-provided YouTube video URL and the public Vercel Council Chamber demo together as prominent top-of-README links.
+- Replaced the outdated pending-video notice, linked both destinations in the judge walkthrough and the demo storyboard, and preserved the separation between the hosted static preview and authenticated live Switch sessions.
+- Documentation-only submission update; no runtime, plugin, agent, security, UI or Vercel configuration changes.
+
 ## v005.03 — Mobile chamber visibility and overflow hardening — 2026-11-07
 
 - Corrected the responsive single-column grid to use `minmax(0, 1fr)`, removed the minimum-content width floor, allowed message metadata to wrap and kept chamber/status/legend text within narrow viewports.

@@ -5,6 +5,9 @@
 # Council Chamber
 ### One room. Real perspectives. One accountable human decision.
 
+**🌐 [TRY THE LIVE COUNCIL CHAMBER](https://switch-council-chamber.vercel.app/)** &nbsp;|&nbsp; **▶️ [WATCH THE HACKATHON DEMO VIDEO](https://youtu.be/ShJp1iTmBdU)**
+
+
 **Flip the Switch Hackathon 2026 · Track 01 — Best Business Workflow**  
 Built by **Jay** with AI-assisted engineering, design and testing.
 
@@ -12,12 +15,12 @@ Built by **Jay** with AI-assisted engineering, design and testing.
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v005.03** · **Submission candidate, November 7, 2026.** The public Council Chamber interface is deployed; the real Council meeting was conducted; native Mattermost plugin installation, unattended wake-up of this ChatGPT session and an authenticated live feed into the public website are separate, unfinished acceptance gates.
+**Current repository version: v005.04** · **Submission candidate, November 7, 2026.** The public Council Chamber interface is deployed; the real Council meeting was conducted; native Mattermost plugin installation, unattended wake-up of this ChatGPT session and an authenticated live feed into the public website are separate, unfinished acceptance gates.
 
 ## Explore the demo
 
 - **[Open the public Council Chamber](https://switch-council-chamber.vercel.app/)** — browser-based, no account needed; historical proofs and clearly labeled offline specimens.
-- **Demo video:** Boons's recording is being finalized. **The YouTube link will be added when Jay provides the published URL.** No unverified video link is used here.
+- **[Watch the hackathon demonstration video on YouTube](https://youtu.be/ShJp1iTmBdU)** — submitted video link provided by the project owner; watch the recorded walkthrough, then try the browser demo.
 - **[Inspect the browser screenshot](ui/captures/chamber-1440x900-verified.png)** and the [mobile capture](ui/captures/chamber-390x844-mobile.png). These demonstrate the UI and historical-proof mode, not live model presence.
 - **[Read the reproducible test evidence](https://github.com/Ranger-Jay/hackathon-flip-the-switch/actions/workflows/gem-council-integration.yml)** and [public demo evidence ledger](https://github.com/Ranger-Jay/hackathon-flip-the-switch/issues/10).
 
@@ -27,6 +30,8 @@ Built by **Jay** with AI-assisted engineering, design and testing.
 <p align="center"><sub>Captured browser interface · HISTORICAL PROOFS mode. A historical receipt is not an online heartbeat.</sub></p>
 
 ### A 60-second tour for judges
+
+**Start here:** [Watch the recorded hackathon video](https://youtu.be/ShJp1iTmBdU), then [open the interactive Council Chamber](https://switch-council-chamber.vercel.app/) and try these controls.
 
 1. Open the **public demo**. The nine-seat Council appears immediately: Jay, Buddy, Cora, Gem, Finch, Boons, Allen, Bucky and Charlie.
 2. Select **Historical Proofs** to inspect recorded, curated evidence; select a portrait to see role, runtime and receipt information. Historical mode is labeled as such.
