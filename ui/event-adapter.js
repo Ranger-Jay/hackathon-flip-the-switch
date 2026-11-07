@@ -386,7 +386,8 @@
       !isPlaceholderId &&
       hostAuthProof &&
       hostAuthProof.verified_by_host_proxy === true &&
-      /^([a-z0-9]{26}|sw_[0-9a-fA-F]{16,64})$/.test(rawMsgId)
+      /^sw_[0-9a-fA-F]{32}$/.test(id) &&
+      rawMsgId === id
     );
     var safeProvenance = "UNVERIFIED_CLIENT_EVENT";
     if (isTrustedHost) {
@@ -399,7 +400,8 @@
 
     var normalized = {
       event_id: id,
-      mm_post_id: isTrustedHost ? (rawEvent.mm_post_id || hostAuthProof.source_msg_id) : null,
+      // The Core event ID is NEVER a Mattermost post ID. Linking requires a genuine 26-character post id.
+      mm_post_id: isTrustedHost && /^[a-z0-9]{26}$/.test(String(rawEvent.mm_post_id || "")) ? rawEvent.mm_post_id : null,
       thread_id: rawEvent.thread_id || null,
       correlation_id: rawEvent.correlation_id || null,
       sender_id: rawEvent.sender_id || "unknown",
@@ -412,7 +414,7 @@
       content: String(rawEvent.content || ""),
       timestamp: Number(rawEvent.timestamp) || Date.now(),
       own_seat: typeof rawEvent.own_seat === "boolean" ? rawEvent.own_seat : null,
-      source_verified_link: Boolean(isTrustedHost && rawEvent.source_verified_link !== false),
+      source_verified_link: Boolean(isTrustedHost && /^[a-z0-9]{26}$/.test(String(rawEvent.mm_post_id || "")) && rawEvent.source_verified_link === true),
       trusted_host_verified: isTrustedHost,
       authenticated_principal: isTrustedHost ? String(hostAuthProof.authenticated_principal || "") : null,
       source_msg_id: isTrustedHost ? hostAuthProof.source_msg_id : null,
@@ -448,7 +450,8 @@
         map[s.id] = HONEST_STATUS.UNKNOWN;
       } else if (mode === OPERATING_MODES.LIVE_READONLY) {
         if (transportState === "connected" || transportState === "syncing") {
-          map[s.id] = HONEST_STATUS.LISTENING;
+          // A healthy history transport is not a heartbeat from any agent.
+          map[s.id] = HONEST_STATUS.UNKNOWN;
         } else if (transportState === "stale") {
           map[s.id] = HONEST_STATUS.STALE;
         } else if (transportState === "disconnected" || transportState === "denied" || transportState === "error_backoff") {
