@@ -901,79 +901,94 @@ function renderLiveDisconnectedStream() {
 }
 
 async function probeLiveProxyEndpoint() {
-  if (typeof fetch !== "function" || currentMode !== "LIVE_READONLY") return;
+  if (typeof fetch !== "function" || currentMode !== "LIVE_READONLY") return false;
   try {
-    const resp = await fetch("/api/council/live-history", { method: "GET", headers: { "Accept": "application/json" } });
-    if (!resp.ok) return;
+    // Same-origin, no-store read. A static Vercel preview has no authenticated Core proxy.
+    const resp = await fetch("/api/council/live-history", {
+      method: "GET",
+      credentials: "same-origin",
+      cache: "no-store",
+      headers: { "Accept": "application/json" }
+    });
+    if (!resp.ok) return false;
     const data = await resp.json();
-    if (!data || data.ok !== true || !Array.isArray(data.events)) return;
-    if (currentMode !== "LIVE_READONLY") return;
+    if (!data || data.ok !== true || data.verified_by_host_proxy !== true || !Array.isArray(data.events)) return false;
+    if (currentMode !== "LIVE_READONLY" || !eventAdapter) return false;
 
-    if (eventAdapter) {
-      eventAdapter.clearEvents();
-      data.events.forEach((ev) => {
-        eventAdapter.ingestEvent(ev, {
-          verified_by_host_proxy: Boolean(data.verified_by_host_proxy),
-          authenticated_principal: ev.sender_id,
-          source_msg_id: ev.mm_post_id || ev.event_id,
-          proposal_correlation_id: ev.correlation_id || "council-workflow-001"
-        });
+    eventAdapter.clearEvents();
+    data.events.forEach((ev) => {
+      if (!ev || typeof ev.event_id !== "string" || !/^sw_[0-9a-fA-F]{32}$/.test(ev.event_id)) return;
+      // The browser must never infer Jay's authenticated principal from a display label.
+      // A human decision needs separately validated server-side identity/correlation proof.
+      eventAdapter.ingestEvent(ev, {
+        verified_by_host_proxy: true,
+        authenticated_principal: "",
+        source_msg_id: ev.event_id,
+        proposal_correlation_id: null
       });
-      eventAdapter.simulateTransportState("connected", null, SEATS);
-    }
+    });
+    const trustedEvents = eventAdapter.getEvents();
+    // Transport connectivity does NOT establish that any of the 9 agent models is online.
+    eventAdapter.simulateTransportState("connected", null, SEATS);
+
     initSeats();
     renderEvidenceDrawer("LIVE_READONLY");
-    if (topModePill) topModePill.textContent = "[LIVE CONNECTED]";
-    if (truthBadge) truthBadge.textContent = "[LIVE READ-ONLY PROXY CONNECTED]";
-    if (truthText) truthText.textContent = `Connected to authenticated read-only host proxy (${data.events.length} verified live channel posts).`;
+    if (topModePill) topModePill.textContent = "[LIVE HISTORY PROXY CONNECTED]";
+    if (truthBadge) truthBadge.textContent = "[AUTHENTICATED READ-ONLY CORE HISTORY]";
+    if (truthText) truthText.textContent =
+      `Read-only host proxy returned ${trustedEvents.length} Core event receipts. Agent presence: UNKNOWN. Human decision: requires separate verified authorization.`;
     if (diagCore) {
-      diagCore.textContent = "Live Read-Only Proxy (Connected)";
+      diagCore.textContent = "Read-Only Core History (Connected)";
       diagCore.className = "diag-val badge-green";
     }
     if (diagTransport) {
-      diagTransport.textContent = `Mattermost 12.0.1 Live (${data.events.length} posts)`;
+      diagTransport.textContent = `Core history: ${trustedEvents.length} verified IDs; agent presence UNKNOWN`;
       diagTransport.className = "diag-val badge-green";
     }
     if (nexusStatus) {
-      nexusStatus.textContent = "CONNECTED";
+      nexusStatus.textContent = "HISTORY CONNECTED";
       nexusStatus.style.color = "#10B981";
     }
     if (transportAlertBox) transportAlertBox.hidden = true;
     if (messagesContainer) {
       messagesContainer.innerHTML = "";
-      data.events.forEach((ev) => appendMessageCard({
+      trustedEvents.forEach((ev) => appendMessageCard({
         sender: ev.sender_id,
         prefix: ev.prefix,
         content: ev.content,
         event_id: ev.event_id,
         timestamp: ev.timestamp,
         execution_mode: ev.execution_mode,
-        source_verified_link: true,
-        provenance: "LIVE_EVENT"
+        source_verified_link: ev.source_verified_link === true,
+        provenance: ev.provenance
       }));
     }
+    return true;
   } catch (_) {
-    // Expected when running static HTTP server without live proxy; stay in LIVE NOT CONNECTED state.
+    // Expected when serving static UI without the authenticated local read-only proxy.
+    return false;
   }
 }
 
 function getVerifiedTurnsList() {
-  const rawEvents = (window.CouncilEventAdapterModule && window.CouncilEventAdapterModule.VERIFIED_RECEIPT_EVENTS)
-    ? window.CouncilEventAdapterModule.VERIFIED_RECEIPT_EVENTS
-    : (eventAdapter ? eventAdapter.getEvents() : []);
-  if (!rawEvents || rawEvents.length === 0) return WORKFLOW_SCRIPT;
+  // Live mode draws ONLY authenticated live history. Never silently substitute
+  // archived receipts or scripted demo turns when the live proxy is missing.
+  const rawEvents = currentMode === "LIVE_READONLY"
+    ? (eventAdapter ? eventAdapter.getEvents() : [])
+    : ((window.CouncilEventAdapterModule && window.CouncilEventAdapterModule.VERIFIED_RECEIPT_EVENTS) || []);
+  if (!rawEvents || rawEvents.length === 0) return [];
   return rawEvents.map((ev) => {
-    const senderId = ev.sender_id || ev.seat_id || ev.sender || "gem";
-    const seat = SEATS.find(s => s.id === senderId) || SEATS[0];
+    const senderId = ev.sender_id || ev.seat_id || ev.sender || "unknown";
+    const seat = SEATS.find(s => s.id === senderId);
     return {
-      sender: senderId,
-      prefix: ev.prefix || `${seat.originalName} (${seat.runtimeName}):`,
+      sender: seat ? senderId : "unknown",
+      prefix: seat ? (ev.prefix || `${seat.originalName} (${seat.runtimeName}):`) : "Unknown Council Sender:",
       content: ev.content,
       event_id: ev.event_id,
       timestamp: ev.timestamp,
-      execution_mode: ev.execution_mode || seat.executionMode,
+      execution_mode: seat ? (ev.execution_mode || seat.executionMode) : "unverified",
       source_verified_link: Boolean(ev.source_verified_link),
-      provenance: ev.provenance || "CURATED_HISTORICAL_SUMMARY"
+      provenance: ev.provenance || "UNVERIFIED_CLIENT_EVENT"
     };
   });
 }
@@ -1069,6 +1084,14 @@ function stepWorkflow(direction = 1) {
     ? getVerifiedTurnsList()
     : WORKFLOW_SCRIPT;
 
+  if (!sourceList.length) {
+    // No verified live event means no step to play; don't fabricate one.
+    stepCursor = 0;
+    if (messagesContainer) messagesContainer.innerHTML = "";
+    updateDirectorStatus(0, 0);
+    return;
+  }
+
   if (stepCursor >= sourceList.length && direction > 0) {
     stepCursor = 1;
   } else {
@@ -1091,15 +1114,15 @@ function stepWorkflow(direction = 1) {
 function appendMessageCard(turn) {
   const seat = SEATS.find(s => s.id === turn.sender) || {
     id: "unknown",
-    originalName: "Agent",
-    runtimeName: "Agent-Switch",
-    role: "Council",
-    emoji: "⚡",
-    avatar: "avatars/buddy.svg",
-    photo: "avatars/buddy.png",
-    status: "online",
+    originalName: "Unknown Sender",
+    runtimeName: "Unverified",
+    role: "Council sender identity not verified",
+    emoji: "❔",
+    avatar: "avatars/unknown.svg",
+    photo: null,
+    status: "unknown",
     honestStatus: "unknown",
-    executionMode: "automated",
+    executionMode: "unverified",
     lastReceiptId: "unverified"
   };
 
@@ -1179,6 +1202,11 @@ function appendMessageCard(turn) {
   if (isLiveVerifiedLink) {
     receiptBadge.textContent = `🔗 Verified Live Receipt: ${receiptId}`;
     receiptBadge.title = "Verified live room event receipt";
+  } else if (turn.provenance === "LIVE_EVENT") {
+    receiptBadge.textContent = `✓ Verified Core Event (Mattermost link unavailable): ${receiptId}`;
+    receiptBadge.disabled = true;
+    receiptBadge.setAttribute("aria-disabled", "true");
+    receiptBadge.title = "Authenticated read-only Core event; no verified Mattermost post URL";
   } else if (turn.provenance === "DEMO_FIXTURE" || String(receiptId).startsWith("specimen_")) {
     receiptBadge.textContent = `🧪 Demo Specimen ID: ${receiptId}`;
     receiptBadge.disabled = true;
@@ -1295,7 +1323,10 @@ function filterMessagesBySender(senderId) {
 // 5. Boons Operator Presentation Mode & Spotlight Controls
 function updateSpotlightFromTurn(turn) {
   if (!speakerSpotlightCard || !turn) return;
-  const seat = SEATS.find(s => s.id === (turn.seat_id || turn.sender)) || SEATS[0];
+  const seat = SEATS.find(s => s.id === (turn.seat_id || turn.sender)) || {
+    originalName: "Unknown Sender", role: "Unverified Council sender",
+    emoji: "❔", avatar: "avatars/unknown.svg", photo: null, lastReceiptId: "unverified"
+  };
   if (spotlightAvatar) {
     spotlightAvatar.src = seat.photo || seat.avatar;
     spotlightAvatar.onerror = () => { spotlightAvatar.src = seat.avatar; };
