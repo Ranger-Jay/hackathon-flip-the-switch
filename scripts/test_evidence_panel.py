@@ -85,7 +85,7 @@ for (const badVerdict of [null, undefined, '', 'YES', 'MAYBE', 'approved_typo'])
     provenance: 'LIVE_EVENT',
     trusted_host_verified: true,
     authenticated_principal: 'jay',
-    source_msg_id: 'sw_1234567890abcdef1234',
+    source_msg_id: 'sw_1234567890abcdef1234567890abcdef',
     proposal_correlation_id: 'council-workflow-001',
     content: 'Decision with invalid verdict'
   };
@@ -106,7 +106,7 @@ const mismatchEv = {
   provenance: 'LIVE_EVENT',
   trusted_host_verified: true,
   authenticated_principal: 'jay',
-  source_msg_id: 'sw_1234567890abcdef1234',
+  source_msg_id: 'sw_1234567890abcdef1234567890abcdef',
   proposal_correlation_id: 'wrong-proposal-999',
   content: 'Decision for a different proposal'
 };
@@ -126,7 +126,7 @@ const placeholderDecEv = {
   provenance: 'LIVE_EVENT',
   trusted_host_verified: true,
   authenticated_principal: 'jay',
-  source_msg_id: 'sw_1234567890abcdef1234',
+  source_msg_id: 'sw_1234567890abcdef1234567890abcdef',
   proposal_correlation_id: 'council-workflow-001',
   content: 'Decision with placeholder event_id'
 };
@@ -162,7 +162,7 @@ console.log('  [PASS] C2 6-Category Separation & WORKFLOW_COMPLETENESS_STATUS ve
 adapter.clearEvents();
 adapter.ingestEvent(
   {
-    event_id: 'sw_1234567890abcdef1234',
+    event_id: 'sw_1234567890abcdef1234567890abcdef',
     sender_id: 'jay',
     event_type: 'decision',
     verdict: 'APPROVED',
@@ -172,12 +172,12 @@ adapter.ingestEvent(
   {
     verified_by_host_proxy: true,
     authenticated_principal: 'jay',
-    source_msg_id: 'sw_1234567890abcdef1234',
+    source_msg_id: 'sw_1234567890abcdef1234567890abcdef',
     proposal_correlation_id: 'council-workflow-001'
   }
 );
 const unlockedModel = evMod.buildEvidenceModel('LIVE_READONLY', adapter.getEvents(), false);
-if (unlockedModel.decision.state !== 'APPROVED' || unlockedModel.decision.human_decision_event_id !== 'sw_1234567890abcdef1234') {
+if (unlockedModel.decision.state !== 'APPROVED' || unlockedModel.decision.human_decision_event_id !== 'sw_1234567890abcdef1234567890abcdef') {
   console.error('FAIL: Host-proxy verified live decision event failed to unlock decision gate:', unlockedModel.decision);
   process.exit(1);
 }
