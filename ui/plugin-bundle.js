@@ -223,6 +223,7 @@
               if (store) {
                 store.dispatch({ type: ACTION_SELECT_POST, postId: p.id });
               }
+              navigateToChannelPostDom(p.id);
             }
           },
           React.createElement(
@@ -467,8 +468,40 @@
     };
   }
 
+  var CHAMBER_SEATS = [
+    { id: "jay", name: "Jay", role: "Human Lead & Authorizer", emoji: "🐕", avatar: "avatars/jay.png", fallback: "avatars/jay.svg", mode: "human_authority", status: "unknown" },
+    { id: "buddy", name: "Buddy", role: "Architect & Conductor", emoji: "🦅", avatar: "avatars/buddy.png", fallback: "avatars/buddy.svg", mode: "direct_seat_mcp", status: "unknown" },
+    { id: "cora", name: "Cora", role: "Operations & Commander", emoji: "🎖️", avatar: "avatars/cora.png", fallback: "avatars/cora.svg", mode: "mode_a_oneseat_helper", status: "unknown" },
+    { id: "gem", name: "Gem", role: "Creative & UX Lead", emoji: "💎", avatar: "avatars/gem.png", fallback: "avatars/gem.svg", mode: "pattern_b_own_runtime", status: "unknown" },
+    { id: "finch", name: "Finch", role: "Runtime & Verification", emoji: "🐦", avatar: "avatars/finch.png", fallback: "avatars/finch.svg", mode: "direct_seat_mcp", status: "unknown" },
+    { id: "boons", name: "Boons", role: "Bridge & Demo Lead", emoji: "🐝", avatar: "avatars/boons.png", fallback: "avatars/boons.svg", mode: "pattern_b_own_runtime", status: "unknown" },
+    { id: "allen", name: "Allen", role: "Engineering Squad Lead", emoji: "🔧", avatar: "avatars/allen.png", fallback: "avatars/allen.svg", mode: "mode_a_oneseat_helper", status: "unknown" },
+    { id: "bucky", name: "Bucky", role: "Evidence Auditor", emoji: "🔭", avatar: "avatars/bucky.png", fallback: "avatars/bucky.svg", mode: "mode_a_oneseat_helper", status: "unknown" },
+    { id: "charlie", name: "Charlie", role: "Product & Creatives", emoji: "🎬", avatar: "avatars/charlie.png", fallback: "avatars/charlie.svg", mode: "mode_a_oneseat_helper", status: "unknown" }
+  ];
+
+  function navigateToChannelPostDom(postId) {
+    if (typeof document === "undefined" || !postId) return false;
+    var row = document.getElementById("mm-post-row-" + postId) || document.querySelector('[data-mm-post-id="' + postId + '"]');
+    if (row) {
+      if (typeof row.scrollIntoView === "function") {
+        row.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      row.style.outline = "2px solid #00F0FF";
+      row.style.background = "rgba(0, 240, 255, 0.14)";
+      setTimeout(function () {
+        row.style.outline = "";
+        row.style.background = "";
+      }, 1800);
+      return true;
+    }
+    return false;
+  }
+
   /**
-   * Root Overlay Component for Full 9-Seat Council Chamber on top of Mattermost channel
+   * Functional Root Overlay Component for Full 9-Seat Council Chamber (Section 6 / C3)
+   * Renders the complete 9-seat circular chamber ring, seat status inspector, and
+   * live channel post stream directly via React.createElement (no placeholder text or external iframe required).
    */
   function createRootOverlayComponent(pluginRef) {
     var React = (typeof window !== "undefined" && window.React) ? window.React : null;
@@ -484,6 +517,108 @@
       if (!pState.isChamberOpen) {
         return null;
       }
+
+      var radius = 155;
+      var centerX = 210;
+      var centerY = 210;
+      var seatNodes = CHAMBER_SEATS.map(function (seat, idx) {
+        var angle = (idx / CHAMBER_SEATS.length) * 2 * Math.PI - Math.PI / 2;
+        var x = Math.round(centerX + radius * Math.cos(angle));
+        var y = Math.round(centerY + radius * Math.sin(angle));
+        return React.createElement(
+          "div",
+          {
+            key: seat.id,
+            className: "mm-overlay-seat-node",
+            "data-seat-id": seat.id,
+            style: {
+              position: "absolute",
+              left: (x - 36) + "px",
+              top: (y - 36) + "px",
+              width: "72px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              cursor: "pointer"
+            }
+          },
+          React.createElement(
+            "div",
+            {
+              style: {
+                width: "52px",
+                height: "52px",
+                borderRadius: "50%",
+                border: "2px solid rgba(156, 163, 175, 0.55)",
+                overflow: "hidden",
+                background: "#111827"
+              }
+            },
+            React.createElement("img", {
+              src: seat.avatar,
+              alt: seat.name,
+              width: "52",
+              height: "52",
+              style: { width: "100%", height: "100%", objectFit: "cover" }
+            })
+          ),
+          React.createElement(
+            "span",
+            {
+              style: {
+                marginTop: "4px",
+                padding: "2px 6px",
+                borderRadius: "10px",
+                background: "rgba(15, 23, 42, 0.92)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                fontSize: "10px",
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+                color: "#F3F4F6"
+              }
+            },
+            seat.emoji + " " + seat.name
+          ),
+          React.createElement(
+            "span",
+            { style: { fontSize: "9px", color: "#9CA3AF", fontFamily: "monospace" } },
+            seat.status.toUpperCase()
+          )
+        );
+      });
+
+      var streamPosts = ctx.posts.map(function (p) {
+        var isSelected = p.id === pState.selectedPostId;
+        return React.createElement(
+          "div",
+          {
+            key: p.id,
+            className: "mm-overlay-post-card" + (isSelected ? " selected" : ""),
+            style: {
+              padding: "10px 12px",
+              marginBottom: "8px",
+              borderRadius: "8px",
+              background: isSelected ? "rgba(0, 240, 255, 0.14)" : "rgba(255,255,255,0.04)",
+              border: isSelected ? "1px solid #00F0FF" : "1px solid rgba(255,255,255,0.08)",
+              cursor: "pointer"
+            },
+            onClick: function () {
+              if (store) {
+                store.dispatch({ type: ACTION_SELECT_POST, postId: p.id });
+              }
+              navigateToChannelPostDom(p.id);
+              navigateToChannelPostDom(p.id);
+            }
+          },
+          React.createElement(
+            "div",
+            { style: { display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "12px" } },
+            React.createElement("strong", { style: { color: "#00F0FF" } }, "@" + (p.sender_name || p.user_id || "seat")),
+            React.createElement("code", { style: { fontSize: "11px", color: "#9CA3AF" } }, p.id)
+          ),
+          React.createElement("div", { style: { fontSize: "12px", color: "#E5E7EB" } }, p.message || "")
+        );
+      });
 
       return React.createElement(
         "div",
@@ -503,6 +638,7 @@
             color: "#F3F4F6"
           }
         },
+        // Header Bar
         React.createElement(
           "div",
           {
@@ -522,7 +658,7 @@
             React.createElement(
               "span",
               { style: { fontSize: "12px", color: "#9CA3AF", fontFamily: "'JetBrains Mono', monospace" } },
-              "Bound to Mattermost Channel: " + ctx.channelDisplayName + " (" + ctx.postsCount + " posts)"
+              "Bound to Mattermost Channel: " + ctx.channelDisplayName + " (" + ctx.postsCount + " posts · Current Online: UNKNOWN)"
             )
           ),
           React.createElement(
@@ -552,13 +688,112 @@
             "✕ Return to Standard Channel View"
           )
         ),
+        // Functional 2-Column Chamber + Channel Stream Mount (No placeholder string!)
         React.createElement(
           "div",
           {
             id: "mmPluginChamberRootMount",
-            style: { flex: 1, position: "relative", overflow: "hidden" }
+            style: {
+              flex: 1,
+              display: "flex",
+              overflow: "hidden",
+              padding: "20px",
+              gap: "24px"
+            }
           },
-          "9-Seat Council Chamber Active for " + ctx.channelDisplayName
+          // Left: 9-Seat Circular Chamber Ring
+          React.createElement(
+            "div",
+            {
+              className: "mm-overlay-chamber-ring-panel",
+              style: {
+                width: "440px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(15, 20, 32, 0.85)",
+                border: "1px solid rgba(0, 240, 255, 0.22)",
+                borderRadius: "14px",
+                padding: "16px"
+              }
+            },
+            React.createElement(
+              "div",
+              { style: { fontSize: "12px", fontWeight: 700, color: "#00F0FF", marginBottom: "8px" } },
+              "9-SEAT COUNCIL RING (4 Mode-A · 2 Pattern-B · 2 Direct-MCP · 1 Human)"
+            ),
+            React.createElement(
+              "div",
+              {
+                className: "mm-overlay-ring-stage",
+                style: { position: "relative", width: "420px", height: "420px" }
+              },
+              seatNodes,
+              React.createElement(
+                "div",
+                {
+                  style: {
+                    position: "absolute",
+                    left: "165px",
+                    top: "165px",
+                    width: "90px",
+                    height: "90px",
+                    borderRadius: "50%",
+                    border: "1px solid rgba(0, 240, 255, 0.4)",
+                    background: "rgba(0, 240, 255, 0.08)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "10px",
+                    fontFamily: "monospace",
+                    color: "#00F0FF"
+                  }
+                },
+                React.createElement("span", null, "⚡"),
+                React.createElement("span", null, pState.operatingMode)
+              )
+            )
+          ),
+          // Right: Live Redux Channel Stream & Fail-Closed Decision Status
+          React.createElement(
+            "div",
+            {
+              className: "mm-overlay-stream-panel",
+              style: {
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                background: "rgba(15, 20, 32, 0.85)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: "14px",
+                padding: "16px",
+                overflowY: "auto"
+              }
+            },
+            React.createElement(
+              "div",
+              {
+                style: {
+                  padding: "10px 12px",
+                  marginBottom: "12px",
+                  borderRadius: "8px",
+                  background: "rgba(245, 158, 11, 0.1)",
+                  border: "1px solid rgba(245, 158, 11, 0.4)",
+                  fontSize: "12px",
+                  color: "#FBBF24"
+                }
+              },
+              "🔒 HUMAN DECISION GATE: AWAITING_HUMAN_DECISION — Click any channel post below to navigate & highlight its source in #council."
+            ),
+            React.createElement(
+              "div",
+              { style: { fontSize: "12px", fontWeight: 700, color: "#9CA3AF", marginBottom: "8px", textTransform: "uppercase" } },
+              "Canonical Channel Posts (" + ctx.postsCount + " in Redux Store)"
+            ),
+            streamPosts
+          )
         )
       );
     };
@@ -581,6 +816,7 @@
           onClick: function () {
             if (pluginRef.store) {
               pluginRef.store.dispatch({ type: ACTION_SELECT_POST, postId: post.id || "unknown" });
+              navigateToChannelPostDom(post.id);
               if (pluginRef.rhs && pluginRef.rhs.showRHSPlugin) {
                 pluginRef.store.dispatch(pluginRef.rhs.showRHSPlugin);
               }

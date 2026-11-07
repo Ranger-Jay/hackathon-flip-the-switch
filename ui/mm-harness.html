@@ -334,6 +334,8 @@
           var post = postsMap[pid];
           var row = document.createElement("div");
           row.className = "mm-post-row";
+          row.id = "mm-post-row-" + post.id;
+          row.setAttribute("data-mm-post-id", post.id);
           var hdr = document.createElement("div");
           hdr.style.display = "flex";
           hdr.style.alignItems = "center";
@@ -370,17 +372,7 @@
           if (vnode) {
             var dom = miniReact.renderVNode(vnode);
             rootSlot.appendChild(dom);
-            var iframeMount = dom.querySelector("#mmPluginChamberRootMount");
-            if (iframeMount) {
-              iframeMount.innerHTML = "";
-              var chamberFrame = document.createElement("iframe");
-              chamberFrame.src = "index.html?embedded=mm-plugin";
-              chamberFrame.title = "Switch Council 9-Seat Chamber";
-              chamberFrame.style.width = "100%";
-              chamberFrame.style.height = "100%";
-              chamberFrame.style.border = "none";
-              iframeMount.appendChild(chamberFrame);
-            }
+// Native React 9-Seat Chamber Overlay mounted directly by plugin-bundle.js
           }
         }
       }

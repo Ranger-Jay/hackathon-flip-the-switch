@@ -117,7 +117,7 @@ const registryMock = {
   registerReducer: (r) => { reducerFn = r; state['plugins-com.switch.council-chamber'] = r(undefined, { type: '@@INIT' }); },
   registerRightHandSidebarComponent: (c, t) => ({ id: 'rhs1', showRHSPlugin: { type: 'SHOW' }, toggleRHSPlugin: { type: 'TOGGLE' } }),
   registerChannelHeaderButtonAction: () => {},
-  registerRootComponent: () => {},
+  registerRootComponent: (c) => { globalThis.__capturedRootComp = c; },
   registerPostActionComponent: () => {},
   registerWebSocketEventHandler: () => {}
 };
@@ -141,6 +141,13 @@ storeMock.dispatch({
 const ctxAfterWs = windowMock.getCouncilChannelContextFromStore(storeMock);
 if (ctxAfterWs.postsCount !== 2 || !ctxAfterWs.posts.some(p => p.id === 'ws_post_99')) {
   console.error('WebSocket posted event was not ingested into channel context:', ctxAfterWs);
+  process.exit(1);
+}
+const rootCompFn = globalThis.__capturedRootComp;
+const rootVdom = rootCompFn();
+const rootJson = JSON.stringify(rootVdom);
+if (!rootVdom || !rootJson.includes('mm-overlay-seat-node') || !rootJson.includes('9-SEAT COUNCIL RING') || rootJson.includes('Full 9-Seat Council Chamber Active')) {
+  console.error('RootOverlayComponent did not render functional 9-seat React tree:', rootJson.slice(0, 300));
   process.exit(1);
 }
 console.log('NODE_VM_MOUNT_OK');
