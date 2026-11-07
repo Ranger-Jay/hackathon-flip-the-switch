@@ -5,6 +5,7 @@ on:
     branches:
       - orocue/public-foundation
       - work/buddy-agent-memory-package
+      - work/buddy-council-mcp
 
 permissions:
   contents: read
@@ -27,6 +28,20 @@ jobs:
           fi
           if test -d tests/council; then
             python3 -m unittest discover -s tests/council -v
+          fi
+      - name: Use Python 3.12 for Council MCP when present
+        if: hashFiles('integrations/council-mcp/requirements.lock') != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify Council MCP when present
+        run: |
+          if test -f integrations/council-mcp/requirements.lock; then
+            python -m pip install -r integrations/council-mcp/requirements.lock
+            python -m compileall -q integrations/council-mcp
+            if test -d tests/council_mcp; then
+              python -m pytest -q tests/council_mcp
+            fi
           fi
       - name: Validate version identity
         shell: bash

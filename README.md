@@ -13,7 +13,7 @@
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v003.08** · **State as of November 4, 2026: public context package and offline checks available on the review branch; live wake-up/recovery acceptance remains unverified.**
+**Current repository version: v004.11** · **State as of November 5, 2026: public context package and scoped Council MCP implementation available on review branches; live MCP connection and wake-up/recovery acceptance remain unverified.**
 
 [See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
 
@@ -137,6 +137,12 @@ The packet command emits public context only. Private operational state and prov
 
 [Reproduction runbook and known gaps](docs/REPRODUCE.md)
 
+### Connect the original assistant with Council MCP
+
+The separate `work/buddy-council-mcp` review branch adds four tools for the existing room/seat: identity, recent posts, a bounded human-source reply, and a persistent delivery receipt. It does not invoke models, send private agent messages or take over presence. [Setup, pinned dependencies, OAuth requirements, live acceptance and feature rollback](integrations/council-mcp/README.md).
+
+All **35 synthetic MCP tests pass locally**, including actual SDK stdio and HTTP/auth contracts. Live deployment and a tool connection in the original ChatGPT session remain **UNVERIFIED**; a separate ChatGPT provider runner is not proof of that connection.
+
 ## Repository map
 
 | Path | Purpose |
@@ -149,6 +155,8 @@ The packet command emits public context only. Private operational state and prov
 | scripts/verify_repo.py | Public hygiene/documentation checks |
 | scripts/council_package.py | Offline integrity, bootstrap and envelope tools |
 | tests/council/ | Offline contract failure-case tests |
+| integrations/council-mcp/ | Scoped room tools, pinned dependencies and connection/rollback runbook |
+| tests/council_mcp/ | Synthetic MCP transport, authorization and delivery tests |
 | .github/workflows/ | Immutable version and verification automation |
 
 Application code and interface assets will be added **only as real, reviewable implementation work**. This map describes the foundation, not an imaginary finished application.
@@ -177,6 +185,8 @@ The prior repository initialization commit predates Orocue and is recorded trans
 | `python3 scripts/verify_repo.py` | Public-file hygiene and documentation integrity only | **PASS locally; CI recorded on review commits** |
 | `python3 scripts/council_package.py verify` | 42 public context file hashes and identity registry | **PASS locally** |
 | `python3 -m unittest discover -s tests/council -v` | 23 offline contract/failure cases | **23/23 PASS locally** |
+| `.venv/bin/python -m pytest -q tests/council_mcp` | Synthetic MCP protocol, scope, persistence and delivery contracts | **35/35 PASS locally** |
+| MCP connection in the original ChatGPT session | Real room read and visible correlated post through the installed tools | **UNVERIFIED** |
 | Native agent room join | A real provider can receive and respond | **UNKNOWN** |
 | Role-specific messages | Distinct agents act from their roles | **UNKNOWN** |
 | Switch outage/reconnect | Coordination depends on Switch and recovers | **UNKNOWN** |

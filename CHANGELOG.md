@@ -1,5 +1,49 @@
 # Changelog
 
+## v004.11
+
+- Opt-in `COUNCIL_AUTH_DIAG=true` logs one secret-free line per auth rejection: timestamp, bearer present, and a category. Acceptance rules are unchanged. Off by default. This is the branch tip, on top of the server runbook. Tag v004.10 is the same patch parented on v004.09 and is not this tip.
+
+## v004.09
+
+- Add the home-env check to the MCP suite. v004.08 introduced the helper and documented 43 tests; this commit is the test that count refers to. The helper still does not start the gateway.
+
+## v004.08
+
+- Add an unprivileged home layout for Buddy and Finch with writes off, paths under the service home, and a check-only helper. Funnel stays unwired. Rollback of a later process is to stop that process. No live start.
+
+## v004.07
+
+- Describe predefined public clients for Buddy and Finch, the ChatGPT callback placeholder, and S256-only discovery. The resource server still has no registration endpoint. Live Dex metadata is unchanged.
+
+## v004.06
+
+- Keep the MCP verifier fail-closed: `aud` must be the resource string, and `openid` does not become `council:read` or `council:write`. Record the Nexus Dex gap for Allen. No live Dex change and no token is issued.
+
+## v004.05
+
+- Bind each Council MCP process to one seat, `buddy` or `finch`, with its own resource URL, OAuth client, Core sender, subject allowlist and state file. Finch cannot reuse the Buddy resource or the shared client, and a token with no client id is denied. Live Dex and Funnel remain unwired.
+
+## v004.04
+
+- Expose only `post_message` and `read_history`. Keep receipt and deduplication internal, and read Switch Core history so a message carries a `sw_` event id and sender. A Mattermost marker does not confirm a write. Live acceptance remains unverified.
+
+## v004.03
+
+- Document the scoped MCP setup, external OAuth prerequisites, configuration/service templates, original-session read/post/receipt acceptance and per-feature rollback. Distinguish the built gateway from an installed ChatGPT connection and preserve unknown live status.
+
+## v004.02
+
+- Correct HTTP resource metadata to advertise read and write scopes while accepting read-only tokens; close the shared upstream client at application shutdown, not at each stateless request. Both defects reproduced before correction; all 35 synthetic MCP tests now pass. Live access remains unverified.
+
+## v004.01
+
+- Add 34 synthetic MCP tests: actual SDK stdio round trip, HTTP JSON-RPC/OAuth/signature and scope checks, fixed identities/room, no DMs/mentions, persistence/concurrent duplicate protection, timeout/cancellation reconciliation and credential-file isolation. These do not establish a live connection.
+
+## v004.00
+
+- Add a fixed-room, fixed-seat Council MCP with stdio and OAuth-protected Streamable HTTP, bounded human-source replies, durable no-resend receipts and pinned dependencies. Extend feature-branch CI. No live deployment or ChatGPT installation is claimed.
+
 ## v003.08
 
 - Define source-linked public assessment/decision traces and a reusable assessment template. Separate user-facing rationale, observable evidence and optional provider summaries from private internal reasoning and simulated authorization.
