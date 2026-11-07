@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ranger-Jay/hackathon-flip-the-switch/ui/contracts/council-event-schema.json",
+  "title": "CouncilEventAdapterContract",
+  "version": "1.0.0",
+  "description": "Canonical event, participant state, role assessment, and human decision schema for the Switch Council Chamber UI and Track 01 demonstration.",
+  "definitions": {
+    "OperatingMode": {
+      "type": "string",
+      "enum": [
+        "DEMO_SPECIMEN",
+        "VERIFIED_RECEIPTS",
+        "LIVE_READONLY"
+      ],
+      "description": "Explicit truthfulness mode displayed across the UI banner, stream, and evidence panel."
+    },
+    "HonestSeatStatus": {
+      "type": "string",
+      "enum": [
+        "listening",
+        "receiving",
+        "responding",
+        "busy",
+        "stale",
+        "offline",
+        "unknown"
+      ],
+      "description": "Truthful participant status. 'listening' indicates an active listener/SSE connection without implying model reasoning."
+    },
+    "ExecutionMode": {
+      "type": "string",
+      "enum": [
+        "human_operator",
+        "direct_seat_mcp",
+        "native_acp_host",
+        "mode_a_oneseat_helper",
+        "console_sdk_worker",
+        "demo_fixture"
+      ]
+    },
+    "CouncilEvent": {
+      "type": "object",
+      "required": [
+        "event_id",
+        "sender_id",
+        "sender_name",
+        "content",
+        "timestamp",
+        "provenance"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "description": "Canonical Switch event ID (sw_...) or specimen turn ID (demo_turn_...)."
+        },
+        "mm_post_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "26-character Mattermost post ID when bridged to channel."
+        },
+        "thread_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Parent message/event ID for threaded replies and auto-receipts."
+        },
+        "correlation_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Mission or receipt correlation identifier."
+        },
+        "sender_id": {
+          "type": "string",
+          "enum": [
+            "jay",
+            "buddy",
+            "cora",
+            "gem",
+            "finch",
+            "boons",
+            "allen",
+            "bucky",
+            "charlie",
+            "system"
+          ]
+        },
+        "sender_name": {
+          "type": "string"
+        },
+        "runtime_label": {
+          "type": "string"
+        },
+        "execution_mode": {
+          "$ref": "#/definitions/ExecutionMode"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "proposal",
+            "auto_receipt",
+            "assessment",
+            "reconciliation",
+            "decision",
+            "receipt_proof",
+            "system_notice"
+          ]
+        },
+        "content": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "integer",
+          "description": "Unix epoch milliseconds."
+        },
+        "own_seat": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "True when verified authored directly by the principal's own seat."
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "type": "string",
+          "enum": [
+            "LIVE_EVENT",
+            "VERIFIED_RECEIPT",
+            "MANUAL_ASSISTED",
+            "DEMO_FIXTURE"
+          ]
+        }
+      }
+    },
+    "RoleAssessment": {
+      "type": "object",
+      "required": [
+        "seat_id",
+        "role",
+        "question_assessed",
+        "recommendation",
+        "rationale_summary",
+        "observations",
+        "options_tradeoffs",
+        "uncertainties_risks",
+        "action_receipts",
+        "next_owner_action",
+        "source_event_id",
+        "provenance"
+      ],
+      "properties": {
+        "seat_id": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "execution_mode": {
+          "$ref": "#/definitions/ExecutionMode"
+        },
+        "question_assessed": {
+          "type": "string"
+        },
+        "recommendation": {
+          "type": "string",
+          "enum": [
+            "APPROVE",
+            "APPROVE_WITH_CONDITIONS",
+            "HOLD",
+            "DECLINE",
+            "DEFER",
+            "INFO_ONLY"
+          ]
+        },
+        "rationale_summary": {
+          "type": "string",
+          "description": "Public role rationale summary (never hidden internal chain-of-thought)."
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "options_tradeoffs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "uncertainties_risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dissent_notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "action_receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "status",
+              "detail"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PASS",
+                  "PARTIAL",
+                  "FAIL",
+                  "UNRUN",
+                  "UNKNOWN"
+                ]
+              },
+              "detail": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "next_owner_action": {
+          "type": "string"
+        },
+        "source_event_id": {
+          "type": "string"
+        },
+        "provenance": {
+          "type": "string",
+          "enum": [
+            "LIVE_EVENT",
+            "VERIFIED_RECEIPT",
+            "DEMO_FIXTURE"
+          ]
+        }
+      }
+    },
+    "DecisionRecord": {
+      "type": "object",
+      "required": [
+        "decision_id",
+        "proposal_event_id",
+        "state",
+        "provenance"
+      ],
+      "properties": {
+        "decision_id": {
+          "type": "string"
+        },
+        "proposal_event_id": {
+          "type": "string"
+        },
+        "reconciliation_event_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "human_decision_event_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "AWAITING_HUMAN_DECISION",
+            "APPROVED",
+            "DECLINED",
+            "DEFERRED",
+            "SIMULATED_DEMO_OUTCOME"
+          ]
+        },
+        "human_authorizer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "unresolved_risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "follow_up_owner": {
+          "type": "string"
+        },
+        "next_action": {
+          "type": "string"
+        },
+        "provenance": {
+          "type": "string",
+          "enum": [
+            "LIVE_DECISION",
+            "AWAITING_LIVE_ACTION",
+            "DEMO_SPECIMEN"
+          ]
+        }
+      }
+    }
+  }
+}

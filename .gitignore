@@ -35,3 +35,6 @@ Thumbs.db
 *.log
 *.tmp
 *.swp
+
+# Disposable browser test profiles
+.tmp-chrome*

@@ -1,0 +1,69 @@
+name: Council Chamber integration checks
+
+on:
+  push:
+    branches:
+      - work/buddy-gem-live-bridge-safety
+      - work/buddy-gem-integrated-preview-20261107
+      - release/hackathon-submission-20261107
+      - main
+  pull_request:
+    branches:
+      - work/gem-council-chamber
+      - main
+    paths:
+      - 'ui/**'
+      - 'mattermost-plugin-council/**'
+      - 'scripts/test_*'
+      - 'scripts/run_all_ui_checks.py'
+      - 'scripts/serve_council_live.py'
+      - '.github/workflows/gem-council-integration.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: council-ui-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-ui-and-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Show installed tool versions
+        run: |
+          python3 --version
+          node --version
+          (command -v google-chrome || command -v chromium || command -v chromium-browser) || true
+      - name: Bridge fail-closed negative tests
+        run: python3 scripts/test_live_bridge.py
+      - name: All Council Chamber UI and plugin checks
+        run: python3 scripts/run_all_ui_checks.py
+      - name: Compile and hash installable Mattermost plugin
+        run: |
+          python3 mattermost-plugin-council/build_plugin.py
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          archive = Path("mattermost-plugin-council/dist/com.switch.council-chamber-0.1.0.tar.gz")
+          print(f"PLUGIN_BUNDLE sha256={hashlib.sha256(archive.read_bytes()).hexdigest()} bytes={archive.stat().st_size}")
+          PY
+      - name: Attach Mattermost plugin bundle to this verified run
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: switch-council-mattermost-plugin-${{ github.sha }}
+          path: mattermost-plugin-council/dist/com.switch.council-chamber-0.1.0.tar.gz
+          retention-days: 30
+          if-no-files-found: error
+      - name: Verify public UI has no server credentials
+        run: |
+          if grep -R -En '(^|[[:space:]])(SWITCH_AGENT_TOKEN|COUNCIL_MM_TOKEN_FILE|COUNCIL_SWITCH_TOKEN_FILE|VERCEL_TOKEN)[[:space:]]*[:=]' ui/; then
+            echo 'Sensitive key assignment found in browser source'
+            exit 1
+          fi
+          echo 'Browser asset credential-assignment check PASS'

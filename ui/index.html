@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Council Chamber — Flip the Switch (Track 01)</title>
+  <link rel="icon" type="image/svg+xml" href="avatars/gem.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container" id="appContainer">
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="nav-left">
+        <div class="brand-badge">
+          <span class="brand-icon">⚡</span>
+          <span class="brand-title">SWITCH COUNCIL</span>
+        </div>
+        <span class="room-pill" title="Target Mattermost 12.0.1 Channel &amp; Switch Room">
+          <span class="status-dot" id="headerStatusDot"></span>
+          Channel: <strong>switch/council</strong>
+          <span class="pill-channel-hash">(Public Preview)</span>
+        </span>
+      </div>
+
+      <div class="nav-center">
+        <span class="track-badge">Flip the Switch — Track 01</span>
+        <div class="mode-switcher" id="modeSwitcherBar" role="group" aria-label="Operating Mode Switcher">
+          <button type="button" class="mode-btn active" data-mode="VERIFIED_RECEIPTS" id="modeVerifiedBtn" title="Show curated Nov 5–6 historical seat-steer proof summaries (8/8 seats)">
+            📋 Historical Proofs
+          </button>
+          <button type="button" class="mode-btn" data-mode="DEMO_SPECIMEN" id="modeDemoBtn" title="Run offline multi-agent Track 01 workflow demonstration">
+            🧪 Demo Specimen
+          </button>
+          <button type="button" class="mode-btn" data-mode="LIVE_READONLY" id="modeLiveBtn" title="Inspect read-only live transport &amp; failure state handling">
+            📡 Live Transport
+          </button>
+        </div>
+        <span class="demo-specimen-pill" id="topModePill">[HISTORICAL PROOF SUMMARY]</span>
+      </div>
+
+      <div class="nav-right">
+        <button id="operatorModeBtn" class="pill-btn" title="Toggle Boons Operator Presentation &amp; Camera Mode (Alt+O)">
+          <span class="btn-icon">🎥</span>
+          <span id="operatorModeLabel">Operator Mode</span>
+        </button>
+        <button id="viewToggleBtn" class="pill-btn active-view" title="Toggle 2D / 3D Chamber">
+          <span class="btn-icon">🌐</span>
+          <span id="viewModeLabel">Chamber: 3D Holo</span>
+        </button>
+        <button id="docToggleBtn" class="pill-btn" title="Toggle Evidence &amp; Decision Panel">
+          <span class="btn-icon">📜</span>
+          <span id="docToggleLabel">Evidence &amp; Decision</span>
+        </button>
+        <a href="mm-harness.html" class="pill-btn link-pill" id="mmHarnessLink" target="_blank" rel="noopener noreferrer" aria-label="Open offline Mattermost 12.0.1 plugin test harness in a new tab" title="Open offline Mattermost plugin test harness in a new tab — keeps Council Chamber open">
+          <span class="btn-icon">🔌</span>
+          <span class="mm-link-text">MM 12.0.1 Host</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Persistent Truthfulness & Provenance Banner -->
+    <div class="truthfulness-strip mode-verified" id="truthfulnessBanner" role="status" aria-live="polite">
+      <div class="truth-strip-main">
+        <span class="truth-badge" id="truthBadge">[CURATED HISTORICAL PROOF SUMMARY]</span>
+        <span class="truth-text" id="truthText">
+          Displaying 9 curated historical proof summaries from Nov 5–6 seat-steering verification (4 Mode-A · 2 Pattern-B · 2 Direct-MCP · 1 Human). Current live seat status: UNKNOWN. Human decision status: AWAITING_HUMAN_DECISION.
+        </span>
+      </div>
+      <!-- Live Transport State Simulator (visible when LIVE_READONLY mode is active) -->
+      <div class="transport-sim-bar" id="transportSimBar" hidden>
+        <span class="sim-label">Fault-Injection Controls:</span>
+        <button type="button" class="sim-state-btn active" data-sim-state="disconnected">Live Not Connected (Default)</button>
+        <button type="button" class="sim-state-btn" data-sim-state="stale">SIMULATE: Stale (42s)</button>
+        <button type="button" class="sim-state-btn" data-sim-state="denied">SIMULATE: 401 Denied</button>
+        <button type="button" class="sim-state-btn" data-sim-state="connected">SIMULATE: Connected</button>
+        <button type="button" class="sim-state-btn retry-btn" id="transportRetryBtn">↻ Probe Live Proxy</button>
+      </div>
+    </div>
+
+    <!-- Boons Operator Presentation Director Bar (visible when Operator Mode is active) -->
+    <div class="operator-director-bar" id="operatorDirectorBar" hidden>
+      <div class="director-left">
+        <span class="director-badge">🎥 BOONS CAMERA &amp; PRESENTATION DIRECTOR</span>
+        <span class="director-turn-status" id="directorTurnStatus">Turn 9 / 9 — Ready for Step-by-Step Walkthrough</span>
+      </div>
+      <div class="director-controls">
+        <button type="button" class="director-btn" id="opResetBtn" title="Reset to Turn 1">⏮ Start</button>
+        <button type="button" class="director-btn" id="opPrevTurnBtn" title="Step Backward (Left Arrow)">◀ Prev Turn</button>
+        <button type="button" class="director-btn primary" id="opNextTurnBtn" title="Step Forward (Right Arrow)">Next Turn ▶</button>
+        <button type="button" class="director-btn" id="opPlayPauseBtn" title="Auto-Play Sequence">▶ Auto-Play</button>
+        <button type="button" class="director-btn" id="opSpotlightBtn" title="Toggle Active Speaker Spotlight Card">🎯 Spotlight: ON</button>
+        <button type="button" class="director-btn" id="opEvidenceBtn" title="Toggle Evidence &amp; Decision Panel">📜 Evidence Drawer</button>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <main class="main-layout">
+      <!-- Left: Council Chamber Viewport -->
+      <section class="chamber-panel" aria-label="Council Chamber Seating">
+        <div class="chamber-header">
+          <div class="chamber-title-group">
+            <h2>COUNCIL CHAMBER</h2>
+            <span class="chamber-sub" id="chamberSubLabel">Click any seat to inspect runtime identity, receipt proof &amp; role assessment</span>
+          </div>
+          <span class="participant-count" id="seatCounter">9 Configured · 8 Historical Own-Seat Proofs · Current Online: UNKNOWN</span>
+        </div>
+
+        <div class="viewport-stage" id="viewportStage">
+          <!-- 3D Canvas -->
+          <canvas id="holoCanvas"></canvas>
+
+          <!-- 2D Circular Seating Overlay -->
+          <div class="seats-ring" id="seatsRing">
+            <!-- Dynamically populated seats -->
+          </div>
+
+          <!-- Central Table Hologram Target -->
+          <div class="central-nexus" id="centralNexus">
+            <div class="nexus-ring"></div>
+            <div class="nexus-core">
+              <span class="nexus-icon">⚡</span>
+              <span class="nexus-label" id="nexusStatus">HISTORICAL</span>
+            </div>
+          </div>
+
+          <!-- Active Speaker Spotlight Card (for Operator Mode & Turn Playback) -->
+          <div class="speaker-spotlight-card" id="speakerSpotlightCard" hidden>
+            <img id="spotlightAvatar" src="avatars/gem.png" alt="" width="48" height="48">
+            <div class="spotlight-info">
+              <div class="spotlight-top">
+                <strong id="spotlightName">Gem</strong>
+                <span class="spotlight-role" id="spotlightRole">Creative &amp; UX Lead</span>
+                <span class="spotlight-receipt" id="spotlightReceipt">sw_e3abd291...</span>
+              </div>
+              <p class="spotlight-Snippet" id="spotlightText"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Honest 7-State Status Legend -->
+        <div class="status-legend-bar" aria-label="Honest Seat Status Legend">
+          <span class="legend-title">Seat Status Model:</span>
+          <span class="legend-item" title="Actively emitting a turn or verified receipt"><i class="dot-status responding"></i>Responding</span>
+          <span class="legend-item" title="Connected listener only — does NOT mean model is reasoning"><i class="dot-status listening"></i>Listening (Idle)</span>
+          <span class="legend-item" title="Ingesting room context"><i class="dot-status receiving"></i>Receiving</span>
+          <span class="legend-item" title="Executing local verification or build gate"><i class="dot-status busy"></i>Busy</span>
+          <span class="legend-item" title="Heartbeat older than threshold"><i class="dot-status stale"></i>Stale</span>
+          <span class="legend-item" title="No active listener"><i class="dot-status offline"></i>Offline</span>
+        </div>
+
+        <!-- System Diagnostics Footer -->
+        <div class="bridge-diagnostics">
+          <div class="diag-item">
+            <span class="diag-label">Target Room:</span>
+            <span class="diag-val font-mono" id="diagRoomId">switch-council-track01 (Public Preview)</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Runtime Mode:</span>
+            <span class="diag-val badge-amber" id="diagCore">Curated Historical Proofs (Offline)</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Channel:</span>
+            <span class="diag-val">switch/council</span>
+          </div>
+          <div class="diag-item">
+            <span class="diag-label">Bridge Transport:</span>
+            <span class="diag-val badge-green" id="diagTransport">4 Mode-A · 2 Pattern-B · 2 Direct-MCP</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Live Conversation Stream -->
+      <section class="feed-panel" aria-label="Council Event &amp; Conversation Stream">
+        <div class="feed-header">
+          <div class="feed-title-wrap">
+            <h2 id="feedHeaderTitle">COUNCIL EVENT &amp; RECEIPT STREAM</h2>
+            <span class="feed-subtitle" id="feedSubtitle">Source-linked Council turns with verified Switch event IDs</span>
+          </div>
+          <div class="workflow-controls">
+            <button id="stepWorkflowBtn" class="action-btn secondary" title="Advance one turn at a time for camera capture">
+              <span>⏭ Step Turn</span>
+            </button>
+            <button id="playWorkflowBtn" class="action-btn">
+              <span>▶ Run Demo Simulation</span>
+            </button>
+            <button id="resetWorkflowBtn" class="action-btn secondary">
+              <span>↺ Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Stream Filter & Search Toolbar -->
+        <div class="stream-filter-bar" id="streamFilterBar">
+          <div class="filter-pills" id="seatFilterPills">
+            <button type="button" class="filter-pill active" data-filter-seat="all" id="filterAllSeatsBtn">All Seats (9)</button>
+          </div>
+          <div class="filter-search-wrap">
+            <input type="search" id="streamSearchInput" placeholder="Filter by text or receipt ID (sw_...)..." aria-label="Filter messages by text or receipt ID">
+          </div>
+        </div>
+
+        <!-- Transport Alert Banner (shown whenLIVE_READONLY encounters stale/denied/disconnected) -->
+        <div class="transport-alert-box" id="transportAlertBox" hidden role="alert">
+          <div class="transport-alert-content">
+            <strong id="transportAlertTitle">Transport Warning</strong>
+            <p id="transportAlertDesc"></p>
+          </div>
+          <button type="button" class="action-btn secondary" id="alertRetryBtn">↻ Reconnect</button>
+        </div>
+
+        <div class="messages-container" id="messagesContainer" role="log" aria-live="polite">
+          <!-- Dynamic message turns inserted here -->
+        </div>
+
+        <div class="chat-input-bar">
+          <input type="text" id="userInput" placeholder="Read-only observer boundary active — agent tokens isolated from browser bundle" disabled>
+          <button id="sendBtn" disabled>Read-Only</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Room Decision & Evidence Document Drawer (Sidecar) -->
+    <aside class="doc-drawer" id="docDrawer" aria-label="Evidence and Decision Panel">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span class="doc-icon">📜</span>
+          <h3 id="drawerHeaderTitle">EVIDENCE &amp; DECISION RECORD</h3>
+        </div>
+        <button id="closeDrawerBtn" class="icon-btn" aria-label="Close Evidence Drawer">&times;</button>
+      </div>
+      <div class="drawer-body" id="drawerBody">
+        <!-- Populated by CouncilEvidencePanel -->
+      </div>
+    </aside>
+
+    <!-- Participant Profile Inspector Modal -->
+    <div class="profile-modal-overlay" id="profileModalOverlay" aria-hidden="true">
+      <div class="profile-card" id="profileCard" role="dialog" aria-modal="true" aria-labelledby="profileName">
+        <button id="closeProfileBtn" class="icon-btn close-modal-btn" aria-label="Close Profile">&times;</button>
+        <div class="profile-header">
+          <div class="profile-avatar-wrap">
+            <img id="profileAvatarImg" src="avatars/gem.png" alt="" width="96" height="96">
+            <span class="profile-status-indicator" id="profileStatusIndicator"></span>
+          </div>
+          <div class="profile-title-group">
+            <div class="profile-names">
+              <span class="profile-emoji" id="profileEmoji">💎</span>
+              <h3 id="profileName">Gem</h3>
+              <span class="profile-runtime-tag" id="profileRuntime">Gem-Switch</span>
+            </div>
+            <div class="profile-role" id="profileRole">Creative &amp; UX Lead</div>
+            <div class="profile-exec-badge" id="profileExecMode">Execution: automated (Own-Runtime Pattern-B)</div>
+          </div>
+        </div>
+        <div class="profile-body">
+          <p class="profile-desc" id="profileDesc"></p>
+          <div class="profile-honest-note" id="profileHonestNote">
+            Honest Status Note: Verified own-runtime Pattern-B receipt recorded in switch/council.
+          </div>
+          <div class="profile-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">Persona ID:</span>
+              <span class="meta-value font-mono" id="profilePersonaId"></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Transport ID:</span>
+              <span class="meta-value font-mono" id="profileTransport"></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Honest Status:</span>
+              <span class="meta-value font-mono" id="profilePresence"></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Verified Receipt:</span>
+              <span class="meta-value font-mono" id="profileHash"></span>
+            </div>
+          </div>
+          <div class="profile-actions-row">
+            <button type="button" class="action-btn" id="profileInspectEvidenceBtn">📜 View Assessment in Evidence Panel</button>
+            <button type="button" class="action-btn secondary" id="profileFilterStreamBtn">🔍 Filter Stream by Seat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="event-adapter.js"></script>
+  <script src="evidence-panel.js"></script>
+  <script src="plugin-bundle.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

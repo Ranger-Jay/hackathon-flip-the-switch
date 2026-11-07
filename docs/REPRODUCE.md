@@ -1,3 +1,13 @@
+# November 7 submission-candidate reproduction supplement
+
+**Current release line:** v005.00. See [the root README](../README.md) for the public live demo and authoritative judge-facing release status. The older guidance retained below describes the staged foundation; its historical UNKNOWN statuses must not be read as the latest full UI status.
+
+To run the actual static Council Chamber from a fresh clone, use Python 3.12, Node.js and Chrome/Chromium for the full browser matrix, then execute `python3 scripts/verify_repo.py`, `python3 scripts/run_all_ui_checks.py`, and `python3 mattermost-plugin-council/build_plugin.py`. For a local page, run `python3 -m http.server 8001` and visit `http://127.0.0.1:8001/ui/`. To reproduce agent/MCP contracts, consult `agents/README.md` and `integrations/council-mcp/README.md` and use sandbox-only credentials.
+
+The static Vercel page is not a live authenticated Mattermost host. Private service access or deployment requires a separate authorized operator, with rollback and secrets kept outside the repository.
+
+---
+
 # Reproduce the Council Room
 
 **Current status:** Foundation-only; complete application reproduction is **NOT YET VERIFIED**. This is a deliberately honest runbook that will be completed from actual testing evidence before submission.

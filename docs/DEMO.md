@@ -1,6 +1,6 @@
 # Demo storyboard — show the real room doing real work
 
-**Status:** Storyboard only. No live video or agent participation is implied.
+**Status as of November 7:** A real multi-agent Council meeting was conducted; the final hackathon demo video is being edited. This document preserves the filming plan and must not be interpreted as a claim that the public static Vercel page has a private live Core feed.
 
 **Target:** A tight 2–3 minute demo for Track 01. Screen-record the actual room, not a simulation presented as a live integration.
 

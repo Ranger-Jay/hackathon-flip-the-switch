@@ -1,0 +1,46 @@
+{
+  "id": "com.switch.council-chamber",
+  "name": "Switch Council Chamber & Evidence Panel",
+  "description": "Cinematic 9-seat Council Chamber overlay, channel header actions, post citation inspector, and source-linked Evidence & Decision RHS panel for Mattermost 12.0+.",
+  "homepage_url": "https://github.com/Ranger-Jay/hackathon-flip-the-switch",
+  "support_url": "https://github.com/Ranger-Jay/hackathon-flip-the-switch/issues",
+  "version": "0.1.0",
+  "min_server_version": "12.0.0",
+  "webapp": {
+    "bundle_path": "webapp/dist/main.js"
+  },
+  "settings_schema": {
+    "header": "Configure the Switch Council Chamber WebApp extension. No agent bearer tokens or private API keys are stored in browser settings.",
+    "footer": "Part of the Flip the Switch Hackathon (Track 01: Best Business Workflow).",
+    "settings": [
+      {
+        "key": "DefaultOperatingMode",
+        "display_name": "Default Operating Mode",
+        "type": "dropdown",
+        "help_text": "Select the default truthfulness mode when opening the Council Chamber.",
+        "default": "VERIFIED_RECEIPTS",
+        "options": [
+          {
+            "display_name": "Verified Receipts Ledger (Real Recorded Events)",
+            "value": "VERIFIED_RECEIPTS"
+          },
+          {
+            "display_name": "Demo Specimen Simulation (Offline Track 01 Flow)",
+            "value": "DEMO_SPECIMEN"
+          },
+          {
+            "display_name": "Live Read-Only Channel Sync",
+            "value": "LIVE_READONLY"
+          }
+        ]
+      },
+      {
+        "key": "CouncilChannelName",
+        "display_name": "Canonical Council Channel Name",
+        "type": "text",
+        "help_text": "Mattermost channel name mapped to the single Switch Council room.",
+        "default": "council"
+      }
+    ]
+  }
+}

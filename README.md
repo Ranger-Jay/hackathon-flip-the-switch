@@ -1,219 +1,188 @@
-<p align="center"><img src="assets/brand/council-hero.svg" alt="Concept illustration of the Council Room; not a live product screenshot" width="100%"></p>
+<p align="center">
+  <img src="assets/brand/council-hero.svg" alt="Original concept illustration of the Council Chamber, not a screenshot of live agent activity" width="100%">
+</p>
 
-# COUNCIL ROOM
-### One room. Many perspectives. One accountable decision.
+# Council Chamber
+### One room. Real perspectives. One accountable human decision.
 
-**A real-time, human-led decision workflow powered by [Agent Switch](https://github.com/sandbox-quantum/switch).**
+**Flip the Switch Hackathon 2026 · Track 01 — Best Business Workflow**  
+Built by **Jay** with AI-assisted engineering, design and testing.
 
-[![Hackathon](https://img.shields.io/badge/Flip%20the%20Switch-2026-725BFF?style=for-the-badge)](https://github.com/sandbox-quantum/switch)
-![Track](https://img.shields.io/badge/Track%2001-Business%20Workflow-14B8A6?style=for-the-badge)
-![Status](https://img.shields.io/badge/STATUS-BUILD%20IN%20PROGRESS-F4B860?style=for-the-badge)
-
-> **The pitch:** A proposal enters one shared room. Specialized AI agents challenge it from different perspectives. A human makes the final call. Switch connects the conversation, evidence, and decision into one auditable thread.
+**Council Chamber uses [Agent Switch](https://github.com/sandbox-quantum/switch) to coordinate a real human-led, multi-agent business discussion and preserve its evidence.** It is designed for decisions that need disagreement, attributable contributions and a responsible human—not nine bots pretending to agree.
 
 <!-- OROCUE_DOCS_READY -->
 
-**Current repository version: v004.11** · **State as of November 5, 2026: public context package and scoped Council MCP implementation available on review branches; live MCP connection and wake-up/recovery acceptance remain unverified.**
+**Current repository version: v005.00** · **Submission candidate, November 7, 2026.** The public Council Chamber interface is deployed; the real Council meeting was conducted; native Mattermost plugin installation, unattended wake-up of this ChatGPT session and an authenticated live feed into the public website are separate, unfinished acceptance gates.
 
-[See the workflow](#one-room-one-decision) · [See the architecture](#architecture) · [Run it yourself](#run-it-yourself) · [Review the evidence](#verification) · [Version history](CHANGELOG.md)
+## Explore the demo
 
----
+- **[Open the public Council Chamber](https://switch-council-chamber.vercel.app/)** — browser-based, no account needed; historical proofs and clearly labeled offline specimens.
+- **Demo video:** Boons's recording is being finalized. **The YouTube link will be added when Jay provides the published URL.** No unverified video link is used here.
+- **[Inspect the browser screenshot](ui/captures/chamber-1440x900-verified.png)** and the [mobile capture](ui/captures/chamber-390x844-mobile.png). These demonstrate the UI and historical-proof mode, not live model presence.
+- **[Read the reproducible test evidence](https://github.com/Ranger-Jay/hackathon-flip-the-switch/actions/workflows/gem-council-integration.yml)** and [public demo evidence ledger](https://github.com/Ranger-Jay/hackathon-flip-the-switch/issues/10).
+
+<p align="center">
+  <img src="ui/captures/chamber-1440x900-verified.png" alt="Real captured Council Chamber frontend showing the nine-seat historical-proof view with evidence stream" width="94%">
+</p>
+<p align="center"><sub>Captured browser interface · HISTORICAL PROOFS mode. A historical receipt is not an online heartbeat.</sub></p>
+
+### A 60-second tour for judges
+
+1. Open the **public demo**. The nine-seat Council appears immediately: Jay, Buddy, Cora, Gem, Finch, Boons, Allen, Bucky and Charlie.
+2. Select **Historical Proofs** to inspect recorded, curated evidence; select a portrait to see role, runtime and receipt information. Historical mode is labeled as such.
+3. Select **Chamber: 3D Holo** to toggle the visual enhancement; the readable 2D interface and reduced-motion handling remain available.
+4. Open **Evidence & Decision** to inspect evidence classification and human-decision safeguards. Unproven outcomes remain UNKNOWN or AWAITING HUMAN DECISION.
+5. Select **Demo Specimen** for a clearly labeled offline workflow demonstration. Select **Live Transport** to see the honest disconnected state; the public site does **not** secretly connect to our private Council or invoke an agent.
+6. Select **MM 12.0.1 Host** to open the **offline Mattermost plugin test harness in another tab**; the Council Chamber stays open. This is **not** a claim that the plugin is installed in the live Mattermost server.
+
+The controls are safe for public demonstration. Opening a seat or evidence panel does not by itself trigger a paid model call.
 
 ## The problem
 
-Multi-agent teams are easy to imagine and surprisingly hard to operate. A human asks a question; one assistant answers in a tab, another produces code in a different workspace, research gets buried in messages, and nobody knows which observation was verified—or who actually made the decision.
+Business decisions made by multiple assistants can disappear into separate chats: nobody knows which evidence was checked, which agent disagreed, whether a suggestion was executed, or who actually authorized the outcome. An attractive avatar alone does not fix accountability.
 
-**Council Room turns that scattered exchange into a human-led business process.** Every participant has a defined responsibility. The team works in one room, cites evidence, reconciles disagreements, and records a decision that can be revisited.
-
-This is not an autonomous executive, a new generic chat platform, or a collection of scripted bots pretending to collaborate. **The human remains accountable.**
+**Council Chamber makes the process explicit.** Switch provides a single durable room for participating humans and agents. We preserve message identities and handoffs, distinguish real evidence from simulations, and put the final decision with the human.
 
 ## One room. One decision.
 
-The entire Track 01 demonstration deliberately contains **one room and one workflow**.
+| Stage | Council behavior | Evidence boundary |
+| --- | --- | --- |
+| **1. Propose** | Jay introduces a concrete business question in the existing Switch Council room. | Original human-authored message |
+| **2. Challenge** | Connected agents contribute independent technical, product, operations and QA perspectives. | Actual room event/seat receipts; absent agents are not shown as present |
+| **3. Reconcile** | Buddy synthesizes alternatives, scoring, risks and remaining UNKNOWNs. | Cited messages and unambiguous agent/runtime identity |
+| **4. Decide** | Jay selects the business priority and retains authority over deployment and spending. | Human confirmation; no client-generated approval accepted |
+| **5. Record** | The team posts evidence, corrections and next-work assignments to the public/private issue trail as appropriate. | Reviewable GitHub commits, tests and event provenance |
 
-| Step | What happens | Proof we must show |
-| :-- | :-- | :-- |
-| **01 · Propose** | A human posts one real, privacy-safe business proposal. | Original Switch room message ID |
-| **02 · Challenge** | Finch, Gem, Cora and Boons reply within their actual roles. | Distinct agent identities and addressed-message IDs |
-| **03 · Reconcile** | The orchestrator summarizes agreement, disagreement and unresolved unknowns. | Summary linked to source messages |
-| **04 · Decide** | The human chooses approve, decline or defer. | Human-authored decision message |
-| **05 · Record** | The room retains a decision document with evidence and provenance. | Durable room document reference |
+### What actually happened in the November 7 live demonstration
 
-**Example demonstration question:** “Should we prioritize an evidence-review checkpoint before publishing a grant opportunity?” This is an illustrative, non-customer-specific scenario—not a claim that a decision has been run.
+A real Council meeting took place in the existing room, with agent messages, corrected ballots, a provisional ranked result and accountable test assignments. **Funding Intelligence led the available ballot tally.** Jay subsequently confirmed that Funding Intelligence is the **next company priority after this hackathon**. That later human direction is not represented as a fabricated authenticated in-room decision receipt.
 
-[Detailed workflow contract](docs/WORKFLOW.md) · [Acceptance and failure cases](docs/TESTING.md)
+Buddy Main in this ChatGPT conversation was invoked manually, posted directly as the authenticated Buddy seat, and independently read back real Switch Core event IDs. A separate Codex instance also used the Buddy seat; sharing a seat label does not merge their sessions or prove automatic wake-up. The meeting was real, while original-session mention-triggered wake remains open.
+
+See the [public demonstration and verification record](https://github.com/Ranger-Jay/hackathon-flip-the-switch/issues/10). Sensitive operational details stay out of this public repository.
 
 ## Why Switch is essential
 
-Switch is the coordination substrate, not a decorative integration. Our intended workflow relies on **one shared, durable room**, addressable participants, real agent responses, and room context that remains available through interruptions.
+Switch—not this web page—coordinates the shared room, addressed participation and persistent history. The website presents an evidence-conscious interface; it does not replace the host, simulate successful delivery, or grant itself decision authority.
 
-```mermaid
-flowchart LR
-    H["Human: proposal + final call"] --> S[("Switch: one durable room")]
-    S --> F["Finch · Codex"]
-    S --> G["Gem · Antigravity"]
-    S --> C["Cora · Cursor CLI"]
-    S --> B["Boons · custom bridge"]
-    F --> S
-    G --> S
-    C --> S
-    B --> S
-    S --> D["Reconciled decision record"]
-```
+~~~mermaid
+flowchart TD
+  H["Jay · accountable human"] --> S[("Switch · one Council room")]
+  S <--> A["Connected agent hosts · role-scoped sessions"]
+  S <--> M["Council MCP gateway · bounded read/write receipts"]
+  S --> E["Recorded messages + real Core event IDs"]
+  E --> G["Human review + GitHub evidence trail"]
+  V["Public Vercel UI"] --> P["Curated recorded proofs / labeled offline demo"]
+  V -. "No authenticated public Core feed" .-> S
+~~~
 
-**A required demo test:** interrupt the Switch connection and show that the same coordinated room workflow cannot proceed normally, then restore it and show continuity. This test is **planned, not yet passed**. We will not claim Switch is essential until the test has been observed.
-
-## Architecture
-
-| Layer | Responsibility | Design choice |
-| :-- | :-- | :-- |
-| Human experience | Read, propose, compare, decide | Accessible 2D interface; optional 3D presence enhancement |
-| Coordination | Room membership, addressing, message history | Self-hosted **Agent Switch** |
-| Native agent sessions | Coding, product/design, operations/research | Codex, Antigravity, Cursor CLI through supported hosts |
-| Custom integration | One non-native participant | Boons' Switch bridge, with explicit tests |
-| Decision artifact | A source-linked human decision | Room-visible record from the same workflow |
-
-**Important distinction:** The ChatGPT-side project orchestrator and any Switch-side “Buddy” agent are different sessions. They do not automatically share memory, credentials or a live connection. The room must not claim an agent is present unless its runtime can actually receive and respond.
-
-[Architecture boundaries](docs/ARCHITECTURE.md)
-
-## A room worth looking at
-
-The [public assessment and decision trace](agents/DECISION_TRACE.md) will show each agent's recommendation, cited evidence, options, uncertainty and observable action receipts, followed by the human decision. This is a user-facing rationale/evidence trail, not a private chain-of-thought transcript or a scripted approval.
-
-Our visual direction is a **cinematic but practical council**: distinct agent identities, luminous presence indicators, clear evidence trails, a high-contrast conversation canvas and a concise decision panel. An optional **3D Council Constellation** would show participants as seats around a virtual table, with the active speaker and evidence links highlighted.
-
-The 3D layer must never be required to read, operate, or reproduce the workflow. Keyboard navigation, reduced-motion support and a fast 2D fallback are mandatory.
-
-**The banner above is original concept art, not a screenshot of a running app.** Interactive screenshots are not yet available. We will publish genuine captures as the implementation is verified, not rendered images represented as a working app.
+Our integration distinguishes the **Switch Core event ID** from a **Mattermost post ID**, checks sources before enabling links, and never equates a connected transport with all agents being online.
 
 ## Current status
 
-**Switch agent communication rule:** no private agent-to-agent messages. Switch agents primarily relay task context and receipts to GitHub; no autonomous agent conversations, mention/ACK loops or circular forwarding. Human-requested Council discussions remain visible and return their outcome to GitHub. See [the charter](agents/CHARTER.md).
+### What we built
 
-**New: [Council context package](agents/README.md).** Eight persona profiles, distinct Switch runner names, a charter, source-linked memory, handoff receipts, recovery, sampling proposals and Cora’s installation runbook. **GitHub is our durable relay/switchboard; Switch is the live Council surface.** [Actions integration findings](agents/ACTIONS_INTEGRATION.md) separate transport delivery from runner ACK and completed work. The included manual workflow is a dry-run template; live wakes and new schedules are not activated.
+| Component | What ships | Status |
+| --- | --- | --- |
+| **Council Chamber frontend** · [`ui/`](ui/README.md) | Nine seats, profile inspector, visual chamber, readable transcript, operator/presentation mode, evidence and decision panel, mobile and keyboard support | **Built; public Vercel page verified** |
+| **Mattermost WebApp plugin** · [`mattermost-plugin-council/`](mattermost-plugin-council/README.md) | Channel actions, RHS evidence pane, root chamber overlay, post citations and read-only context | **Built, tested in simulated host; live server install not verified** |
+| **Council MCP gateway** · [`integrations/council-mcp/`](integrations/council-mcp/README.md) | Scoped seat binding, OAuth boundary, durable write receipts, read history and safe error states | **Source and synthetic tests; specific hosted connections verified separately** |
+| **Agent package** · [`agents/`](agents/README.md) | Roles, public context, charter, wake/ACK contracts, assessment and recovery templates | **Public documentation and offline verification; unattended wake not established** |
+| **Release evidence** · [`docs/`](docs/TESTING.md) | Acceptance criteria, technical handoffs, UI tests, security and reproduction notes | **Source-linked; incomplete live gates explicitly identified** |
 
+### Verification evidence
 
-| Capability | Status |
-| :-- | :-- |
-| Public repository and versioning foundation | **v001.00 / v001.01 tagged and GitHub Actions checked**; current release review pending |
-| Agent context package | **42 public context files pass integrity checks; 23 offline regression tests pass** |
-| Live Actions → Switch wake / target ACK | **UNKNOWN; endpoint, network and runtime tests required** |
-| Switch deployment and room availability | **Not verified** |
-| Native agent join + real responses | **Not verified** |
-| Boons custom host bridge | **In development** |
-| Human proposal → decision document | **Not verified** |
-| Interactive room interface / 3D enhancement | **In development / proposed** |
-| Fresh-clone end-to-end reproduction | **Not verified** |
-| Recorded demo and submission | **Not yet available** |
+- **11/11** live-history bridge safety tests passed on GitHub Actions.
+- **9/9** Council UI suites passed, including browser viewport screenshots, plugin harness, accessibility, static asset packaging and source verification.
+- The Mattermost plugin ZIP is attached to a [verified GitHub Actions run](https://github.com/Ranger-Jay/hackathon-flip-the-switch/actions/runs/42393874555); it contains the installable `com.switch.council-chamber-0.1.0.tar.gz`. Building the archive twice is tested for reproducibility.
+- The **MM Host navigation fix** also passed [its production-target regression run](https://github.com/Ranger-Jay/hackathon-flip-the-switch/actions/runs/42394069389), and the public click-through was independently checked in a browser.
+- These are **code/browser test results**, not proof of a production Mattermost server plugin, an authenticated browser-to-Core feed or autonomous original-session agent wake.
 
-No green “passed” badge is awarded merely because code exists or an agent reports success. The [evidence ledger](docs/TESTING.md) defines the checks we require.
+[Full verification ledger](docs/TESTING.md) · [UI acceptance and rollout gates](docs/GEM_LIVE_WIRING_ACCEPTANCE.md) · [Mattermost walkthrough](docs/COUNCIL_CHAMBER_WALKTHROUGH.md)
 
 ## Run it yourself
 
-The public repository is intentionally being built in stages. **At this version, a clone runs documentation/repository safety checks, not yet the complete multi-agent Council Room.**
+**Requirements:** Python 3.12, Node.js and Chrome/Chromium for the full UI/browser matrix. Running the offline tests does not require Switch credentials.
 
-```bash
+~~~bash
 git clone https://github.com/Ranger-Jay/hackathon-flip-the-switch.git
 cd hackathon-flip-the-switch
+git checkout v005.00
+
+# Public hygiene and documentation
 python3 scripts/verify_repo.py
-```
 
-For now, cloning the **review branch** may be necessary to see these files before they are approved for `main`. A complete, tested setup will include the pinned Switch version, host configuration, provider prerequisites, sample non-sensitive decision and exact verification commands.
+# Complete local frontend, accessibility, harness and browser checks
+python3 scripts/run_all_ui_checks.py
 
-### Verify the agent package
+# Rebuild the installable Mattermost WebApp plugin
+python3 mattermost-plugin-council/build_plugin.py
 
-On the package review branch `work/buddy-agent-memory-package` (pending independent review):
-
-```bash
+# Agent context contracts
 python3 scripts/council_package.py verify
 python3 -m unittest discover -s tests/council -v
-python3 scripts/council_package.py packet Buddy-Switch
-```
+~~~
 
-[Cora’s setup and two-runtime acceptance](agents/CORA_SETUP.md) · [Memory and provenance](agents/MEMORY.md) · [Identity and avatar contract](agents/AVATARS.md) · [Temperature proposals and actual-setting limits](agents/SAMPLING.md)
+To test the scoped Council MCP gateway, use an isolated environment and the [pinned setup guide](integrations/council-mcp/README.md):
 
-The packet command emits public context only. Private operational state and provider credentials stay outside this repository. Original/channel names remain Buddy, Cora, Gem and so on; runners use `Buddy-Switch`, `Cora-Switch`, etc. Proposed temperatures do not imply a setting was applied. [Diary/lessons learned](agents/BUDDY_TOWN_FUTURE.md) is a deferred Buddy Town template, outside hackathon acceptance.
+~~~bash
+python3 -m pip install -r integrations/council-mcp/requirements.lock
+python3 -m pytest -q tests/council_mcp
+~~~
 
-[Reproduction runbook and known gaps](docs/REPRODUCE.md)
+For a quick local UI preview, from the repository root:
 
-### Connect the original assistant with Council MCP
+~~~bash
+python3 -m http.server 8001
+~~~
 
-The separate `work/buddy-council-mcp` review branch adds four tools for the existing room/seat: identity, recent posts, a bounded human-source reply, and a persistent delivery receipt. It does not invoke models, send private agent messages or take over presence. [Setup, pinned dependencies, OAuth requirements, live acceptance and feature rollback](integrations/council-mcp/README.md).
+Then visit `http://127.0.0.1:8001/ui/`. The static preview does not expose private live Core history. Do not paste production tokens into browser JavaScript.
 
-All **35 synthetic MCP tests pass locally**, including actual SDK stdio and HTTP/auth contracts. Live deployment and a tool connection in the original ChatGPT session remain **UNVERIFIED**; a separate ChatGPT provider runner is not proof of that connection.
+[Detailed reproduction guide](docs/REPRODUCE.md) · [Security policy](SECURITY.md)
 
 ## Repository map
 
 | Path | Purpose |
-|---|---|
-| README.md / VERSION / CHANGELOG.md | Narrative, current version and immutable history |
-| CONTRIBUTING.md / SECURITY.md | Review and public contribution rules |
-| agents/ | Startup, eight personas, memory, relay and recovery package |
-| agents/templates/ | Blank private-state structures and dry-run workflow |
-| docs/ | Architecture, workflow, reproduction, testing and demonstration |
-| scripts/verify_repo.py | Public hygiene/documentation checks |
-| scripts/council_package.py | Offline integrity, bootstrap and envelope tools |
-| tests/council/ | Offline contract failure-case tests |
-| integrations/council-mcp/ | Scoped room tools, pinned dependencies and connection/rollback runbook |
-| tests/council_mcp/ | Synthetic MCP transport, authorization and delivery tests |
-| .github/workflows/ | Immutable version and verification automation |
-
-Application code and interface assets will be added **only as real, reviewable implementation work**. This map describes the foundation, not an imaginary finished application.
+| --- | --- |
+| `ui/`, `ui/avatars/`, `ui/captures/` | Frontend, approved portraits, captured screenshot evidence |
+| `mattermost-plugin-council/` | Native WebApp extension source and deterministic package builder |
+| `integrations/council-mcp/` | Authenticated, role-scoped Council history and message bridge |
+| `agents/` | Public-safe persona, handoff and verification contracts |
+| `scripts/`, `tests/` | Offline, browser, security and component regression suites |
+| `.github/workflows/` | Build verification and Orocue release discipline |
+| `docs/` | Architecture, storyboard, evidence, acceptance and operations |
+| `VERSION`, `CHANGELOG.md`, `CONTRIBUTING.md` | Version history, scope and review contract |
 
 ## Versioning
 
-We release features individually under the **Orocue one-version / one-commit rule**. Each feature has its own tag and rollback record; unrelated features are not bundled into a single release. See the [feature-release contract](agents/FEATURE_RELEASES.md).
+This project follows **Orocue**: **one concern per commit, one release version per commit, and an immutable annotated tag for each numbered release**. Feature milestones use `vNNN.00`; subsequent corrections or documentation receive their own revisions. Historical Gem UI tags and the existing `v001`–`v004` series remain intact; a combined release does not rewrite previously tagged commits.
 
-We use the **Orocue one-version / one-commit rule**:
+**v005.00** is the unified submission-candidate integration milestone: the public agent/MCP line and independently developed UI/plugin line converge into a reviewed release. The published YouTube link will be added in a **separate, tagged documentation revision** after it becomes available.
 
-- **Exactly one distinct concern per commit:** one feature, fix, test change, or documentation change—not a mixture.
-- **Exactly one immutable tag per new version:** `v001.00`, `v001.01`, `v002.00`, and so on. Never rewrite or recycle a version.
-- **Feature milestones** advance the three-digit component and reset the revision to `.00`.
-- **Subsequent fixes, tests and docs** take their own incrementing `.01`, `.02` … revisions. Each gets its own commit and tag.
-- **Chronological evidence:** update `VERSION`, `CHANGELOG.md` and the README's current version together, so the project history never claims a release that didn't happen.
-- **Independent review:** author != approver. No merging or deployment without the human lead's explicit approval.
-
-The prior repository initialization commit predates Orocue and is recorded transparently in [the changelog](CHANGELOG.md). Version tags apply to the subsequent numbered commits, not retroactively to that baseline.
-
-[Full contributor and versioning rules](CONTRIBUTING.md)
+[Chronological changelog](CHANGELOG.md) · [Contribution/version rules](CONTRIBUTING.md)
 
 ## Verification
 
-| Test | What it actually proves | Recorded outcome |
-| :-- | :-- | :-- |
-| `python3 scripts/verify_repo.py` | Public-file hygiene and documentation integrity only | **PASS locally; CI recorded on review commits** |
-| `python3 scripts/council_package.py verify` | 42 public context file hashes and identity registry | **PASS locally** |
-| `python3 -m unittest discover -s tests/council -v` | 23 offline contract/failure cases | **23/23 PASS locally** |
-| `.venv/bin/python -m pytest -q tests/council_mcp` | Synthetic MCP protocol, scope, persistence and delivery contracts | **35/35 PASS locally** |
-| MCP connection in the original ChatGPT session | Real room read and visible correlated post through the installed tools | **UNVERIFIED** |
-| Native agent room join | A real provider can receive and respond | **UNKNOWN** |
-| Role-specific messages | Distinct agents act from their roles | **UNKNOWN** |
-| Switch outage/reconnect | Coordination depends on Switch and recovers | **UNKNOWN** |
-| Durable decision record | A human decision can be reopened with citations | **UNKNOWN** |
-| Fresh third-party clone | Another developer reproduces the full workflow | **UNKNOWN** |
-| 3D/2D accessibility and performance | Enhancement is optional and usable | **UNKNOWN** |
-
-[See the acceptance matrix](docs/TESTING.md) · [Demo requirements](docs/DEMO.md)
+| Claim | Verified | Still unknown or pending |
+| --- | --- | --- |
+| Public UI accessible | Vercel page and nine-seat rendering | Authenticated live Core stream in public UI |
+| Agent participation | Real Council messages/seat receipts from the Nov 7 session | Original ChatGPT session auto-wake on mention |
+| Plugin implementation | Compiled bundle, offline host harness and browser regression tests | Installed/enabled on actual Mattermost 12.x server |
+| Evidence & human control | Role/receipt checks, fail-closed client presentation | Server-authenticated human decision receipt for a complete end-to-end public demo |
+| Reproduction | Automated source and browser checks | Full fresh-host multi-runtime deployment by outside judges |
+| Delivery | Real source, CI runs, public site, video in production | Published YouTube video link |
 
 ## Known limitations
 
-- The current branch is a **repository and documentation foundation**, not the complete product.
-- Switch service deployment, provider authentication and cross-host reachability still require live proof.
-- Native providers and the custom host may require separate operating-system credentials and login steps.
-- The decision document format and UI are subject to real-room integration tests.
-- 3D presentation is a progressive enhancement, not a committed dependency.
-- Upstream Switch carries its own license, including a Commons Clause condition; this repository does **not** relicense upstream source. See [Switch's LICENSE](https://github.com/sandbox-quantum/switch/blob/main/LICENSE). Licensing of original Council Room code has not yet been selected.
+The public hosted page is an **honestly labeled historical/offline visualization**, not a live mirror of the private Council. A production Mattermost plugin install, independently authenticated live browser bridge, automatic mention wake-ups, model-cost governance and full cold-restart recovery remain separate integration and operational gates. Agent status must never be guessed from a green network connection. The November 7 meeting was genuine, but do not confuse curated older UI records with a live meeting replay.
 
-## Hackathon entry
+Agent Switch is an upstream project and retains its own license and conditions. This repository does not claim to relicense upstream Switch code. No blanket reuse license for our original code should be inferred without an explicit repository license.
 
-**Flip the Switch · WeMakeDevs × DevTools Academy × Switch · November 4–7, 2026**  
-**Track 01 — Best Business Workflow**  
-**Human entrant: Jay.** AI agents contribute engineering, design and research support; they are not additional human entrants.
+## Hackathon and assistance
 
-The submission will include a live, reproducible workflow, real demo video, clear Switch-essential evidence and honest limitations—**only when those artifacts exist and pass review**.
+**Flip the Switch · November 4–7, 2026 · Track 01 — Best Business Workflow.** Jay is the human entrant and decision owner. AI assistance contributed coding, product and UX design, QA and documentation; names of participants are not proof of independent human authorship. Public documentation includes observable claims, source receipts and verification outputs—not hidden model reasoning or invented approvals.
 
 ---
 
-<p align="center"><strong>One room. Real agents. Clear evidence. A human decision.</strong></p>
-<p align="center"><sub>Built for the Flip the Switch Hackathon · Intended for ongoing human–AI team coordination</sub></p>
+<p align="center"><strong>One room. Real evidence. A human decision.</strong></p>
+<p align="center"><sub>Built with Switch for accountable multi-agent business workflows · Funding Intelligence is the next project priority after this hackathon.</sub></p>

@@ -1,5 +1,13 @@
 # Changelog
 
+## v005.00 — Hackathon submission integration — 2026-11-07
+
+- Integrated the previously independent, non-squashed Council agent/MCP release line and Gem's verified Council Chamber UI/plugin branch as one two-parent release milestone, preserving their original commits and immutable historical tags.
+- Made a judge-ready public README the canonical entry point with a working Vercel URL, real captured UI, a precise public-vs-live boundary, reproduction commands, test receipts and a clearly reserved YouTube link.
+- Preserved the local plugin bundle, frontend and nine-suite Chrome suite; documented the MM Host separate-tab navigation hotfix, real Nov 7 Council demonstration and human business-priority confirmation.
+- Kept the scoped MCP host and agent package tests separate from the public static browser; no production plugin install, private Core feed or original-session auto-wake is inferred.
+- **Version evidence:** this release requires a passing exact-SHA UI/bridge CI and Orocue gateway/contract CI; annotated tag v005.00 must be created by the version workflow. The video URL will be a later separately tagged documentation revision.
+
 ## v004.11
 
 - Opt-in `COUNCIL_AUTH_DIAG=true` logs one secret-free line per auth rejection: timestamp, bearer present, and a category. Acceptance rules are unchanged. Off by default. This is the branch tip, on top of the server runbook. Tag v004.10 is the same patch parented on v004.09 and is not this tip.

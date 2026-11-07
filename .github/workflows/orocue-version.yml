@@ -6,6 +6,8 @@ on:
       - orocue/public-foundation
       - work/buddy-agent-memory-package
       - work/buddy-council-mcp
+      - release/hackathon-submission-20261107
+      - main
 
 permissions:
   contents: read
