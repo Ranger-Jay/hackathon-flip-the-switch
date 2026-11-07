@@ -41,6 +41,17 @@ for r in rewrites:
             print(f"FAIL: vercel.json rewrite destination does not exist: {dest}")
             sys.exit(1)
 
+# Clean URL compatibility: public root navigates to /mm-harness,
+# while local static-server mode preserves mm-harness.html.
+if not any(r.get("source") == "/mm-harness" for r in rewrites):
+    print("FAIL: Vercel missing clean /mm-harness route")
+    sys.exit(1)
+html = (UI / "index.html").read_text(encoding="utf-8")
+if 'link.setAttribute("href", "/mm-harness")' not in html or 'id="mmHarnessLink"' not in html:
+    print("FAIL: MM harness public clean-URL routing contract missing")
+    sys.exit(1)
+print("  [PASS] MM host link supports Vercel clean route and local .html fallback")
+
 print("  [PASS] vercel.json exists, is valid JSON, and defines security headers & static rewrites")
 
 # 2. Verify all 9 portraits exist in PNG and SVG

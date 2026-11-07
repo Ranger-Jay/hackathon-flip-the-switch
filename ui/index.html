@@ -285,6 +285,17 @@
     </div>
   </div>
 
+  <!-- Hosted clean-URL routing differs from a local Python static server.
+       Preserve the local file link; on the deployed root use the verified /mm-harness route. -->
+  <script>
+    (function () {
+      const link = document.getElementById("mmHarnessLink");
+      const localHost = /^(localhost|127\\.0\\.0\\.1|::1)$/i.test(window.location.hostname);
+      if (link && !localHost && !window.location.pathname.startsWith("/ui/")) {
+        link.setAttribute("href", "/mm-harness");
+      }
+    })();
+  </script>
   <script src="event-adapter.js"></script>
   <script src="evidence-panel.js"></script>
   <script src="plugin-bundle.js"></script>

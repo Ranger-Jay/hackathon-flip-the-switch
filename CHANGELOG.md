@@ -1,5 +1,11 @@
 # Changelog
 
+## v005.01 — Public MM host clean-URL compatibility — 2026-11-07
+
+- Corrected the public Mattermost test-harness button to use Vercel's verified `/mm-harness` route when served from a deployed root, while retaining the local static-server `mm-harness.html` path.
+- Added an offline regression assertion that the clean route and local fallback are both configured. The public Council remains open in the original tab and the harness remains clearly labeled offline.
+- This version addresses navigation only; no UI redesign, agent model calls, credentials, native plugin installation, or public Core access change.
+
 ## v005.00 — Hackathon submission integration — 2026-11-07
 
 - Integrated the previously independent, non-squashed Council agent/MCP release line and Gem's verified Council Chamber UI/plugin branch as one two-parent release milestone, preserving their original commits and immutable historical tags.
