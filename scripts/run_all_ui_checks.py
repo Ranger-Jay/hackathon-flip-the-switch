@@ -20,12 +20,13 @@ SUITES.extend([
     ("Accessibility, Focus Trap, Reduced Motion & XSS Gate", [sys.executable, os.path.join(SCRIPT_DIR, "test_ui_hardening.py")]),
     ("Mattermost 12.0.1 WebApp Plugin Shell Gate", [sys.executable, os.path.join(SCRIPT_DIR, "test_mm_plugin.py")]),
     ("Event Adapter, Honest 7-State & Safe Renderer Gate", [sys.executable, os.path.join(SCRIPT_DIR, "test_event_adapter.py")]),
+    ("Live History Bridge Core-ID & Provenance Gate", [sys.executable, os.path.join(SCRIPT_DIR, "test_live_bridge.py")]),
     ("Evidence & Decision Panel & Truthful Human Gate", [sys.executable, os.path.join(SCRIPT_DIR, "test_evidence_panel.py")]),
     ("Headless Chrome 5-Viewport Matrix & Screenshot Gate", ["node", os.path.join(SCRIPT_DIR, "test_browser_matrix.js")]),
 ])
 
 print("=====================================================================")
-print("  SWITCH COUNCIL CHAMBER — FULL UI/UX VERIFICATION RUNNER (7 SUITES)")
+print("  SWITCH COUNCIL CHAMBER — FULL UI/UX VERIFICATION RUNNER (8 SUITES)")
 print("=====================================================================")
 
 failed = []
