@@ -2,13 +2,13 @@
 
 ## 1. Source Reconciliation & Baseline Inventory
 
-| Repository | Branch | Baseline SHA | Purpose |
+| Repository | Branch | Baseline / Reference SHA | Purpose |
 | :--- | :--- | :--- | :--- |
 | `hackathon-flip-the-switch` (public) | `work/gem-interface` | `d237b142f6eb56f6e085947ea4fd59f1bbc6d7a8` | Accepted responsive chamber & avatar layout baseline |
 | `hackathon-flip-the-switch` (public) | `work/gem-ui-hardening` | `2ea95b24b4179bb412495fcfe2a59a0e38dc9f3d` | Slice 1 runtime hardening (WCAG modal focus trap, reduced-motion guard, AbortController, XSS-safe DOM rendering) |
-| `hackathon-flip-the-switch` (public) | `work/gem-council-chamber` | Active delivery branch | Full 6-slice Council Chamber UI/UX & Mattermost 12.0.1 plugin implementation |
+| `hackathon-flip-the-switch` (public) | `work/gem-council-chamber` | `bd1a9b94ca041e22d3224c68ca297cbe573bcfe5` (6-slice base) + `C1`–`C4` | Full Council Chamber UI/UX, Mattermost 12.0.1 plugin, and C1–C4 provenance/truthfulness hardening |
 | `switch-private` (private) | `agents/gem-ui-hardening` | `cc60c91cad8cc03f997524d72fdeefd222dd3a59` | Private operational mirror of Slice 1 runtime hardening |
-| `switch-private` (private) | `agents/gem-council-chamber` | Active delivery branch | Private operational mirror with host configuration mapping |
+| `switch-private` (private) | `agents/gem-council-chamber` | `3528aaff66af6d227327870f8906c5eacc5ce317` (6-slice base) + `C1`–`C4` | Private operational mirror with host configuration mapping |
 
 All hardening guarantees from `2ea95b24` / `cc60c91c` are strictly preserved and regression-tested on every slice:
 - Dialog focus entry (`closeProfileBtn.focus()`), Tab/Shift+Tab focus wrap (`handleModalFocusTrap`), `Escape` dismissal, and opener focus restoration (`lastActiveElement.focus()`).
@@ -32,50 +32,50 @@ Because `frame-ancestors 'self'` and `X-Frame-Options: SAMEORIGIN` are enforced 
 ### 2.2 Confirmed WebApp `PluginRegistry` APIs in Mattermost 12.0.1
 Extracted directly from the deployed server's active `/static/main.611ed40447cf94b26233.js` and active plugin bundles (`mattermost-ai` v2.9.0, `com.mattermost.calls` v1.12.5):
 - `window.registerPlugin(pluginId, pluginInstance)` — primary plugin mount point (`initialize(registry, store)`).
-- `registry.registerChannelHeaderButtonAction(icon, action, dropdownText, tooltipText)` — adds the **Council Chamber** action button to the channel header.
+- `registry.registerChannelHeaderButtonAction(icon, action, dropdownText, tooltipText)` — adds the **Council Evidence** and **Council Chamber** action buttons to the channel header.
 - `registry.registerRightHandSidebarComponent(component, title)` — registers the expandable **Council Evidence & Decision Panel** in the Right-Hand Sidebar (RHS) and returns `{ id, showRHSPlugin, hideRHSPlugin, toggleRHSPlugin }`.
-- `registry.registerRootComponent(component)` — registers the full-viewport **Council Chamber Overlay** directly inside the Mattermost root DOM so operators can switch between the standard channel stream, the RHS Evidence Panel, and the 9-seat Council Chamber without leaving the `switch/council` channel.
-- `registry.registerPostActionComponent(component)` — links individual channel posts into the Evidence Panel.
-- `registry.registerWebSocketEventHandler(event, handler)` — subscribes to live channel/plugin events.
+- `registry.registerRootComponent(component)` — registers the full-viewport **9-Seat Council Chamber Overlay** directly inside the Mattermost root DOM via `React.createElement` so operators can switch between the standard channel stream, the RHS Evidence Panel, and the 9-seat Council Chamber without leaving the `switch/council` channel.
+- `registry.registerPostActionComponent(component)` — links individual channel posts into the Evidence Panel and highlights/scrolls to cited source rows (`navigateToChannelPostDom`).
+- `registry.registerWebSocketEventHandler(event, handler)` — subscribes to live channel `posted` events.
 - `registry.registerReducer(reducer)` — manages plugin state inside the Mattermost Redux store.
-- Confirmed external globals provided by Mattermost 12.0.1: `window.React`, `window.ReactDOM`, `window.Redux`, `window.ReactRedux`, `window.ReactBootstrap`, `window.Components`, `window.WebappUtils`, `window.PostUtils`.
 
-### 2.3 Installation Gate vs. Read-Only Verification
-- **Confirmed Local Build & Harness:** The plugin (`com.switch.council-chamber`) compiles deterministically via `mattermost-plugin-council/build_plugin.py` into `dist/com.switch.council-chamber-webapp-bundle.js` and `dist/com.switch.council-chamber-0.1.0.tar.gz`, and mounts in our local Mattermost 12.0.1 `PluginRegistry` host harness (`ui/mm-harness.html` and `ui/index.html`).
-- **Production Install Gate:** Uploading and enabling a new plugin bundle on the live Mattermost host requires Mattermost `sysadmin` privileges (`/api/v4/plugins` POST or filesystem deploy under `/opt/mattermost/plugins`) and explicit human lead authorization. We never claim production installation without that explicit gate.
+### 2.3 Local Harness vs. Production Server Installation Gate
+- **Confirmed Local Build & Harness:** The plugin (`com.switch.council-chamber`) compiles deterministically via `mattermost-plugin-council/build_plugin.py` into:
+  - `mattermost-plugin-council/webapp/dist/main.js`
+  - `ui/plugin-bundle.js`
+  - `mattermost-plugin-council/dist/com.switch.council-chamber-0.1.0.tar.gz`
+  It mounts and is verified in our local Mattermost 12.0.1 `PluginRegistry` host harness (`ui/mm-harness.html`, labeled `⚠️ LOCAL MATTERMOST v12.0.1 PLUGIN HOST HARNESS (OFFLINE SIMULATION — PRODUCTION SERVER INSTALL UNVERIFIED)`).
+- **Production Install Gate (Not Yet Executed on Live Server):** Uploading and enabling a new plugin bundle on the live Mattermost host (`:8065`) requires Mattermost `sysadmin` privileges (`POST /api/v4/plugins` or filesystem deploy under `/opt/mattermost/plugins`) and explicit human lead authorization. Passing local harness checks does **not** establish production server installation.
 
 ---
 
-## 3. Event Adapter Contract (`ui/contracts/council-event-schema.json`)
+## 3. Event Adapter & Evidence Provenance Contract (`ui/contracts/council-event-schema.json`)
 
 Shared contract with the Track 01 demonstration and bridge track:
 1. **Explicit Operating Modes (`OperatingMode`):**
    - `DEMO_SPECIMEN`: Offline Track 01 specimen simulation (`[DEMO SPECIMEN — NOT LIVE EVIDENCE]`).
-   - `VERIFIED_RECEIPTS`: Displays real, verified room events and 8/8 seat-steering receipts recorded from Switch Core, while keeping unrun human decisions explicitly marked `AWAITING_HUMAN_DECISION`.
-   - `LIVE_READONLY`: Polls or subscribes to a read-only channel/room history endpoint without exposing any agent API keys or bearer tokens in browser code.
-2. **Honest 7-State Seat Status (`HonestSeatStatus`):**
-   - `listening` (connected listener/SSE stream; explicitly distinguished from active reasoning)
-   - `receiving` (addressed message delivered; awaiting receipt/turn)
-   - `responding` (active turn / generating response)
-   - `busy` (running tool or verification check)
-   - `stale` (heartbeat older than freshness window)
-   - `offline` (no active connection)
-   - `unknown` (telemetry unavailable in current mode)
-3. **Zero Side Effects:**
-   - Rendering, mode switching, filtering, retrying read fetches, or stepping through demo turns **never** auto-posts messages, wakes agents, or consumes model tokens.
+   - `VERIFIED_RECEIPTS`: Displays curated historical Nov 5–6 seat-steer proof summaries (`[HISTORICAL SEAT-STEER PROOFS — OFFLINE SNAPSHOT]`), retaining real recorded Switch event IDs (`sw_e3abd2912ee949338cfd0ce4a4a6a00f` for Gem Pattern-B and `sw_9f3f6de5d9774c43914093ae1be5187e` for Finch Direct-MCP) and `hist_summary_*` identifiers elsewhere. Historical summary badges are disabled/non-clickable unless backed by a verified live source event, and all seat statuses default to `unknown` (`9 Configured · 8 Historical Own-Seat Proofs · Current Online: UNKNOWN`).
+   - `LIVE_READONLY`: Connects strictly through the local read-only host proxy (`/api/council/live-history` served by `scripts/serve_council_live.py`, which bridges to Switch Core `GET /agents/{id}/rooms/{room}/history` server-side without exposing bearer tokens in browser code). Defaults fail-closed to `[LIVE NOT CONNECTED]` / `LIVE PREVIEW UNAVAILABLE` and withholds historical fixtures whenever the proxy is inactive.
+2. **Six-Category Evidence Separation (`EVIDENCE_CATEGORIES` in `ui/evidence-panel.js`):**
+   - `HISTORICAL_READINESS_SUMMARY` — Nov 5–6 engineering/seat readiness summaries (never presented as live deliberation on the Funding Intelligence business proposal).
+   - `LIVE_COUNCIL_ASSESSMENT` — Verified live agent assessments on the active proposal.
+   - `DEMO_SPECIMEN_ASSESSMENT` — Offline demonstration specimen turns.
+   - `ORCHESTRATOR_RECONCILIATION` — Buddy Main's verified live reconciliation vs. curated readiness synthesis.
+   - `HUMAN_DECISION_RECORD` — Fail-closed human authorization gate requiring authenticated `jay` principal, non-placeholder `source_msg_id`, matching `proposal_correlation_id`, and explicit verdict in `{"APPROVED", "DECLINED", "DEFERRED"}`.
+   - `WORKFLOW_COMPLETENESS_STATUS` — Explicitly reports `INCOMPLETE_WORKFLOW_AWAITING_LIVE_DELIBERATION_AND_DECISION` until live proposal deliberation, live reconciliation, and Jay's live decision are recorded.
+3. **Honest 7-State Seat Status (`HonestSeatStatus`):**
+   - `listening`, `receiving`, `responding`, `busy`, `stale`, `offline`, `unknown`.
 
 ---
 
-## 4. Feature Slice Delivery & Rollback Plan
-
-Each slice is committed atomically and tagged on the feature branch so any slice can be reverted cleanly without disturbing earlier accepted work:
+## 4. Feature Slice & Corrective Slice Delivery Plan
 
 | Slice | Tag | Scope | Rollback Command |
 | :--- | :--- | :--- | :--- |
 | Baseline | `2ea95b24` / `cc60c91c` | Hardened UI baseline (`work/gem-ui-hardening`) | `git checkout work/gem-ui-hardening` |
-| Slice 1 | `gem/council-ui/slice-1-manifest` | Integration manifest, 9 local PNG portraits + SVG fallbacks, event schema contract | `git checkout 2ea95b24` |
-| Slice 2 | `gem/council-ui/slice-2-plugin-shell` | Mattermost 12.0.1 WebApp plugin (`com.switch.council-chamber`), bundler, and local host harness | `git checkout gem/council-ui/slice-1-manifest` |
-| Slice 3 | `gem/council-ui/slice-3-event-chamber` | `CouncilEventAdapter`, honest 7-state seat model, verified receipts fixture, safe markdown renderer | `git checkout gem/council-ui/slice-2-plugin-shell` |
-| Slice 4 | `gem/council-ui/slice-4-evidence-panel` | Expandable Evidence & Decision panel, role assessments, reconciliation matrix, truthful approval gate | `git checkout gem/council-ui/slice-3-event-chamber` |
-| Slice 5 | `gem/council-ui/slice-5-cinematic-polish` | Cinematic command center polish, Operator Presentation/Capture mode, 5-viewport Chrome verification | `git checkout gem/council-ui/slice-4-evidence-panel` |
-| Slice 6 | `gem/council-ui/slice-6-handoff` | Final integration handoff, fresh-clone runbook, full test runner, and operational mapping | `git checkout gem/council-ui/slice-5-cinematic-polish` |
+| Slice 1–6 | `gem/council-ui/slice-1-manifest` .. `slice-6-handoff` | Original 6-slice Council Chamber UI/UX & Mattermost plugin (`bd1a9b94` / `3528aaff`) | `git checkout gem/council-ui/slice-6-handoff` |
+| Slice 7 | `gem/council-ui/slice-7-p0-truth-hardening` | Initial P0/P1/P2 truthfulness hardening (`8ff7345d` / `9e87494c`) | `git checkout gem/council-ui/slice-7-p0-truth-hardening` |
+| Corrective C1 | `gem/council-ui/c1-evidence-status-truth` | Placeholder-ID live rejection guard, curated historical summary provenance, `UNKNOWN` default seat status | `git checkout gem/council-ui/c1-evidence-status-truth` |
+| Corrective C2 | `gem/council-ui/c2-live-transport-human-gate` | `SwitchCoreBridge` read-only proxy binding, fail-closed `LIVE_READONLY`, 6-category separation & strict human verdict gate | `git checkout gem/council-ui/c2-live-transport-human-gate` |
+| Corrective C3 | `gem/council-ui/c3-mattermost-functional-integration` | Native React 9-seat Root Chamber Overlay + RHS mount in `plugin-bundle.js`, post-to-source DOM highlight navigation | `git checkout gem/council-ui/c3-mattermost-functional-integration` |
+| Corrective C4 | `gem/council-ui/c4-verification-handoff` | Behavioral negative tests, refreshed multi-viewport & harness screenshots, and reconciled documentation handoff | `git checkout gem/council-ui/c4-verification-handoff` |

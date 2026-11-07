@@ -540,9 +540,22 @@ async function main() {
     })()`);
     await sleep(250);
     await captureScreenshot("mm-plugin-rhs-1440x900.png");
-    await evalJS(`(() => { const btns = document.querySelectorAll('.mm-header-plugin-btn'); if (btns[1]) btns[1].click(); })()`);
+    const overlayCheck = await evalJS(`(() => {
+      const btns = document.querySelectorAll('.mm-header-plugin-btn');
+      if (btns[1]) btns[1].click();
+      const seatNodesInOverlay = document.querySelectorAll('#mmPluginChamberRootMount .mm-overlay-seat-node').length;
+      const postCardsInOverlay = document.querySelectorAll('#mmPluginChamberRootMount .mm-overlay-post-card');
+      if (postCardsInOverlay[0]) postCardsInOverlay[0].click();
+      const highlightedRow = document.getElementById('mm-post-row-mm_post_001');
+      const sourceHighlighted = Boolean(highlightedRow && highlightedRow.style.outline.includes('2px'));
+      return { seatNodesInOverlay, postCardsCount: postCardsInOverlay.length, sourceHighlighted };
+    })()`);
     await sleep(350);
     await captureScreenshot("mm-plugin-harness-1440x900.png");
+    assertCheck(
+      overlayCheck.seatNodesInOverlay === 9 && overlayCheck.postCardsCount >= 4 && overlayCheck.sourceHighlighted,
+      "C3 Mattermost Root Overlay natively renders 9-seat Council Ring via React & highlights cited post row in #council DOM"
+    );
 
     assertCheck(
       mmResult.hasOfflineBanner && mmResult.statusText.includes("com.switch.council-chamber") && mmResult.headerBtnCount === 2 && mmResult.rhsLoaded && mmResult.rhsHasGate && mmResult.rhsHasSelectedPost && mmResult.rhsReadinessCount === 7 && mmResult.postRowsAfterWs === 4 && mmResult.modalOpen,
